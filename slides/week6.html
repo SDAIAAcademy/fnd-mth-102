@@ -1,10 +1,10 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes"><p>Collect Problem set 5. Week 5 measured curvatures and edges; this week explains them. The lab's evidence form, six annotated surfaces marked against a reference, is the form of the LO2 assessment, so the lab is also practice for it.</p></aside>
+  <aside class="notes"><p>Collect Problem set 5. Week 5 measured curvatures and edges; this week explains them. The lab's evidence form, six annotated surfaces marked against a reference, is the form of the LO2 assessment, so the lab is also practice for it. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<section class="slide" id="review-week5" data-lo="LO6" data-minutes="4">
+<section class="slide" id="review-week5" data-lo="LO6" data-minutes="7">
   <div class="kicker">Review of week 5</div>
   <h2>Which change fixes this run?</h2>
   <div class="quiz" data-type="single" data-lo="LO6">
@@ -20,7 +20,7 @@
   <aside class="notes"><p>Answer: D. A larger batch would also help; it is not among the options on purpose.</p></aside>
 </section>
 
-<section class="slide" id="lab-5-1-debrief" data-lo="LO6" data-minutes="6">
+<section class="slide" id="lab-5-1-debrief" data-lo="LO6" data-minutes="10">
   <div class="kicker">Lab 5.1 · what your runs showed</div>
   <h2>Scaling the features cut the curvature ratio from 2.7e11 to 12</h2>
   <div class="cols cols-2">
@@ -44,7 +44,7 @@
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="convex-definition" data-lo="LO2" data-minutes="7">
+<section class="slide" id="convex-definition" data-lo="LO2" data-minutes="12">
   <div class="kicker">Block 1 · Convexity</div>
   <h2>A convex function lies below every chord, so it has no traps</h2>
   <div class="cols cols-2">
@@ -57,7 +57,7 @@
   <aside class="notes"><p>Draw a bowl and a chord above it, then a two-humped curve where a chord dips below. The logistic loss is convex in its weights: that is why week 3's model trains reliably from any start, and why the capstone's two-layer network does not.</p></aside>
 </section>
 
-<section class="slide" id="minima-and-saddles" data-lo="LO2" data-minutes="7">
+<section class="slide" id="minima-and-saddles" data-lo="LO2" data-minutes="12">
   <div class="kicker">Block 1 · What non-convex looks like</div>
   <h2>Non-convex losses have local minima, saddles and plateaus</h2>
   <div class="cols cols-3">
@@ -69,7 +69,7 @@
   <aside class="notes"><p>The count argument for saddles: at a critical point of a function of n variables, every one of n curvatures must be positive for a minimum; with random signs, mixed signs are far more likely. The lab has six surfaces; participants decide which kind each one is.</p></aside>
 </section>
 
-<section class="slide" id="check-convex" data-lo="LO2" data-minutes="3">
+<section class="slide" id="check-convex" data-lo="LO2" data-minutes="5">
   <div class="kicker">Checkpoint 1</div>
   <h2>What does convexity guarantee here?</h2>
   <div class="quiz" data-type="single" data-lo="LO2">
@@ -85,7 +85,7 @@
   <aside class="notes"><p>Answer: B. The bracket in the why-callout prepares week 7: on separable data the logistic loss has no finite minimiser at all, and a penalty fixes that.</p></aside>
 </section>
 
-<section class="slide" id="hessian-curvatures" data-lo="LO2" data-minutes="7">
+<section class="slide" id="hessian-curvatures" data-lo="LO2" data-minutes="11">
   <div class="kicker">Block 2 · Curvature</div>
   <h2>The Hessian's eigenvalues are the curvatures along its eigenvectors</h2>
   <div class="cols cols-2">
@@ -105,7 +105,7 @@
   <aside class="notes"><p>Example for the board: f = x² + xy − 2y² at the origin. H = [[2, 1], [1, −4]], eigenvalues about 2.16 and −4.16: a saddle. The eigenvectors and eigenvalues of a symmetric matrix are from FND-MTH-101; here they acquire a meaning, curvature.</p></aside>
 </section>
 
-<section class="slide" id="saddle-escape" data-lo="LO2" data-minutes="7">
+<section class="slide" id="saddle-escape" data-lo="LO2" data-minutes="11">
   <div class="kicker">Block 2 · Saddles in practice</div>
   <h2>Exactly on a saddle's ridge, descent stops; a nudge lets it escape</h2>
   <div class="cols cols-32">
@@ -122,7 +122,7 @@
   <aside class="notes"><p>A parallel example; the lab has its own saddle surface with different minima. The escape is slow at first: near the saddle the gradient is tiny, and the negative curvature only takes over once the point is off the ridge. In high dimension this slow start is the practical cost of saddles.</p></aside>
 </section>
 
-<section class="slide" id="check-hessian-kind" data-lo="LO2" data-minutes="3">
+<section class="slide" id="check-hessian-kind" data-lo="LO2" data-minutes="5">
   <div class="kicker">Checkpoint 2</div>
   <h2>What kind of point is this?</h2>
   <div class="quiz" data-type="single" data-lo="LO2">
@@ -138,7 +138,7 @@
   <aside class="notes"><p>Answer: C. Ask how she would leave it: a small step along the second weight in either direction.</p></aside>
 </section>
 
-<section class="slide" id="largest-stable-step" data-lo="LO2 LO6" data-minutes="7">
+<section class="slide" id="largest-stable-step" data-lo="LO2 LO6" data-minutes="11">
   <div class="kicker">Block 3 · Step size and curvature</div>
   <h2>The largest curvature bounds the step; the ratio of curvatures sets the pace</h2>
   <div class="cols cols-2">
@@ -156,7 +156,7 @@
   <aside class="notes"><p>The condition number is the conditioning of FND-MTH-101, seen from the optimiser's side. 2.109 / 0.174 = 12.1 after scaling. Standardising features is the cheapest preconditioning there is; adaptive methods (week 5) are a per-coordinate version of the same idea.</p></aside>
 </section>
 
-<section class="slide" id="newton-step" data-lo="LO2" data-minutes="5">
+<section class="slide" id="newton-step" data-lo="LO2" data-minutes="8">
   <div class="kicker">Block 3 · Using the curvature</div>
   <h2>A Newton step divides by the curvature instead of guessing a rate</h2>
   <div class="cols cols-2">
@@ -166,7 +166,7 @@
   <aside class="notes"><p>Awareness only. The lab's stretch compares Newton steps with gradient descent on its curved valley; do not quote the count. Quasi-Newton and second-order methods are outside this course.</p></aside>
 </section>
 
-<section class="slide" id="check-condition" data-lo="LO2" data-minutes="3">
+<section class="slide" id="check-condition" data-lo="LO2" data-minutes="5">
   <div class="kicker">Checkpoint 3</div>
   <h2>What will the sweep show?</h2>
   <div class="quiz" data-type="single" data-lo="LO2">
@@ -186,7 +186,7 @@
   <aside class="notes"><p>AI-tutor. The comparison with the reference in task 6 is strict: a dictionary per surface must match exactly. When a participant's annotation differs, ask them to defend it before they change it; some differences are legitimate readings (a grid can only refute convexity) and worth discussing. Common mistakes: a Hessian step of 1e-8 (rounding swamps second differences: use 1e-4), and calling the plateau run "converged".</p></aside>
 </section>
 
-<section class="slide" id="problem-set-6" data-label="Problem set 6">
+<section class="slide" id="problem-set-6" data-label="Problem set 6" data-minutes="3">
   <div class="kicker">Before week 7</div>
   <h2>Problem set 6: a Hessian, two critical points, an edge and three verdicts</h2>
   <div class="cols cols-2">
@@ -201,7 +201,7 @@ uv run python problem_sets/check.py PS6</code></pre>
   <aside class="notes"><p>Worked answers are in the trainer pack, not in the repository. Remind participants that a NumPy eigenvalue routine is allowed for checking a hand answer, not for replacing it.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
+<section class="slide" id="wrap-up" data-minutes="3">
   <div class="kicker">Week 6 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
@@ -211,7 +211,7 @@ uv run python problem_sets/check.py PS6</code></pre>
   </div>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
+<section class="slide dark" id="next" data-label="Next" data-minutes="2">
   <div class="kicker">Next</div>
   <h2>Week 7: Stable losses and penalties</h2>
   <p class="lead">Hand in Problem set 6. Week 7 makes the losses you will train in the capstone safe to compute.</p>

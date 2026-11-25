@@ -73,15 +73,17 @@ them outside the repository.
 - Plain training, 2,000 steps: weight norm 3.70 at step 50 and 16.22 at the end, still growing;
   held-out loss 0.071, accuracy 1.000.
 
-| λ | ‖W‖ | training loss | held-out loss | held-out accuracy |
-|---|---|---|---|---|
-| 0 | 16.216 | 0.0940 | 0.0712 | 1.000 |
-| 0.001 | 11.099 | 0.1357 | 0.1126 | 1.000 |
-| 0.01 | 4.904 | 0.2872 | 0.2730 | 0.980 |
-| 0.1 | 1.701 | 0.5824 | 0.5856 | 0.880 |
-| 1 | 0.391 | 0.9223 | 0.9265 | 0.787 |
+| λ | ‖W‖ | training loss | held-out loss | held-out accuracy | held-out loss, re-test |
+|---|---|---|---|---|---|
+| 0 | 16.216 | 0.0940 | 0.0712 | 1.000 | 0.7000 |
+| 0.001 | 11.099 | 0.1357 | 0.1126 | 1.000 | 0.5411 |
+| 0.01 | 4.904 | 0.2872 | 0.2730 | 0.980 | 0.4621 |
+| 0.1 | 1.701 | 0.5824 | 0.5856 | 0.880 | 0.6530 |
+| 1 | 0.391 | 0.9223 | 0.9265 | 0.787 | 0.9425 |
 
-- No penalty improved the held-out loss on these noise-free labels; the penalty bounded the
+- On the noise-free first results no penalty improved the held-out loss (lowest at λ = 0). On the
+  re-test, where 10 of the 150 held-out learners land one level away, λ = 0.01 gives the lowest
+  held-out loss (0.462 against 0.700 without a penalty). Either way the penalty bounded the
   weights. Smallest Hessian eigenvalue (stretch): about −1e-12 plain, 0.0100 with λ = 0.01.
 
 ## Lab 8.1 · A budget allocation two ways

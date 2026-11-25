@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib.util
 import math
 import sys
+from decimal import Decimal, localcontext
 from pathlib import Path
 
 import numpy as np
@@ -344,16 +345,25 @@ def _(m):
 _Z = np.array([-1000.0, -50.0, -3.0, -0.2, 0.0, 0.7, 4.0, 60.0, 1000.0])
 
 
+def _log1p_exp(z: float) -> float:
+    """log(1 + e^z) in 40-digit decimal arithmetic, where e^1000 does not overflow: a slow referee
+    that shows no floating-point trick."""
+    with localcontext() as ctx:
+        ctx.prec = 40
+        return float((Decimal(1) + Decimal(repr(float(z))).exp()).ln())
+
+
 @check("PS7", "1 · a stable log-sigmoid")
 def _(m):
     got = np.asarray(m.log_sigmoid(_Z), float)
-    return bool(np.all(np.isfinite(got))) and close(got, -np.logaddexp(0.0, -_Z), 1e-9)
+    want = np.array([-_log1p_exp(-z) for z in _Z])
+    return bool(np.all(np.isfinite(got))) and close(got, want, 1e-9)
 
 
 @check("PS7", "2 · binary cross-entropy from logits")
 def _(m):
     y = np.array([0, 1, 1, 0, 1, 0, 0, 1, 0])
-    want = float(np.mean(np.logaddexp(0.0, _Z) - y * _Z))
+    want = float(np.mean([_log1p_exp(-z) if t else _log1p_exp(z) for z, t in zip(_Z, y)]))
     got = float(m.bce_from_logits(_Z, y))
     return math.isfinite(got) and close(got, want, 1e-9)
 
@@ -389,9 +399,9 @@ def _(m):
 def _(m):
     X, y = _ridge_data()
     for lam in (0.1, 2.0):
+        loss = lambda v: 0.5 * np.mean((X @ v - y) ** 2) + 0.5 * lam * (v @ v)  # noqa: E731
         w = np.asarray(m.ridge_solution(X, y, lam), float)
-        g = X.T @ (X @ w - y) / len(y) + lam * w
-        if not np.linalg.norm(g) < 1e-8:
+        if not np.linalg.norm(cdiff(loss, w)) < 1e-7:  # stationary, by differences of the loss
             return False
     return True
 

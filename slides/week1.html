@@ -1,8 +1,8 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes"><p>Welcome the cohort. Ask two quick questions with a show of hands: who differentiated anything in the last year, and who has trained a model with a library? The answers set the pace of today's first block. Eight weeks, one session a week: about 105 minutes of teaching in three blocks with a checkpoint after each, then a 105-minute lab.</p></aside>
+  <aside class="notes"><p>Welcome the cohort. Ask two quick questions with a show of hands: who differentiated anything in the last year, and who has trained a model with a library? The answers set the pace of today's first block. Eight weeks, one session a week: about 105 minutes of teaching in three blocks with a checkpoint after each, then a 105-minute lab. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
 </section>
 
-<section class="slide" id="eight-weeks" data-label="The course">
+<section class="slide" id="eight-weeks" data-label="The course" data-minutes="4">
   <div class="kicker">The course at a glance</div>
   <h2>Eight weeks from a single slope to a network you train with your own engine</h2>
   <div class="cols cols-4 gap-s">
@@ -19,7 +19,7 @@
   <aside class="notes"><p>One sentence per week, no teaching yet. Point out the arc: weeks 1 to 4 compute gradients, weeks 5 to 8 use them. The engine of week 4 is the one the capstone trains with, so week 4 matters most.</p></aside>
 </section>
 
-<section class="slide" id="how-assessed" data-label="Assessment">
+<section class="slide" id="how-assessed" data-label="Assessment" data-minutes="4">
   <div class="kicker">How the course is assessed</div>
   <h2>Four parts, and two tests you sit without help</h2>
   <div class="cols cols-2">
@@ -37,7 +37,7 @@
   <aside class="notes"><p>Read the AI levels aloud and say why: the tests and the oral check ask you to trace a backward pass yourself, so the practice has to be yours. A tutor gives hints, not answers; its instruction text is in labs/TUTOR.md. Test 1 comes after week 4, Test 2 after week 8, each 90 minutes: 40 on paper, 50 at the keyboard.</p></aside>
 </section>
 
-<section class="slide" id="the-charity" data-label="Case study">
+<section class="slide" id="the-charity" data-label="Case study" data-minutes="4">
   <div class="kicker">One case all term</div>
   <h2>The adult learning charity: evening classes in five districts</h2>
   <p class="lead">A non-profit that teaches adults to read, write and calculate. Its data analyst wants to understand the models before trusting them.</p>
@@ -46,11 +46,11 @@
     <div class="card c-cyan flat"><h4>Placement model</h4><p class="small mb0">Three class levels from an entry score. Week 7.</p></div>
     <div class="card c-coral flat"><h4>Outreach budget</h4><p class="small mb0">Enrolment curves for districts D1 to D5, one budget. Weeks 1, 2 and 8.</p></div>
   </div>
-  <div class="callout note mt"><b>All synthetic.</b> 600 learners coded LR-0001 onwards, generated with a fixed seed. Weeks 5 and the capstone use public datasets instead.</div>
+  <div class="callout note mt"><b>All synthetic.</b> 600 learners coded LR-0001 onwards, generated with a fixed seed. Week 5 and the capstone use public datasets instead.</div>
   <aside class="notes"><p>People appear by role only: the programme lead, the data analyst, the finance officer. The data is written by labs/_tools/make_data.py with seed 102; no names, no identity numbers. The two public datasets (week 5 and the capstone) come from the UCI Machine Learning Repository under CC BY 4.0 and are downloaded when the lab runs; they are never the charity's data.</p></aside>
 </section>
 
-<section class="slide" id="setup-check" data-label="Setup">
+<section class="slide" id="setup-check" data-label="Setup" data-minutes="4">
   <div class="kicker">Before the first lab</div>
   <h2>Open the setup check and run it once</h2>
   <div class="cols cols-2">
@@ -74,7 +74,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="secant-to-tangent" data-lo="LO1" data-minutes="6">
+<section class="slide" id="secant-to-tangent" data-lo="LO1" data-minutes="7">
   <div class="kicker">Block 1 · What a derivative is</div>
   <h2>A derivative is the slope a secant settles on as the gap closes</h2>
   <div class="cols cols-2">
@@ -94,7 +94,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
   <aside class="notes"><p>Do the table on the board for x squared at 3: (3+h)² - 9 over h is 6 + h. That last line is the whole idea: the slope is 6 plus something that vanishes with h. Ask what happens for |x| at 0: the slope from the left is -1 and from the right +1, so there is no single number. Losses with a kink (ReLU, absolute error) behave like that at one point, and week 4 decides what the engine does there.</p></aside>
 </section>
 
-<section class="slide" id="best-linear-fit" data-lo="LO1" data-minutes="6">
+<section class="slide" id="best-linear-fit" data-lo="LO1" data-minutes="7">
   <div class="kicker">Block 1 · The definition that generalises</div>
   <h2>The derivative gives the best straight-line fit near a point</h2>
   <div class="cols cols-2">
@@ -108,7 +108,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
   <aside class="notes"><p>Write f(x + h) = f(x) + f'(x) h + r(h), with r(h)/h going to 0. Stress "faster than h": a line with any other slope leaves an error proportional to h. Then the bridge to the course: gradient descent is this approximation used to choose a step. Keep it brief; Taylor makes the error term precise in block 2.</p></aside>
 </section>
 
-<section class="slide" id="tangent-d3" data-lo="LO1" data-minutes="5">
+<section class="slide" id="tangent-d3" data-lo="LO1" data-minutes="6">
   <div class="kicker">Block 1 · In the case</div>
   <h2>District D3's enrolment curve and its tangent at 12 thousand</h2>
   <div class="cols cols-32">
@@ -125,7 +125,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
   <aside class="notes"><p>This is district D3, not the D1 curve of the lab. Numbers from the figure script: E(12) = 41.23, E(14) = 45.52, tangent at 14 = 45.73, so the tangent overstates by 0.46%. At 17 thousand it overstates by 2.4%, at 22 by 7.2%, at 32 by 19%. Ask: is the overstatement an accident of this curve? Hold the answer for the Taylor slide.</p></aside>
 </section>
 
-<section class="slide" id="check-local-estimate" data-lo="LO1" data-minutes="3">
+<section class="slide" id="check-local-estimate" data-lo="LO1" data-minutes="4">
   <div class="kicker">Checkpoint 1</div>
   <h2>What does the slope promise the finance officer?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -141,7 +141,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
   <aside class="notes"><p>Answer: B. If many pick C, go back to the D3 figure: the tangent lies above the curve. If many pick A, write the approximation again with h = 2. Two minutes, then move on.</p></aside>
 </section>
 
-<section class="slide" id="rules-table" data-lo="LO1" data-minutes="7">
+<section class="slide" id="rules-table" data-lo="LO1" data-minutes="9">
   <div class="kicker">Block 2 · Computing derivatives exactly</div>
   <h2>Five rules cover every function in this course</h2>
   <table class="t">
@@ -156,7 +156,7 @@ uv run jupyter lab 00_setup_check.ipynb</code></pre>
   <aside class="notes"><p>Work the sigmoid derivative on the board with the chain rule: d/dz (1 + e^-z)^-1 = (1 + e^-z)^-2 e^-z, then rewrite. The chain rule row is highlighted because weeks 3 and 4 are the chain rule applied to a graph. Do not derive the D1 curve of the lab: the lab asks for it.</p></aside>
 </section>
 
-<section class="slide" id="symbolic-algebra" data-lo="LO1" data-minutes="7">
+<section class="slide" id="symbolic-algebra" data-lo="LO1" data-minutes="9">
   <div class="kicker">Block 2 · Rules, done by a program</div>
   <h2>Symbolic algebra applies the same rules exactly, and can bloat</h2>
   <div class="cols cols-2">
@@ -176,7 +176,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>Run it live if the room has the environment ready: sp.factor gives x(x + 4) e^(x/2) / 2, and f(1.0) = 4.1218 (that is 2.5 times e to the 0.5). Symbolic algebra is one of the tool slots (SymPy, Maxima): any system that applies the rules exactly fills it. Expression swell is the reason frameworks do not differentiate symbolically.</p></aside>
 </section>
 
-<section class="slide" id="taylor-quadratic" data-lo="LO1" data-minutes="7">
+<section class="slide" id="taylor-quadratic" data-lo="LO1" data-minutes="9">
   <div class="kicker">Block 2 · Taylor expansions</div>
   <h2>Add the curvature term and the approximation reaches further</h2>
   <div class="cols cols-2">
@@ -196,7 +196,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>Answer the question from the D3 slide: E''(x) = -45 / (8 + x)², negative everywhere, so the tangent always overestimates. The percentages are the figure script's, for D3. The lab measures the same for D1 and also for the quadratic; do not give those numbers. Week 6 uses f'' again, as the Hessian, to bound the step size.</p></aside>
 </section>
 
-<section class="slide" id="check-concave-tangent" data-lo="LO1" data-minutes="3">
+<section class="slide" id="check-concave-tangent" data-lo="LO1" data-minutes="4">
   <div class="kicker">Checkpoint 2</div>
   <h2>Which side of the tangent is the curve on?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -212,7 +212,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>Answer: D. Draw a hill and a tangent touching it once. The same picture explains why a step of gradient descent on a concave piece overshoots the gain it promised.</p></aside>
 </section>
 
-<section class="slide" id="finite-differences" data-lo="LO1" data-minutes="7">
+<section class="slide" id="finite-differences" data-lo="LO1" data-minutes="8">
   <div class="kicker">Block 3 · Derivatives from values alone</div>
   <h2>Finite differences need only the function, and pay with error</h2>
   <div class="cols cols-2">
@@ -225,7 +225,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>Derive both error terms from Taylor on the board: subtract f(x - h) from f(x + h) and the even powers cancel. Say clearly what finite differences are for in machine learning: gradient checking. A model with a million weights needs two million evaluations for one central-difference gradient; reverse mode needs one backward pass (week 3).</p></aside>
 </section>
 
-<section class="slide" id="rounding-error" data-lo="LO1" data-minutes="6">
+<section class="slide" id="rounding-error" data-lo="LO1" data-minutes="7">
   <div class="kicker">Block 3 · The second error</div>
   <h2>A float holds about 16 digits, and subtraction throws them away</h2>
   <div class="cols cols-2">
@@ -244,7 +244,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>The last line of the code is the whole story: 1e-16 is below half the gap between 1 and the next float, so it vanishes. Floating-point limits are a prerequisite topic from FND-MTH-101; this is the one consequence that matters here.</p></aside>
 </section>
 
-<section class="slide" id="error-v" data-lo="LO1" data-minutes="6">
+<section class="slide" id="error-v" data-lo="LO1" data-minutes="7">
   <div class="kicker">Block 3 · Two errors, one best step</div>
   <h2>Error falls with h, then rises: the best step sits in the V</h2>
   <div class="cols cols-32">
@@ -263,7 +263,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>Balance h/2 |f''| against eps |f| / h and the minimum is near the square root of eps; for the central difference balance h²/6 against eps/h and you get the cube root. The example numbers come from the figure script. The lab makes the same plot for the three case functions; let the room predict where their V's sit before they run it.</p></aside>
 </section>
 
-<section class="slide" id="check-step-size" data-lo="LO1" data-minutes="3">
+<section class="slide" id="check-step-size" data-lo="LO1" data-minutes="4">
   <div class="kicker">Checkpoint 3</div>
   <h2>Which step should the gradient check use next?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -283,7 +283,7 @@ print(f(1.0))          # 4.1218...</code></pre>
   <aside class="notes"><p>AI-tutor lab: hints, not answers (labs/TUTOR.md). Walk the room during task 1: the common slip is forgetting the inner derivative of the chain rule for p (the factor w_a). In task 4, people who plot without log axes see nothing: point them to loglog. Task 5 is a written explanation: ask two people to read theirs aloud at the end. Every exercise has a safety net, so a stuck participant can still run the later cells.</p></aside>
 </section>
 
-<section class="slide" id="problem-set-1" data-label="Problem set 1">
+<section class="slide" id="problem-set-1" data-label="Problem set 1" data-minutes="3">
   <div class="kicker">Before week 2</div>
   <h2>Problem set 1: six derivatives and one explanation</h2>
   <div class="cols cols-2">
@@ -299,7 +299,7 @@ uv run python problem_sets/check.py PS1</code></pre>
   <aside class="notes"><p>The weekly problem sets are 20% of the grade together. The written answer (question 6) is marked by the trainer; the checker only sees that it is there. Remind the room of the pre-work refresher in labs/prework/README.md for anyone whose rules were slow today.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
+<section class="slide" id="wrap-up" data-minutes="3">
   <div class="kicker">Week 1 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
@@ -309,7 +309,7 @@ uv run python problem_sets/check.py PS1</code></pre>
   </div>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
+<section class="slide dark" id="next" data-label="Next" data-minutes="2">
   <div class="kicker">Next</div>
   <h2>Week 2: Several variables</h2>
   <p class="lead">Hand in Problem set 1. Finish Lab 1.1 at home if needed: week 2 opens with its results.</p>

@@ -1,10 +1,10 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes"><p>Collect Problem set 7. Last teaching week. Announce Test 2 (after this week, AI-off, 40 minutes on paper and 50 at the keyboard) and the capstone brief, which participants receive at the end of today. Today's lab is the course's responsible-use moment: a correct optimisation of the wrong objective.</p></aside>
+  <aside class="notes"><p>Collect Problem set 7. Last teaching week. Announce Test 2 (after this week, AI-off, 40 minutes on paper and 50 at the keyboard) and the capstone brief, which participants receive at the end of today. Today's lab is the course's responsible-use moment: a correct optimisation of the wrong objective. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<section class="slide" id="review-week7" data-lo="LO1" data-minutes="4">
+<section class="slide" id="review-week7" data-lo="LO1" data-minutes="7">
   <div class="kicker">Review of week 7</div>
   <h2>Where did this loss go wrong?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -20,31 +20,31 @@
   <aside class="notes"><p>Answer: C. Large logits, from separable data or a high rate, are how a probability gets to 0; the cure is the stable form, with or without a penalty.</p></aside>
 </section>
 
-<section class="slide" id="lab-7-1-debrief" data-lo="LO2" data-minutes="6">
+<section class="slide" id="lab-7-1-debrief" data-lo="LO2" data-minutes="11">
   <div class="kicker">Lab 7.1 · what your runs showed</div>
-  <h2>The penalty bounded the weights; it did not lower the held-out loss</h2>
+  <h2>The penalty bounded the weights; whether it lowered held-out loss depended on the labels</h2>
   <div class="cols cols-2">
     <table class="t small">
-      <tr><th class="num">λ</th><th class="num">‖W‖</th><th class="num">held-out loss</th><th class="num">accuracy</th></tr>
-      <tr class="hl"><td class="num">0</td><td class="num">16.22</td><td class="num">0.071</td><td class="num">1.000</td></tr>
-      <tr><td class="num">0.001</td><td class="num">11.10</td><td class="num">0.113</td><td class="num">1.000</td></tr>
-      <tr><td class="num">0.01</td><td class="num">4.90</td><td class="num">0.273</td><td class="num">0.980</td></tr>
-      <tr><td class="num">0.1</td><td class="num">1.70</td><td class="num">0.586</td><td class="num">0.880</td></tr>
-      <tr><td class="num">1</td><td class="num">0.39</td><td class="num">0.927</td><td class="num">0.787</td></tr>
+      <tr><th class="num">λ</th><th class="num">‖W‖</th><th class="num">held-out loss, first results</th><th class="num">held-out loss, re-test</th></tr>
+      <tr><td class="num">0</td><td class="num">16.22</td><td class="num">0.071</td><td class="num">0.700</td></tr>
+      <tr><td class="num">0.001</td><td class="num">11.10</td><td class="num">0.113</td><td class="num">0.541</td></tr>
+      <tr class="hl"><td class="num">0.01</td><td class="num">4.90</td><td class="num">0.273</td><td class="num">0.462</td></tr>
+      <tr><td class="num">0.1</td><td class="num">1.70</td><td class="num">0.586</td><td class="num">0.653</td></tr>
+      <tr><td class="num">1</td><td class="num">0.39</td><td class="num">0.927</td><td class="num">0.943</td></tr>
     </table>
     <div class="stack">
       <div class="card c-coral flat"><h4>Naive: nan, nan, inf</h4><p class="small mb0">Stable cross-entropy on the planted rows: 22.00. Gradient check: 9e-10.</p></div>
       <div class="card c-teal flat"><h4>Plain norm still growing</h4><p class="small mb0">3.70 at step 50, 16.22 at step 2,000. Smallest Hessian eigenvalue: about 0 plain, 0.01 with λ = 0.01.</p></div>
     </div>
   </div>
-  <aside class="notes"><p>All from the solution run, 2,000 steps. The levels are thresholds on the entry score with no noise, so held-out learners look exactly like training ones and confidence costs nothing. Ask: when would the penalty pay? When labels are noisy or the held-out learners differ from the training ones. The habit to keep is measuring, not assuming.</p></aside>
+  <aside class="notes"><p>All from the solution run, 2,000 steps. The first results are thresholds on the entry score with no noise, so held-out learners scored the same way look exactly like training ones and confidence costs nothing: the plain model wins that column. On the re-test, 10 of 150 learners land one level away; the plain model is near-certain and wrong on them, and λ = 0.01 gives the lowest loss. Ask which column the charity will meet in use. The habit to keep is measuring, not assuming.</p></aside>
 </section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="lagrangian" data-lo="LO3" data-minutes="7">
+<section class="slide" id="lagrangian" data-lo="LO3" data-minutes="13">
   <div class="kicker">Block 1 · The Lagrangian</div>
   <h2>At a constrained optimum, the gradient points across the constraint</h2>
   <div class="cols cols-2">
@@ -62,7 +62,7 @@
   <aside class="notes"><p>Read the conditions in words: the marginal value of the last unit is the same in both places; otherwise moving a unit across would help. That reading is the whole of today's lab. Check the example: 2/4 = 0.5 = 1/2.</p></aside>
 </section>
 
-<section class="slide" id="multiplier-price" data-lo="LO3" data-minutes="6">
+<section class="slide" id="multiplier-price" data-lo="LO3" data-minutes="11">
   <div class="kicker">Block 1 · The multiplier</div>
   <h2>The multiplier is the price of the constraint: value per extra unit</h2>
   <div class="cols cols-2">
@@ -73,7 +73,7 @@
   <aside class="notes"><p>Exact check for the board: V(6.1) − V(6) = 2 log(4.0667/4) + log(2.0333/2) ≈ 0.0331 + 0.0165 = 0.0496. Close to 0.05. The multiplier is a derivative, so it is accurate for small changes only.</p></aside>
 </section>
 
-<section class="slide" id="check-lagrange" data-lo="LO3" data-minutes="3">
+<section class="slide" id="check-lagrange" data-lo="LO3" data-minutes="6">
   <div class="kicker">Checkpoint 1</div>
   <h2>What does the multiplier say?</h2>
   <div class="quiz" data-type="single" data-lo="LO3">
@@ -89,7 +89,7 @@
   <aside class="notes"><p>Answer: B. "About", because λ itself changes as the limit moves.</p></aside>
 </section>
 
-<section class="slide" id="equal-margins" data-lo="LO3" data-minutes="7">
+<section class="slide" id="equal-margins" data-lo="LO3" data-minutes="13">
   <div class="kicker">Block 2 · Limits that bind</div>
   <h2>With budgets that cannot be negative, a programme can get nothing</h2>
   <div class="cols cols-32">
@@ -106,7 +106,7 @@
   <aside class="notes"><p>A parallel example; the lab's districts have their own numbers. The condition for a programme held at zero is an inequality: its margin at zero is at most λ. These are the Karush-Kuhn-Tucker conditions, named here for awareness only.</p></aside>
 </section>
 
-<section class="slide" id="projected-gradient" data-lo="LO3" data-minutes="6">
+<section class="slide" id="projected-gradient" data-lo="LO3" data-minutes="11">
   <div class="kicker">Block 2 · A second way</div>
   <h2>Projected gradient: step uphill, then return to the nearest allowed point</h2>
   <div class="cols cols-2">
@@ -120,7 +120,7 @@
   <aside class="notes"><p>Why two methods: the Lagrange route gives λ and insight, the projected route generalises to constraints with no closed form. Agreement between them is the check. Finding θ is a small sorting exercise in the lab.</p></aside>
 </section>
 
-<section class="slide" id="check-corner" data-lo="LO3" data-minutes="3">
+<section class="slide" id="check-corner" data-lo="LO3" data-minutes="6">
   <div class="kicker">Checkpoint 2</div>
   <h2>Who gets funded?</h2>
   <div class="quiz" data-type="single" data-lo="LO3">
@@ -136,7 +136,7 @@
   <aside class="notes"><p>Answer: D. Ask what would have to change for it to be funded: a larger k (more value per unit) or a smaller budget elsewhere that lowers λ.</p></aside>
 </section>
 
-<section class="slide" id="proxy-harm" data-lo="LO3" data-minutes="7">
+<section class="slide" id="proxy-harm" data-lo="LO3" data-minutes="13">
   <div class="kicker">Block 3 · Responsible use</div>
   <h2>Optimising a convenient proxy can harm the people a model serves</h2>
   <div class="cols cols-3">
@@ -147,7 +147,7 @@
   <aside class="notes"><p>This is the course's responsible-use point for the allocation lab. Keep it concrete: in the lab, participants will see which districts the proxy leaves out and what a floor costs, in enrolments per thousand. Segregation of duties is not bureaucracy: the person who builds the model should not also be the one who decides whose outcomes count.</p></aside>
 </section>
 
-<section class="slide" id="check-roles" data-lo="LO3" data-minutes="3">
+<section class="slide" id="check-roles" data-lo="LO3" data-minutes="6">
   <div class="kicker">Checkpoint 3</div>
   <h2>Who decides?</h2>
   <div class="quiz" data-type="single" data-lo="LO3">
@@ -167,7 +167,7 @@
   <aside class="notes"><p>AI-tutor. Task 1 is on paper first; the code only checks it. In task 5, let participants find on their own who the proxy leaves out before you say anything. The recommendation in task 6 is the LO3 evidence form: numbers, each multiplier read as a price, and the three roles kept separate. Common mistakes: bisection with the comparison reversed (the sum of budgets falls as λ rises), and a projection that sums to the budget but leaves negative entries.</p></aside>
 </section>
 
-<section class="slide" id="problem-set-8" data-label="Problem set 8">
+<section class="slide" id="problem-set-8" data-label="Problem set 8" data-minutes="3">
   <div class="kicker">Before Test 2</div>
   <h2>Problem set 8: three constrained problems and their prices</h2>
   <div class="cols cols-2">
@@ -182,7 +182,7 @@ uv run python problem_sets/check.py PS8</code></pre>
   <aside class="notes"><p>Worked answers are in the trainer pack. Test 2 is AI-off: 40 minutes on paper, 50 at the keyboard.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
+<section class="slide" id="wrap-up" data-minutes="3">
   <div class="kicker">Week 8 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
@@ -192,7 +192,7 @@ uv run python problem_sets/check.py PS8</code></pre>
   </div>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
+<section class="slide dark" id="next" data-label="Next" data-minutes="2">
   <div class="kicker">Next</div>
   <h2>Test 2, then the capstone</h2>
   <p class="lead">Hand in Problem set 8. The capstone brief is in <code>labs/capstone/BRIEF.md</code>: a two-layer network trained with your own engine, every run reported.</p>

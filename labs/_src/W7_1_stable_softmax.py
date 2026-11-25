@@ -6,7 +6,8 @@
 # The charity places each new learner in one of three class levels (0, 1, 2). You watch a naive
 # softmax overflow, write a stable one with its cross-entropy, check its gradient, train a
 # three-level placement model with gradient descent, then add an L2 penalty and measure what it
-# changes: the weights, the training loss and the held-out loss.
+# changes: the weights, the training loss and the held-out loss, first against the held-out
+# learners' first placement results and then against a noisier re-test.
 #
 # **Reference state.** Nothing to build on: the data are in `data/learners.csv` (synthetic).
 #
@@ -148,6 +149,11 @@ print(f"relative error, logits: {errs[0]:.1e}; weights: {errs[1]:.1e}")
 # a bias column: `X` has four columns and `W` is 4 × 3. The split is fixed: 450 learners to train,
 # 150 held out.
 #
+# The levels in `learners.csv` are the first placement results, set by thresholds on the entry
+# score, so they carry no noise. A month later the charity re-tests the 150 held-out learners, and
+# a placement test is not exact: 10 of the 150 land one level away from their first result
+# (`yte_retest`, seeded; synthetic like everything else). Task 6 uses it.
+#
 # ✏️ **Exercise** · `train(lam, steps, lr=0.5)` starts from `W = 0` and takes `steps` steps of
 # gradient descent on `cross_entropy(X W, y) + (lam / 2) ‖W‖²`. The penalty covers all twelve
 # parameters, bias included. It returns `W` and a history: a list of `(step, data loss, ‖W‖)`
@@ -161,6 +167,10 @@ TR, TE = perm[:450], perm[450:]
 mu, sd = X_raw[TR].mean(axis=0), X_raw[TR].std(axis=0)
 X_all = np.column_stack([(X_raw - mu) / sd, np.ones(len(y_all))])
 Xtr, ytr, Xte, yte = X_all[TR], y_all[TR], X_all[TE], y_all[TE]
+_rt = np.random.default_rng(7102)
+_moved = _rt.choice(len(yte), 10, replace=False)
+yte_retest = yte.copy()
+yte_retest[_moved] = np.where(yte[_moved] == 1, 1 + _rt.choice([-1, 1], 10), 1)  # one level away
 
 
 def train(lam, steps, lr=0.5):
@@ -196,7 +206,8 @@ print(f"held-out loss {plain['held_out']:.4f}, held-out accuracy {plain['accurac
 # ## 5 · An L2 penalty (15')
 #
 # ✏️ **Exercise** · `sweep()` trains with `lam` in `LAMS` (same steps, same rate) and returns one
-# row per strength: `lam`, final ‖W‖, training data loss, held-out loss, held-out accuracy.
+# row per strength: `lam`, final ‖W‖, training data loss, held-out loss, held-out accuracy, and
+# the held-out loss against the re-test levels `yte_retest`.
 
 # %%
 LAMS = [0.0, 1e-3, 1e-2, 1e-1, 1.0]
@@ -208,7 +219,7 @@ def sweep():
     for lam in LAMS:
         W, _ = train(lam, STEPS)
         rows.append([lam, float(np.linalg.norm(W)), cross_entropy(Xtr @ W, ytr), cross_entropy(Xte @ W, yte),
-                     float(np.mean((Xte @ W).argmax(axis=1) == yte))])
+                     float(np.mean((Xte @ W).argmax(axis=1) == yte)), cross_entropy(Xte @ W, yte_retest)])
     return rows
     # END SOLUTION
 
@@ -217,18 +228,20 @@ try:
     rows = sweep()
 except NotImplementedError:
     rows = U.reference("w7_sweep")
-print(f"{'lam':>6} {'|W|':>8} {'train':>8} {'held-out':>9} {'accuracy':>9}")
-for lam, norm, tr_loss, te_loss, acc in rows:
-    print(f"{lam:6g} {norm:8.3f} {tr_loss:8.4f} {te_loss:9.4f} {acc:9.3f}")
+print(f"{'lam':>6} {'|W|':>8} {'train':>8} {'held-out':>9} {'accuracy':>9} {'re-test':>8}")
+for lam, norm, tr_loss, te_loss, acc, rt_loss in rows:
+    print(f"{lam:6g} {norm:8.3f} {tr_loss:8.4f} {te_loss:9.4f} {acc:9.3f} {rt_loss:8.4f}")
 
 # %% [markdown]
 # ## 6 · Weight norms and held-out loss (15')
 #
 # The cell plots the weight norm over the steps for the plain model and for `lam = 0.01`, and the
-# held-out loss against the strength.
+# held-out loss against the strength, on the first results and on the re-test.
 #
-# ✏️ **Exercise** · Answer in `compare()`: which strength gave the lowest held-out loss, and did
-# any penalty improve on the plain model here? Return the strength and `True` or `False`.
+# ✏️ **Exercise** · Answer in `compare()`, once for the first results (column 4 of a row) and once
+# for the re-test (column 6): which strength gave the lowest held-out loss, and did any penalty
+# improve on the plain model? Return four values: strength and `True` or `False` for the first
+# results, then the same for the re-test.
 
 # %%
 plt = U.plt()
@@ -240,8 +253,9 @@ fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
 a1.plot([h[0] for h in plain["history"]], [h[2] for h in plain["history"]], label="plain")
 a1.plot([h[0] for h in hist_pen], [h[2] for h in hist_pen], label="lam = 0.01")
 a1.set_xlabel("step"), a1.set_ylabel("weight norm"), a1.legend()
-a2.semilogx([max(r[0], 1e-4) for r in rows], [r[3] for r in rows], "o-")
-a2.set_xlabel("lam (plain shown at 1e-4)"), a2.set_ylabel("held-out loss")
+a2.semilogx([max(r[0], 1e-4) for r in rows], [r[3] for r in rows], "o-", label="first results")
+a2.semilogx([max(r[0], 1e-4) for r in rows], [r[5] for r in rows], "s--", label="re-test")
+a2.set_xlabel("lam (plain shown at 1e-4)"), a2.set_ylabel("held-out loss"), a2.legend()
 fig.tight_layout()
 fig.savefig(U.out("W7_1_penalty.png"), dpi=110)
 plt.close(fig)
@@ -250,23 +264,29 @@ print("saved out/W7_1_penalty.png")
 
 def compare():
     # BEGIN SOLUTION
-    best = min(rows, key=lambda r: r[3])
-    return best[0], bool(any(r[3] < rows[0][3] for r in rows[1:]))
+    answer = []
+    for col in (3, 5):
+        best = min(rows, key=lambda r: r[col])
+        answer += [best[0], bool(any(r[col] < rows[0][col] for r in rows[1:]))]
+    return tuple(answer)
     # END SOLUTION
 
 # %%
 try:
-    best_lam, penalty_helped = compare()
+    best_lam, penalty_helped, best_lam_rt, penalty_helped_rt = compare()
 except NotImplementedError:
-    best_lam, penalty_helped = U.reference("w7_compare")
-print(f"lowest held-out loss at lam = {best_lam:g}; a penalty improved on the plain model: {penalty_helped}")
+    best_lam, penalty_helped, best_lam_rt, penalty_helped_rt = U.reference("w7_compare")
+print(f"first results: lowest held-out loss at lam = {best_lam:g}; a penalty improved on the plain model: {penalty_helped}")
+print(f"re-test:       lowest held-out loss at lam = {best_lam_rt:g}; a penalty improved on the plain model: {penalty_helped_rt}")
 
 # %% [markdown]
-# **Look at** the price and the gain. These labels carry no noise, so the plain model's
-# overconfidence costs nothing on held-out learners of the same kind, and every penalty raised
-# the held-out loss. What the penalty buys is a finite, unique solution with bounded weights: a
-# model whose training stops somewhere. On noisy labels the trade can come out the other way;
-# measure it, do not assume it.
+# **Look at** the price and the gain. The first results carry no noise, so the plain model's
+# overconfidence costs nothing on held-out learners scored the same way, and every penalty raised
+# that held-out loss. The re-test is what the model meets in use: ten learners one level away are
+# enough for the plain model's near-certain wrong answers to cost more than the penalty's
+# softer ones, and a small penalty gives the lowest loss. The penalty also buys a finite, unique
+# solution with bounded weights: a model whose training stops somewhere. Whether it pays on
+# held-out data is measured, not assumed.
 #
 # ## 7 · The lab log (10')
 #
@@ -284,8 +304,8 @@ def findings():
         f"The gradient P - Y matched central differences to {errs[0]:.0e} on the logits and {errs[1]:.0e} on the weights.",
         f"Without a penalty the weight norm grew from {norm_first:.2f} at step 50 to {norm_last:.2f} at step "
         f"{plain['history'][-1][0]} and was still growing; at lam = 0.01 it stayed at {r1[1]:.2f}. "
-        f"Held-out loss rose from {rows[0][3]:.3f} to {r1[3]:.3f}: on noise-free labels the penalty bought "
-        "bounded weights, not a better held-out loss.",
+        f"On the noise-free first results held-out loss rose from {rows[0][3]:.3f} to {r1[3]:.3f}; on the "
+        f"re-test it fell from {rows[0][5]:.3f} to {r1[5]:.3f}: the penalty's value depends on the labels it meets.",
     ]
     # END SOLUTION
 

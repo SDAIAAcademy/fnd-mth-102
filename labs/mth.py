@@ -126,7 +126,10 @@ def _download(name: str) -> bytes:
     CACHE.mkdir(parents=True, exist_ok=True)
     cached = CACHE / spec["member"]
     if cached.exists():
-        return cached.read_bytes()
+        raw = cached.read_bytes()
+        if not spec["sha256"] or hashlib.sha256(raw).hexdigest() == spec["sha256"]:
+            return raw
+        cached.unlink()  # a damaged or edited cache: fetch it again
     last = None
     for _ in range(3):
         try:

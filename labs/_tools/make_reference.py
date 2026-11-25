@@ -289,6 +289,10 @@ def week7(C):
     TR, TE = perm[:450], perm[450:]
     X = np.column_stack([(Xr - Xr[TR].mean(axis=0)) / Xr[TR].std(axis=0), np.ones(len(y))])
     Xtr, ytr, Xte, yte = X[TR], y[TR], X[TE], y[TE]
+    rt = np.random.default_rng(7102)
+    moved = rt.choice(len(yte), 10, replace=False)
+    yrt = yte.copy()
+    yrt[moved] = np.where(yte[moved] == 1, 1 + rt.choice([-1, 1], 10), 1)
 
     def train(lam, steps=2000, lr=0.5):
         W, Yt, hist = np.zeros((4, 3)), np.eye(3)[ytr], []
@@ -305,12 +309,15 @@ def week7(C):
     for lam in [0.0, 1e-3, 1e-2, 1e-1, 1.0]:
         W, h = train(lam)
         rows.append([lam, float(np.linalg.norm(W)), ce(Xtr @ W, ytr), ce(Xte @ W, yte),
-                     float(np.mean((Xte @ W).argmax(axis=1) == yte))])
+                     float(np.mean((Xte @ W).argmax(axis=1) == yte)), ce(Xte @ W, yrt)])
         if lam == 1e-2:
             save("w7_penalised_history", h)
     save("w7_sweep", rows)
-    best = min(rows, key=lambda r: r[3])
-    save("w7_compare", [best[0], bool(any(r[3] < rows[0][3] for r in rows[1:]))])
+    answer = []
+    for col in (3, 5):
+        best = min(rows, key=lambda r: r[col])
+        answer += [best[0], bool(any(r[col] < rows[0][col] for r in rows[1:]))]
+    save("w7_compare", answer)
 
 
 def week8(C):

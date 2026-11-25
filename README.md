@@ -68,6 +68,11 @@ Every lab is a notebook in `labs/`. Open it in Google Colab from the course page
 | 8.1 | Week 8 · Session 1 | A budget allocation two ways | [`W8_1_budget_allocation.ipynb`](labs/W8_1_budget_allocation.ipynb) |
 <!-- /academy:labs -->
 
+The catalog entry lists five labs: 1.1, 3.1, 4.1, 5.1 and 8.1 keep its wording. The format asks for
+one lab a week, so three labs are **additions** drawn from the entry's outcomes and topics, not new
+topics: 2.1 (gradients and Jacobians, practice for LO1), 6.1 (six loss surfaces, the evidence form
+of LO2) and 7.1 (numerically stable softmax and regularisation as a penalty).
+
 ## Capstone
 
 A two-layer network trained on public data with the participant's own engine, with gradient checks, three optimisers compared across seeds and every run reported, defended in a ten-minute oral check
@@ -88,7 +93,7 @@ in [`labs/capstone/`](labs/capstone/BRIEF.md).
 | Lab | 14 | 840 | 8 labs × 105 minutes, one after each session |
 | Guided self-study | 8 | 480 | pre-work refresher 80; Problem sets 1 to 8, 50 each (400) |
 | Assessment | 3 | 180 | Test 1 after week 4 and Test 2 after week 8, 90 each: 40 on paper, 50 at the keyboard |
-| Capstone | 6 | 360 | brief and planning clinic 30; build 255; gradient check and test oral 30; oral check 10; changeover 5; written feedback 30 |
+| Capstone | 6 | 360 | brief and planning clinic 30; build 255; gradient check and a practice oral in pairs 30; oral check 10; changeover 5; written feedback 30 |
 | **Total** | **45** | **2,700** | |
 
 ## Assessment
@@ -125,10 +130,15 @@ model serves.
 
 The lab solutions are public, in `labs/solutions/`, with the labs' answer key
 (`labs/solutions/answer_key.md`). The problem sets are checked by property in
-`labs/problem_sets/check.py`, which holds no answers. Worked problem-set answers, the capstone
-reference run, the oral-check sheet, the LO3 marking rubric and the papers and keys of the two
-supervised tests are kept by the trainer outside this repository, because publishing them would
-defeat the assessment.
+`labs/problem_sets/check.py`, which holds no worked answers: it compares each function with
+finite differences, its own runs or the definition of the quantity asked, so reading it shows
+what is checked, not the derivation the trainer marks. Worked problem-set answers, the capstone
+reference run, the oral-check sheet and the LO3 marking rubric are kept by the trainer outside
+this repository, because publishing them would defeat the assessment.
+
+**The two supervised tests have no papers yet.** Their format is fixed (90 minutes each, 40 on
+paper and 50 at the keyboard, AI-off, Test 1 after week 4 on weeks 1 to 4 and Test 2 after week 8),
+but the papers and their keys are still to be written, and will be kept off this repository.
 
 ## Running the labs
 

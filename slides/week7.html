@@ -1,10 +1,10 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes"><p>Collect Problem set 6. This week is about two habits every training loop needs: computing a loss so that it cannot overflow, and deciding deliberately whether to penalise the weights. Both come back in the capstone.</p></aside>
+  <aside class="notes"><p>Collect Problem set 6. This week is about two habits every training loop needs: computing a loss so that it cannot overflow, and deciding deliberately whether to penalise the weights. Both come back in the capstone. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<section class="slide" id="review-week6" data-lo="LO2" data-minutes="4">
+<section class="slide" id="review-week6" data-lo="LO2" data-minutes="7">
   <div class="kicker">Review of week 6</div>
   <h2>Why did this run stop?</h2>
   <div class="quiz" data-type="single" data-lo="LO2">
@@ -20,7 +20,7 @@
   <aside class="notes"><p>Answer: B.</p></aside>
 </section>
 
-<section class="slide" id="lab-6-1-debrief" data-lo="LO2" data-minutes="6">
+<section class="slide" id="lab-6-1-debrief" data-lo="LO2" data-minutes="11">
   <div class="kicker">Lab 6.1 · what your annotations showed</div>
   <h2>Two of six surfaces were convex, and one of those still diverged</h2>
   <div class="cols cols-2">
@@ -45,7 +45,7 @@
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="float-range" data-lo="LO1" data-minutes="7">
+<section class="slide" id="float-range" data-lo="LO1" data-minutes="13">
   <div class="kicker">Block 1 · Overflow</div>
   <h2>Shift the logits by their maximum before exponentiating</h2>
   <div class="cols cols-2">
@@ -63,7 +63,7 @@
   <aside class="notes"><p>Shifting changes nothing mathematically: the factor exp(−m) cancels between numerator and denominator. The same trick gives log-sum-exp: m + log Σ exp(z − m). Very negative logits fail the other way: exp underflows towards 0, and log of 0 is −inf.</p></aside>
 </section>
 
-<section class="slide" id="ce-from-logits" data-lo="LO1" data-minutes="6">
+<section class="slide" id="ce-from-logits" data-lo="LO1" data-minutes="11">
   <div class="kicker">Block 1 · The loss</div>
   <h2>Compute cross-entropy from logits, never as the log of a probability</h2>
   <div class="cols cols-2">
@@ -74,7 +74,7 @@
   <aside class="notes"><p>The binary case is the same idea: log(1 + e^z) − y z, with the softplus computed stably. That is a problem-set question, so do not write it out here.</p></aside>
 </section>
 
-<section class="slide" id="check-overflow" data-lo="LO1" data-minutes="3">
+<section class="slide" id="check-overflow" data-lo="LO1" data-minutes="6">
   <div class="kicker">Checkpoint 1</div>
   <h2>Which computation is safe?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -90,7 +90,7 @@
   <aside class="notes"><p>Answer: C. 5 + log(1 + e⁻⁵) = 5.0067.</p></aside>
 </section>
 
-<section class="slide" id="softmax-jacobian" data-lo="LO1" data-minutes="7">
+<section class="slide" id="softmax-jacobian" data-lo="LO1" data-minutes="13">
   <div class="kicker">Block 2 · The gradient</div>
   <h2>The gradient of softmax cross-entropy is probabilities minus the label</h2>
   <div class="cols cols-2">
@@ -109,7 +109,7 @@
   <aside class="notes"><p>Read the gradient: descent raises the label's logit and lowers the others, each in proportion to how much probability it took. The entries sum to 0, because shifting every logit equally changes nothing. With logits Z = XW the chain rule from week 3 gives Xᵀ(P − Y)/n for the weights.</p></aside>
 </section>
 
-<section class="slide" id="check-gradient" data-lo="LO1" data-minutes="3">
+<section class="slide" id="check-gradient" data-lo="LO1" data-minutes="6">
   <div class="kicker">Checkpoint 2</div>
   <h2>What is the gradient?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -125,7 +125,7 @@
   <aside class="notes"><p>Answer: D. Option C is a useful wrong answer: it is the derivative with respect to the probability, the step before the softmax Jacobian.</p></aside>
 </section>
 
-<section class="slide" id="penalty-shape" data-lo="LO2" data-minutes="7">
+<section class="slide" id="penalty-shape" data-lo="LO2" data-minutes="13">
   <div class="kicker">Block 3 · Penalties</div>
   <h2>On separable data the plain loss falls for ever; a penalty gives it a minimum</h2>
   <div class="cols cols-32">
@@ -142,7 +142,7 @@
   <aside class="notes"><p>A parallel example in one weight; the lab's placement data are separable in the same way, and participants will measure what happens to the weights. Do not predict the lab's held-out numbers.</p></aside>
 </section>
 
-<section class="slide" id="penalty-curvature" data-lo="LO2" data-minutes="6">
+<section class="slide" id="penalty-curvature" data-lo="LO2" data-minutes="11">
   <div class="kicker">Block 3 · What the penalty changes</div>
   <h2>The penalty adds λ to every curvature, so the minimum becomes unique</h2>
   <div class="cols cols-3">
@@ -153,7 +153,7 @@
   <aside class="notes"><p>Link to week 6: a larger smallest eigenvalue also means a smaller condition number. Whether the bias is penalised is a choice; the lab penalises every parameter so that the stretch claim about strict convexity holds, and says so.</p></aside>
 </section>
 
-<section class="slide" id="check-penalty" data-lo="LO2" data-minutes="3">
+<section class="slide" id="check-penalty" data-lo="LO2" data-minutes="6">
   <div class="kicker">Checkpoint 3</div>
   <h2>What does the penalty do to this Hessian?</h2>
   <div class="quiz" data-type="single" data-lo="LO2">
@@ -173,7 +173,7 @@
   <aside class="notes"><p>AI-tutor. Task 1 asks for a prediction before running: collect a few, then compare them with the output row by row. In task 6, ask each participant to write down what they expect the penalty to do to the held-out loss before the sweep runs, then to explain what they see. Common mistakes: subtracting the global maximum of the matrix instead of each row's (correct, but can still underflow a row), and forgetting to divide the gradient by n.</p></aside>
 </section>
 
-<section class="slide" id="problem-set-7" data-label="Problem set 7">
+<section class="slide" id="problem-set-7" data-label="Problem set 7" data-minutes="3">
   <div class="kicker">Before week 8</div>
   <h2>Problem set 7: stable losses, two gradients and a penalised minimum</h2>
   <div class="cols cols-2">
@@ -188,7 +188,7 @@ uv run python problem_sets/check.py PS7</code></pre>
   <aside class="notes"><p>Worked answers are in the trainer pack. Test 2 follows week 8.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
+<section class="slide" id="wrap-up" data-minutes="3">
   <div class="kicker">Week 7 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
@@ -198,7 +198,7 @@ uv run python problem_sets/check.py PS7</code></pre>
   </div>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
+<section class="slide dark" id="next" data-label="Next" data-minutes="2">
   <div class="kicker">Next</div>
   <h2>Week 8: Constraints</h2>
   <p class="lead">Hand in Problem set 7. Week 8 replaces a soft penalty with a hard limit: a fixed budget, and the price of each extra thousand.</p>

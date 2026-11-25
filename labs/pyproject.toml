@@ -15,3 +15,13 @@ dependencies = [
 
 [tool.uv]
 package = false
+
+# CPU wheels of PyTorch on every platform: nothing in the labs needs a graphics processor, and the
+# default Linux wheel would pull several gigabytes of CUDA libraries
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]

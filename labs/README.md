@@ -15,6 +15,10 @@ uv run jupyter lab 00_setup_check.ipynb
 Run `00_setup_check.ipynb` once first. No lab calls an AI model, so no key is needed. Set
 `MTH_QUICK=1` for a short run (fewer steps and seeds).
 
+`uv sync` takes PyTorch from its CPU-only index on every platform (`pyproject.toml`), so no
+graphics libraries are downloaded: the PyTorch wheel is about 130 MB and the whole environment
+about 0.8 GB on disk. On Colab nothing is installed.
+
 | Unit | Session | Notebook | AI level |
 |---|---|---|---|
 | Week 1 | Derivatives as local lines | [`W1_1_derivatives.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W1_1_derivatives.ipynb) | tutor |
@@ -25,6 +29,9 @@ Run `00_setup_check.ipynb` once first. No lab calls an AI model, so no key is ne
 | Week 6 | Convexity and curvature | [`W6_1_loss_surfaces.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W6_1_loss_surfaces.ipynb) | tutor |
 | Week 7 | Stable losses and penalties | [`W7_1_stable_softmax.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W7_1_stable_softmax.ipynb) | tutor |
 | Week 8 | Constraints and prices | [`W8_1_budget_allocation.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W8_1_budget_allocation.ipynb) | tutor |
+
+Labs 1.1, 3.1, 4.1, 5.1 and 8.1 are the catalog entry's five labs. Labs 2.1, 6.1 and 7.1 are
+additions, so that every week has a lab; each comes from an outcome or a topic of the entry.
 
 The tutor's instruction text is in [`TUTOR.md`](TUTOR.md).
 

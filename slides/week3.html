@@ -1,10 +1,10 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes"><p>Collect Problem set 2. Today is the hinge of the course: the chain rule applied to a graph, by hand. Everything the engine of week 4 does, participants do on paper first today. Lab 3.1 is AI-off: say it now, and say it again before the lab.</p></aside>
+  <aside class="notes"><p>Collect Problem set 2. Today is the hinge of the course: the chain rule applied to a graph, by hand. Everything the engine of week 4 does, participants do on paper first today. Lab 3.1 is AI-off: say it now, and say it again before the lab. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<section class="slide" id="review-week2" data-lo="LO1" data-minutes="4">
+<section class="slide" id="review-week2" data-lo="LO1" data-minutes="5">
   <div class="kicker">Review of week 2</div>
   <h2>What shape is this Jacobian?</h2>
   <div class="quiz" data-type="single" data-lo="LO1">
@@ -20,7 +20,7 @@
   <aside class="notes"><p>Answer: B. The shape check is the cheapest bug detector in the engine next week.</p></aside>
 </section>
 
-<section class="slide" id="lab-2-1-debrief" data-lo="LO1" data-minutes="5">
+<section class="slide" id="lab-2-1-debrief" data-lo="LO1" data-minutes="7">
   <div class="kicker">Lab 2.1 · what your runs showed</div>
   <h2>The Jacobian was right for 5 thousand and badly wrong for 20</h2>
   <div class="cols cols-2">
@@ -41,7 +41,7 @@
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="graph-of-operations" data-lo="LO4" data-minutes="7">
+<section class="slide" id="graph-of-operations" data-lo="LO4" data-minutes="10">
   <div class="kicker">Block 1 · Computational graphs</div>
   <h2>Any formula a program computes is a graph of simple operations</h2>
   <div class="cols cols-2">
@@ -65,7 +65,7 @@
   <aside class="notes"><p>Draw the graph on the board as a tree with y feeding two nodes. Ask what the order constraint is called: a topological order. The engine of week 4 builds this graph by itself as the code runs.</p></aside>
 </section>
 
-<section class="slide" id="chain-rule-on-a-chain" data-lo="LO4" data-minutes="7">
+<section class="slide" id="chain-rule-on-a-chain" data-lo="LO4" data-minutes="10">
   <div class="kicker">Block 1 · The chain rule, scalar</div>
   <h2>Along a chain, multiply the local derivatives</h2>
   <div class="cols cols-2">
@@ -78,7 +78,7 @@
   <aside class="notes"><p>Do the example on the board, then the two-path rule on (x + y) y: df/dy = (path through the sum) a-adjoint times 1, plus (direct path) a. That gives y + a = 3 + 5 = 8, which matches the formula's derivative x + 2y = 8. Multiplying along a path and adding over paths is the whole of backpropagation.</p></aside>
 </section>
 
-<section class="slide" id="backward-pass-example" data-lo="LO4" data-minutes="6">
+<section class="slide" id="backward-pass-example" data-lo="LO4" data-minutes="8">
   <div class="kicker">Block 1 · A backward pass</div>
   <h2>Go down the graph once, passing adjoints to inputs</h2>
   <table class="t">
@@ -92,7 +92,7 @@
   <aside class="notes"><p>Fill the last column row by row, top down. The adjoint of the output is 1. Every node multiplies its adjoint by its local derivative and sends the product to each input, which adds it to what it already has. Week 4's engine has a test for exactly this accumulation.</p></aside>
 </section>
 
-<section class="slide" id="check-reused-node" data-lo="LO4" data-minutes="3">
+<section class="slide" id="check-reused-node" data-lo="LO4" data-minutes="4">
   <div class="kicker">Checkpoint 1</div>
   <h2>What is the adjoint of the reused input?</h2>
   <div class="quiz" data-type="single" data-lo="LO4">
@@ -108,7 +108,7 @@
   <aside class="notes"><p>Answer: C. The check line is the habit to build: when a closed form is easy, compare with it.</p></aside>
 </section>
 
-<section class="slide" id="forward-mode" data-lo="LO4" data-minutes="7">
+<section class="slide" id="forward-mode" data-lo="LO4" data-minutes="10">
   <div class="kicker">Block 2 · Forward mode</div>
   <h2>Forward mode carries one tangent up with the values</h2>
   <div class="cols cols-2">
@@ -126,7 +126,7 @@
   <aside class="notes"><p>Forward mode is easy to implement with dual numbers: each number carries a value and a tangent, and every operation updates both. Its cost per pass is a small multiple of the function's cost. The lab has one forward-mode step so participants feel the difference.</p></aside>
 </section>
 
-<section class="slide" id="mode-costs" data-lo="LO4" data-minutes="6">
+<section class="slide" id="mode-costs" data-lo="LO4" data-minutes="8">
   <div class="kicker">Block 2 · Which mode</div>
   <h2>Reverse mode wins when many inputs feed one output, as a loss does</h2>
   <table class="t">
@@ -139,7 +139,7 @@
   <aside class="notes"><p>The backward pass costs a small constant multiple of the forward pass, independent of the number of weights. Memory is the trade: depth in SPC-DLR-302 (saved activations and memory). Frameworks use reverse mode for training and offer forward mode for the cases in the last row.</p></aside>
 </section>
 
-<section class="slide" id="check-which-mode" data-lo="LO4" data-minutes="3">
+<section class="slide" id="check-which-mode" data-lo="LO4" data-minutes="4">
   <div class="kicker">Checkpoint 2</div>
   <h2>Which mode should the analyst use?</h2>
   <div class="quiz" data-type="single" data-lo="LO4">
@@ -155,7 +155,7 @@
   <aside class="notes"><p>Answer: B. The scenario is the mirror image of training, where reverse mode wins.</p></aside>
 </section>
 
-<section class="slide" id="logistic-graph" data-lo="LO4" data-minutes="7">
+<section class="slide" id="logistic-graph" data-lo="LO4" data-minutes="10">
   <div class="kicker">Block 3 · Backpropagation by hand</div>
   <h2>A logistic loss is four nodes per learner</h2>
   <div class="flow">
@@ -177,7 +177,7 @@
   <aside class="notes"><p>Derive p - y on the board for y = 1: -1/p times p(1 - p) = -(1 - p) = p - 1. For y = 0 it is p. The simplification is why frameworks fuse the sigmoid with the cross-entropy into one node, which is also more stable: week 7.</p></aside>
 </section>
 
-<section class="slide" id="one-learner-worked" data-lo="LO4" data-minutes="7">
+<section class="slide" id="one-learner-worked" data-lo="LO4" data-minutes="10">
   <div class="kicker">Block 3 · One learner, worked</div>
   <h2>Forward up, backward down: a worked example</h2>
   <div class="cols cols-2">
@@ -199,7 +199,7 @@
   <aside class="notes"><p>One learner, invented for the slide; the lab has two different learners and different weights. Work it at four decimals, the precision the lab asks for. Point out the sign: the learner completed (y = 1) but p is only 0.55, so the gradient is negative and a descent step raises z.</p></aside>
 </section>
 
-<section class="slide" id="hand-work-discipline" data-lo="LO4" data-minutes="5">
+<section class="slide" id="hand-work-discipline" data-lo="LO4" data-minutes="7">
   <div class="kicker">Block 3 · Why by hand, and how</div>
   <h2>Do it by hand once, carefully, and check it against numbers</h2>
   <div class="cols cols-3">
@@ -210,7 +210,7 @@
   <aside class="notes"><p>Explain the AI level without moralising: the evidence for LO4 is a hand-worked backward pass, and the oral check asks for the same in the participant's own engine. A tutor that writes the numbers removes the practice the assessment measures.</p></aside>
 </section>
 
-<section class="slide" id="check-z-adjoint" data-lo="LO4" data-minutes="3">
+<section class="slide" id="check-z-adjoint" data-lo="LO4" data-minutes="4">
   <div class="kicker">Checkpoint 3</div>
   <h2>What does the learner who left send back?</h2>
   <div class="quiz" data-type="single" data-lo="LO4">
@@ -230,7 +230,7 @@
   <aside class="notes"><p>AI-off: no assistant and no tutor; paper, pencil and a calculator. Walk the room during task 3: the common errors are forgetting the 1/2 of the mean, a sign error in the loss's derivative for the learner with y = 0, and overwriting instead of adding the two learners' contributions to w. When a value fails task 4's check, ask the participant to recompute that node, not to look up the answer. Task 6 should take the last ten minutes for most.</p></aside>
 </section>
 
-<section class="slide" id="problem-set-3" data-label="Problem set 3">
+<section class="slide" id="problem-set-3" data-label="Problem set 3" data-minutes="3">
   <div class="kicker">Before week 4</div>
   <h2>Problem set 3: four backward passes and a cost</h2>
   <div class="cols cols-2">
@@ -245,7 +245,7 @@ uv run python problem_sets/check.py PS3</code></pre>
   <aside class="notes"><p>Test 1 comes after week 4 and covers weeks 1 to 4: say so now, so the problem sets are read as practice for it.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
+<section class="slide" id="wrap-up" data-minutes="3">
   <div class="kicker">Week 3 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
@@ -255,7 +255,7 @@ uv run python problem_sets/check.py PS3</code></pre>
   </div>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
+<section class="slide dark" id="next" data-label="Next" data-minutes="2">
   <div class="kicker">Next</div>
   <h2>Week 4: Reverse mode in code</h2>
   <p class="lead">Hand in Problem set 3. Keep your hand values from Lab 3.1: your engine's first test reproduces them.</p>

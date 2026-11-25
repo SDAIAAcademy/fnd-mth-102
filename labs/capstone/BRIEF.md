@@ -26,7 +26,10 @@ built on the stand-in must say so on its first line.
 ## What to build
 
 1. **The engine.** Your own `Value` class from Lab 4.1 (scalar reverse mode), extended as you need.
-   It must pass the course test suite: `engine_tests.run_tests(Value)`.
+   It must pass the course test suite: `engine_tests.run_tests(Value)`. The Lab 4.1 solution,
+   `labs/solutions/engine_reference.py`, is public; if your engine starts from it rather than from
+   your own lab work, say so in the report. Either way the oral check asks you to trace a backward
+   pass through the engine you submit and to show where each gradient is accumulated.
 2. **The network.** Four inputs, one hidden layer of your choice of width and activation, one output
    logit. The loss is the mean binary cross-entropy computed from the logit in the stable form of
    week 7, never as the log of a probability.

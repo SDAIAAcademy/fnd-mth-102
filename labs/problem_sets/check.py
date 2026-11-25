@@ -229,6 +229,61 @@ def _(m):
     return written(m.why_vjp)
 
 
+# ------------------------------------------------------------------ PS5 · week 5
+_H5 = np.array([[3.0, 1.0], [1.0, 3.0]])
+
+
+@check("PS5", "1 · plain gradient descent")
+def _(m):
+    w = np.array([1.0, -2.0])
+    for _ in range(7):
+        w = w - 0.1 * (_H5 @ w)
+    return close(m.gd(lambda v: _H5 @ v, np.array([1.0, -2.0]), 0.1, 7), w)
+
+
+@check("PS5", "2 · the largest stable rate")
+def _(m):
+    r = float(m.largest_stable_rate())
+    def runs(lr):
+        w = np.array([1.0, 1.0])
+        for _ in range(400):
+            w = w - lr * (_H5 @ w)
+        return np.linalg.norm(w) < 1.0
+    return runs(r * 0.98) and not runs(r * 1.02)
+
+
+@check("PS5", "3 · one momentum step")
+def _(m):
+    w, v, g = np.array([1.0, 2.0]), np.array([0.5, -0.5]), np.array([0.2, 0.4])
+    w2, v2 = m.momentum_step(w, v, g, 0.1, 0.9)
+    return close(v2, 0.9 * v + g) and close(w2, w - 0.1 * (0.9 * v + g))
+
+
+@check("PS5", "4 · a mini-batch gradient")
+def _(m):
+    rng = np.random.default_rng(55)
+    A, b, w = rng.normal(size=(40, 3)), rng.normal(size=40), rng.normal(size=3)
+    idx = np.array([3, 7, 11, 20, 33])
+    f = lambda v: 0.5 * float(np.mean((A[idx] @ v - b[idx]) ** 2))  # noqa: E731
+    return close(m.minibatch_grad(A, b, w, idx), cdiff(f, w))
+
+
+@check("PS5", "5 · diagnosing four runs")
+def _(m):
+    ref = 10.0
+    good = list(100 * 0.6 ** np.arange(40) + ref)
+    slow = list(100 * 0.99 ** np.arange(40) + ref)
+    noisy = list(100 * 0.6 ** np.arange(40) + ref + np.r_[np.zeros(20), np.tile([0.0, 0.9], 10)])
+    bad = list(100 * 1.3 ** np.arange(40))
+    return (m.diagnose(good, ref), m.diagnose(slow, ref), m.diagnose(noisy, ref), m.diagnose(bad, ref)) == (
+        "converged", "slow", "noisy", "diverged")
+
+
+@check("PS5", "6 · written: noise and a decaying rate")
+def _(m):
+    return written(m.why_noise)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

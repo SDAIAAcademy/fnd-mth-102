@@ -93,6 +93,42 @@ def week2() -> None:
     print("r(0.45,0.45)", s, "grad", 3 * s * (1 - s), 2 * s * (1 - s))
 
 
+def week5() -> None:
+    # parallel example: the quadratic f(u, v) = 0.5 (u^2 + 10 v^2), curvatures 1 and 10, start (10, 1)
+    lam = np.array([1.0, 10.0])
+    f = lambda w: 0.5 * float(np.sum(lam * w * w))  # noqa: E731
+
+    def gd(lr, steps=60, beta=0.0):
+        w, v, hist, path = np.array([10.0, 1.0]), np.zeros(2), [], []
+        for _ in range(steps + 1):
+            hist.append(f(w)), path.append(w.copy())
+            v = beta * v + lam * w
+            w = w - lr * v
+        return hist, np.array(path)
+
+    fig, ax = plt.subplots(figsize=(7.5, 4.2))
+    styles = [(0.01, "slow: rate 0.01", NAVY), (0.15, "converges: rate 0.15", TEAL),
+              (0.195, "oscillates: rate 0.195", AMBER), (0.205, "diverges: rate 0.205", CORAL)]
+    for lr, label, col in styles:
+        h, _ = gd(lr)
+        ax.semilogy(h, color=col, lw=2, label=label)
+        print(label, "loss after 60 steps", h[-1])
+    ax.set_xlabel("step"), ax.set_ylabel("loss (log scale)"), ax.set_ylim(1e-6, 1e4)
+    ax.legend(frameon=False, fontsize=11)
+    save(fig, "w5-curve-shapes.svg")
+
+    U_, V_ = np.meshgrid(np.linspace(-11, 11, 200), np.linspace(-1.6, 1.6, 200))
+    fig, ax = plt.subplots(figsize=(7.5, 3.6))
+    ax.contour(U_, V_, 0.5 * (U_ ** 2 + 10 * V_ ** 2), levels=12, colors="#9aa5b1", linewidths=0.8)
+    _, p1 = gd(0.04, 25)
+    _, p2 = gd(0.04, 25, beta=0.8)
+    ax.plot(p1[:, 0], p1[:, 1], "o-", color=CORAL, ms=3, lw=1.5, label="gradient descent, rate 0.04")
+    ax.plot(p2[:, 0], p2[:, 1], "s-", color=TEAL, ms=3, lw=1.5, label="momentum 0.8, rate 0.04")
+    ax.set_xlabel("u (flat direction)"), ax.set_ylabel("v (steep)"), ax.legend(frameon=False, fontsize=10, loc="lower left")
+    save(fig, "w5-momentum-path.svg")
+    print("after 25 steps: gd", f(p1[-1]), "momentum", f(p2[-1]))
+
+
 if __name__ == "__main__":
     for w in sys.argv[1:] or ["1"]:
         globals()[f"week{w}"]()

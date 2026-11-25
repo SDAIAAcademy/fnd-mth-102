@@ -1,0 +1,20 @@
+{
+ "batch lr=0.01": "slow",
+ "batch lr=0.03": "converged",
+ "batch lr=0.1": "converged",
+ "batch lr=0.3": "converged",
+ "batch lr=0.9": "converged",
+ "batch lr=1.0": "diverged",
+ "sgd lr=0.003": "converged",
+ "sgd lr=0.01": "converged",
+ "sgd lr=0.03": "converged",
+ "sgd lr=0.1": "converged",
+ "sgd lr=0.3": "noisy",
+ "momentum lr=0.001": "slow",
+ "momentum lr=0.01": "converged",
+ "momentum lr=0.03": "converged",
+ "momentum lr=0.1": "converged",
+ "momentum lr=0.3": "converged",
+ "batch, unscaled lr=1e-7": "slow",
+ "batch, unscaled lr=1e-6": "diverged"
+}

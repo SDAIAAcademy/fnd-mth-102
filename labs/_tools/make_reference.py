@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -37,7 +38,10 @@ def r(v):
 
 def save(name: str, value) -> None:
     REF.mkdir(parents=True, exist_ok=True)
-    (REF / f"{name}.json").write_text(json.dumps(r(value), indent=1) + "\n", encoding="utf-8", newline="\n")
+    text = json.dumps(r(value), indent=1)
+    # large losses of diverging runs in scientific notation, so no long digit run lands in a file
+    text = re.sub(r"(?<![\w.])(-?\d{7,})\.0(?!\d)", lambda m: f"{float(m.group(1)):.4e}", text)
+    (REF / f"{name}.json").write_text(text + "\n", encoding="utf-8", newline="\n")
     print("wrote reference", name)
 
 
@@ -123,6 +127,74 @@ def week4(C):
     save("w4_fd_worst", 1e-9)  # the order of the step error of central differences at h = 1e-6
     save("w4_overwrite_fails", ["add_mul", "constants_both_sides", "same_node_twice", "random_expressions",
                                 "two_learner_loss", "zero_grad"])
+
+
+def week5(C):
+    """Loss histories of Lab 5.1 on the public airfoil data (downloaded; only derived losses are saved)."""
+    X, y, source = U.public_data("airfoil")
+    if "stand-in" in source:
+        raise SystemExit("week 5 references need the real download")
+    perm = np.random.default_rng(5).permutation(len(y))
+    TR = perm[:1200]
+    mu, sd = X[TR].mean(axis=0), X[TR].std(axis=0)
+    A = np.column_stack([(X - mu) / sd, np.ones(len(y))])[TR]
+    b = y[TR]
+    L = lambda A_, w: 0.5 * float(np.mean((A_ @ w - b) ** 2))  # noqa: E731
+    G = lambda A_, w, i=None: (A_[i].T @ (A_[i] @ w - b[i]) / len(i)) if i is not None else A_.T @ (A_ @ w - b) / len(b)  # noqa: E731
+    ref = L(A, np.linalg.lstsq(A, b, rcond=None)[0])
+
+    def run(step_fn, A_=A):
+        w, state, hist = np.zeros(A_.shape[1]), {}, [L(A_, np.zeros(A_.shape[1]))]
+        with np.errstate(over="ignore", invalid="ignore"):
+            for e in range(200):
+                w = step_fn(A_, w, state, e)
+                hist.append(L(A_, w))
+                if not np.isfinite(hist[-1]):
+                    break
+        return [h if np.isfinite(h) else float("inf") for h in hist]
+
+    def sgd_step(lr, schedule=None):
+        def f(A_, w, st, e):
+            order = np.random.default_rng(e).permutation(len(b))
+            for i in range(0, len(order), 32):
+                rate = lr if schedule is None else lr * schedule(st.setdefault("t", 0))
+                w = w - rate * G(A_, w, order[i:i + 32])
+                st["t"] = st.get("t", 0) + 1
+            return w
+        return f
+
+    def mom_step(lr):
+        def f(A_, w, st, e):
+            st["v"] = 0.9 * st.get("v", 0) + G(A_, w)
+            return w - lr * st["v"]
+        return f
+
+    batch = {f"lr={lr}": run(lambda A_, w, st, e, lr=lr: w - lr * G(A_, w)) for lr in [0.01, 0.03, 0.1, 0.3, 0.9, 1.0]}
+    sgd = {f"lr={lr}": run(sgd_step(lr)) for lr in [0.003, 0.01, 0.03, 0.1, 0.3]}
+    mom = {f"lr={lr}": run(mom_step(lr)) for lr in [0.001, 0.01, 0.03, 0.1, 0.3]}
+    A_raw = np.column_stack([X[TR], np.ones(len(TR))])
+    e = np.linalg.eigvalsh(A_raw.T @ A_raw / len(TR))
+    raw = {f"lr={lr}": run(lambda A_, w, st, e_, lr=lr: w - lr * G(A_, w), A_raw) for lr in ["1e-7", "1e-6"] for lr in [float(lr)]}
+    raw = {"lr=1e-7": raw.get("lr=1e-07"), "lr=1e-6": raw.get("lr=1e-06")}
+    sched = lambda t: 0.1 + 0.9 * t / 100 if t < 100 else 0.5 ** ((t - 100) // 1500)  # noqa: E731
+    save("w5_batch", batch)
+    save("w5_sgd", sgd)
+    save("w5_momentum", mom)
+    save("w5_unscaled", {"runs": raw, "lam_max": e[-1], "lam_min": e[0]})
+    save("w5_schedule", run(sgd_step(0.3, sched)))
+
+    def diag(h):
+        h = np.array(h, dtype=float)
+        if not np.isfinite(h[-1]) or h[-1] > h[0]:
+            return "diverged"
+        if h[-1] > 1.1 * ref:
+            return "slow"
+        return "noisy" if h[-20:].max() - h[-20:].min() > 0.05 * ref else "converged"
+    diags = {}
+    for name, runs in (("batch", batch), ("sgd", sgd), ("momentum", mom), ("batch, unscaled", raw)):
+        for k, h in runs.items():
+            diags[f"{name} {k}"] = diag(h)
+    save("w5_diagnoses", diags)
 
 
 def main() -> None:

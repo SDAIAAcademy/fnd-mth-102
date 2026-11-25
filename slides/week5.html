@@ -1,56 +1,229 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Collect Problem set 4 and say when Test 1 results come back. The course turns here: weeks 1 to 4 computed gradients, weeks 5 to 8 use them. The lab runs on public data for the first time; mention that its numbers belong to the airfoil dataset, not to the charity.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
+
+<section class="slide" id="review-week4" data-lo="LO5" data-minutes="4">
+  <div class="kicker">Review of week 4</div>
+  <h2>What does a matrix–vector node send back to x?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5">
+    <p class="lead">A node computes y = A x with A of shape 4 × 6, and receives the upstream gradient g = ∂L/∂y. What does its backward pass add to x's gradient?</p>
+    <div class="opts">
+      <div class="opt" data-why="Multiplies in the forward direction: A g does not even have matching shapes here">A g</div>
+      <div class="opt" data-why="Sends the gradient with respect to A, not to x">g xᵀ</div>
+      <div class="opt" data-why="Builds the whole Jacobian: reverse mode sends a vector, never the matrix">The 4 × 6 Jacobian A</div>
+      <div class="opt" data-ok>Aᵀ g</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Each xⱼ reaches every yᵢ with local derivative Aᵢⱼ, so its adjoint is Σᵢ gᵢ Aᵢⱼ: the j-th entry of Aᵀg, 6 numbers.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. A shape check gives it away: x has 6 entries, A g cannot be computed and g xᵀ is 4 × 6.</p></aside>
+</section>
+
+<section class="slide" id="lab-4-1-debrief" data-lo="LO5" data-minutes="5">
+  <div class="kicker">Lab 4.1 · what your runs showed</div>
+  <h2>The engine agreed with the framework to about 1e-13</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Reference engine, solution run</th><th class="num">Result</th></tr>
+      <tr><td>Test suite</td><td class="num">10 of 10</td></tr>
+      <tr><td>Against central differences, 50 random expressions, worst</td><td class="num">3e-9</td></tr>
+      <tr><td>Against PyTorch, Lab 3.1 loss</td><td class="num">6e-16</td></tr>
+      <tr class="hl"><td>Against PyTorch, ten random expressions, worst</td><td class="num">3e-13</td></tr>
+    </table>
+    <div class="card c-coral flat"><h4>One = instead of +=</h4><p class="small mb0">Overwriting in multiplication broke 6 of the 10 tests: every graph where a node reaches the output along more than one path.</p></div>
+  </div>
+  <aside class="notes"><p>Ask how many engines pass all ten tests. For those that do not, the usual culprits: a recursive sort (deep_graph), a number not wrapped in Value (constants_both_sides), missing zero_grad. Remind everyone to keep the class in an engine.py: the capstone imports it.</p></aside>
+</section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" id="descent-step" data-lo="LO6" data-minutes="6">
+  <div class="kicker">Block 1 · Gradient descent</div>
+  <h2>Step against the gradient, by a rate you choose</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="stack">
+      <div class="card c-navy"><h4>The update</h4><p class="mb0"><code>w ← w − η ∇L(w)</code></p></div>
+      <p class="small">From week 2: −∇L is the steepest way down, and the local line promises a fall of about <code>η |∇L|²</code>.</p>
+      <p class="small">The promise holds only while the step is small enough for the line to be right. The rate η decides that.</p>
+    </div>
+    <div class="card c-coral flat"><h4>What goes wrong</h4><p class="small mb0">A rate that is too small wastes thousands of steps; one that is too large overshoots the valley and climbs out of it. Neither shows in the code: both show in the loss curve.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Write the update on the board and connect it to the week 1 picture: the tangent line overestimates the gain for a concave piece and the step overshoots for a curved valley. The next slide makes "too large" exact for a quadratic.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" id="stable-rate" data-lo="LO6 LO2" data-minutes="7">
+  <div class="kicker">Block 1 · How large is too large</div>
+  <h2>On a quadratic, each direction shrinks by |1 − η λ| per step</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li>For <code>L = ½ Σ λᵢ uᵢ²</code>, one step multiplies each <code>uᵢ</code> by <code>1 − η λᵢ</code>.</li>
+      <li><b>Stable</b> when every |1 − η λᵢ| &lt; 1, that is <b>η &lt; 2 / λ_max</b>.</li>
+      <li><b>Slow</b> when η λ_min is tiny: the flattest direction barely moves.</li>
+      <li>Near the edge, 1 − η λ_max is close to −1: the steep direction flips sign every step.</li>
+    </ul>
+    <div class="figure">
+      <img src="../assets/w5-curve-shapes.svg" alt="Four loss curves on a log scale for the quadratic with curvatures 1 and 10: rate 0.01 falls slowly, rate 0.15 falls fast to below a millionth, rate 0.195 falls with a slow zigzag, rate 0.205 rises steadily" width="680">
+      <div class="caption">0.5 (u² + 10 v²), λ_max = 10, edge at η = 0.2; labs/_tools/make_figures.py.</div>
+    </div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>The parallel example has curvatures 1 and 10, so the edge is 2/10 = 0.2. After 60 steps: rate 0.01 leaves the loss at 15, 0.15 at 2e-7, 0.195 at 0.01 (the steep direction shrinks by only 0.95 a step), 0.205 at 1,700. Week 6 explains where the curvatures come from (the Hessian); the lab computes them for its own data.</p></aside>
+</section>
+
+<section class="slide" id="check-stable-rate" data-lo="LO6" data-minutes="3">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>Which rates will the analyst see diverge?</h2>
+  <div class="quiz" data-type="single" data-lo="LO6">
+    <p class="lead">A least-squares loss has curvatures (eigenvalues of AᵀA / n) from 0.05 to 4. The analyst sweeps the rate over 0.01, 0.1, 0.4 and 0.6 with full-batch gradient descent. Which runs diverge?</p>
+    <div class="opts">
+      <div class="opt" data-why="Uses the smallest curvature for the edge: divergence comes from the steepest direction">0.1, 0.4 and 0.6</div>
+      <div class="opt" data-why="Uses 1/λ_max as the edge: the steep direction overshoots but still shrinks until 2/λ_max">0.4 and 0.6</div>
+      <div class="opt" data-ok>0.6 only</div>
+      <div class="opt" data-why="Thinks least squares always converges: it is convex, but a large rate still overshoots">None of them</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The edge is 2 / 4 = 0.5. Only 0.6 passes it; 0.01 will be slow along the 0.05 direction.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Ask which run will be slowest: 0.01, whose flattest direction shrinks by only 1 − 0.0005 a step.</p></aside>
+</section>
+
+<section class="slide" id="stochastic-gradients" data-lo="LO6" data-minutes="7">
+  <div class="kicker">Block 2 · Stochastic and mini-batch gradients</div>
+  <h2>A mini-batch gradient is cheap, right on average, and noisy</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li>The loss is a mean over n rows, so its gradient is a mean too.</li>
+      <li>A random batch of b rows gives an <b>unbiased</b> estimate at <b>b / n</b> of the cost.</li>
+      <li>Many cheap steps per pass over the data (an <b>epoch</b>), instead of one exact step.</li>
+      <li>The noise does not vanish at the minimum: with a fixed rate, the weights keep moving.</li>
+    </ul>
+    <div class="card c-purple flat"><h4>Batch size as a dial</h4><p class="small mb0">b = 1 is stochastic gradient descent in its first form; b = n is full batch. Larger b: less noise per step, more cost per step. The lab uses b = 32.</p></div>
+  </div>
+  <aside class="notes"><p>The noise floor is the key idea: SGD at a fixed rate settles into a band around the minimum whose width grows with the rate. The lab measures that band as the spread of the last 20 epochs; warm-up and decay narrow it.</p></aside>
+</section>
+
+<section class="slide" id="momentum-path" data-lo="LO6" data-minutes="7">
+  <div class="kicker">Block 2 · Momentum</div>
+  <h2>Momentum keeps a velocity, so the flat direction speeds up</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>Heavy ball</h4><p class="mb0"><code>v ← β v + ∇L(w)</code><br><code>w ← w − η v</code></p></div>
+      <p class="small">Steps that agree add up, to about <code>η / (1 − β)</code> in a steady slope; steps that flip sign cancel. With β = 0.9 it averages about the last ten gradients.</p>
+    </div>
+    <div class="figure">
+      <img src="../assets/w5-momentum-path.svg" alt="Contour lines of a long narrow valley; plain gradient descent at rate 0.04 creeps along the flat direction and covers about two thirds of the way in 25 steps, while momentum at the same rate overshoots slightly and reaches the centre" width="680">
+      <div class="caption">Same quadratic, same rate 0.04, 25 steps: loss 6.5 without momentum, 0.095 with β = 0.8.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>Numbers from the figure script. Momentum's stable range is wider for this kind of loss: about η &lt; 2(1 + β)/λ_max. In the lab, momentum at rate 0.001 behaves much like batch descent at 0.01: ask the room why (1 / (1 − 0.9) = 10).</p></aside>
+</section>
+
+<section class="slide" id="adaptive-and-schedules" data-lo="LO6" data-minutes="6">
+  <div class="kicker">Block 2 · Adaptive steps and schedules</div>
+  <h2>Adaptive methods scale each coordinate; schedules change the rate over time</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal flat"><h4>Adaptive step (Adam, for example)</h4><p class="small mb0">Keep running averages of g and g². Step each coordinate by <code>η · m̂ / (√v̂ + ε)</code>: about η per coordinate whatever the gradient's scale. Common defaults: β₁ = 0.9, β₂ = 0.999.</p></div>
+    <div class="card c-coral flat"><h4>Warm-up, then decay</h4><p class="small mb0"><b>Warm-up</b>: start small for the first steps, when gradients are large and erratic. <b>Decay</b>: shrink the rate later, to narrow the noise band. Step, cosine and linear decays are all in use.</p></div>
+  </div>
+  <div class="callout note mt"><b>Awareness level.</b> Which adaptive optimiser is in common use changes; AdamW, scaling rules and newer methods are SPC-DLR-302's subject.</div>
+  <aside class="notes"><p>Keep this slide short: the entry asks for awareness of adaptive methods and schedules. The lab's last task adds a warm-up and step decay to one noisy run; Adam is its stretch. One honest point: an adaptive step of about η per coordinate is a weakness when a parameter must travel far (in the lab's stretch, an intercept near 125 decibels is still far from reached after 7,600 steps at η = 0.01).</p></aside>
+</section>
+
+<section class="slide" id="check-momentum" data-lo="LO6" data-minutes="3">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>What does momentum change here?</h2>
+  <div class="quiz" data-type="single" data-lo="LO6">
+    <p class="lead">Plain gradient descent at its largest stable rate zigzags across a narrow valley and crawls along it. The analyst adds momentum with β = 0.9 and keeps the rate. What should she expect first?</p>
+    <div class="opts">
+      <div class="opt" data-ok>Faster progress along the valley, possibly with overshoot; retune the rate</div>
+      <div class="opt" data-why="Assumes momentum only speeds things up: at a rate already near the edge, the larger effective step may overshoot">Faster progress along the valley, and nothing else</div>
+      <div class="opt" data-why="Thinks momentum removes noise from the data: it averages gradients, it does not change the loss">A lower final loss than the least-squares solution</div>
+      <div class="opt" data-why="Thinks momentum and the rate are unrelated: the effective step grows to about η / (1 − β)">No change unless the batch size changes</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Agreeing steps add up along the valley; the zigzags partly cancel. The effective step grows, so the best rate with momentum is usually smaller.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. The lab's momentum sweep starts ten times lower than the batch sweep for this reason.</p></aside>
+</section>
+
+<section class="slide" id="reading-loss-curves" data-lo="LO6" data-minutes="8">
+  <div class="kicker">Block 3 · Reading loss curves</div>
+  <h2>Each failure has a shape you can name from the curve</h2>
+  <table class="t small">
+    <tr><th>The curve</th><th>Diagnosis</th><th>Likely cause</th><th>First fix</th></tr>
+    <tr><td>Grows, or turns into NaN</td><td>diverged</td><td>η above 2 / λ_max</td><td>divide η by 3 to 10</td></tr>
+    <tr><td>Falls fast, then crawls far above the best</td><td>slow</td><td>η too small for λ_min; unscaled features</td><td>scale features; raise η; momentum</td></tr>
+    <tr><td>Falls, then a wide band that never narrows</td><td>noisy</td><td>small batch at a large constant η</td><td>decay the rate; larger batch</td></tr>
+    <tr><td>Saw-tooth on the way down</td><td>near the edge</td><td>η close to 2 / λ_max</td><td>lower η a little</td></tr>
+    <tr class="hl"><td>Smooth fall to the reference</td><td>converged</td><td></td><td>keep it, and log it</td></tr>
+  </table>
+  <aside class="notes"><p>The lab turns the first four rows into a function that labels runs from their history alone, then writes a log of every run. Insist on log scales: on a linear axis, a slow run and a converged one look the same after the first few epochs.</p></aside>
+</section>
+
+<section class="slide" id="log-every-run" data-lo="LO6" data-minutes="5">
+  <div class="kicker">Block 3 · Reporting</div>
+  <h2>Log every run, not only the best one</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="out/experiments.csv (shape)"><code>variant,learning_rate,seed,epochs_run,final_loss,diagnosis
+batch,0.5,0,200,...,converged
+batch,2.0,0,57,inf,diverged</code></pre>
+    <ul class="bullets">
+      <li>A sweep that reports only its best rate hides how fragile the method is.</li>
+      <li>Every run gets its rate, its seed, its result and a diagnosis in words.</li>
+      <li>The capstone is scored on this: every run, seed and failure, not the best result alone.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>This is the course's responsible-use point on transparent reporting, said early so that the capstone log is a habit by week 8. The values in the code block are placeholders of the format, not results.</p></aside>
+</section>
+
+<section class="slide" id="check-diagnose-curve" data-lo="LO6" data-minutes="3">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>Name this run</h2>
+  <div class="quiz" data-type="single" data-lo="LO6">
+    <p class="lead">On a dataset of household energy use, a run on raw, unscaled features falls from 900 to 520 in ten epochs, then sits near 500 for 190 more. The least-squares loss is 3. Any larger rate diverges. What is the diagnosis?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads a flat curve as success: flat at 500 is far from the reference of 3">Converged</div>
+      <div class="opt" data-ok>Slow: the rate fits the steepest direction and starves the flattest</div>
+      <div class="opt" data-why="Blames batch noise: the curve is flat, not a wide band, and noise does not explain a gap of 500">Noisy: use a larger batch</div>
+      <div class="opt" data-why="Reads any trouble as divergence: the loss never rose">Diverged: lower the rate</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Unscaled features spread the curvatures over many orders of magnitude; the stable rate is tiny and the flat directions do not move. Scale the features.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. The dataset and numbers are invented for the question; the lab measures its own on the airfoil data. Then start the lab.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-5-1" data-auto="lab" data-lab="5.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>AI-tutor. The first run downloads the airfoil data into data/cache; if the network blocks it, the helper uses a synthetic stand-in and prints that in capitals: those participants' numbers will differ, and that is fine for learning, but their log must say so. Watch task 1: standardising with the statistics of all rows (not only the training rows) leaks the held-out set. In task 6 the most common mistake is calling a flat but high curve "converged".</p></aside>
+</section>
+
+<section class="slide" id="problem-set-5" data-label="Problem set 5">
+  <div class="kicker">Before week 6</div>
+  <h2>Problem set 5: descent, a stable rate, momentum and four diagnoses</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS5.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b></li>
+      <li>The checker runs your functions on its own small problems.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash">cd labs
+uv run python problem_sets/check.py PS5</code></pre>
+  </div>
+  <aside class="notes"><p>Question 2 asks for an edge rate: participants who compute 1/λ_max will fail the check, which runs descent just below and just above their answer.</p></aside>
 </section>
 
 <section class="slide" id="wrap-up">
   <div class="kicker">Week 5 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+    <div class="card c-teal"><h4>2 / λ_max</h4><p class="small mb0">The steepest curvature sets the largest stable rate; the flattest sets how slow it is.</p></div>
+    <div class="card c-coral"><h4>Noise and velocity</h4><p class="small mb0">Mini-batches trade exactness for cheap steps; momentum averages steps; schedules shrink the noise band.</p></div>
+    <div class="card c-purple"><h4>Curves are evidence</h4><p class="small mb0">Diagnose from the loss curve on a log scale, and log every run with its rate and seed.</p></div>
   </div>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Week 6: REPLACE: the theme of this unit, in a few words</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Week 6: The shape of a loss</h2>
+  <p class="lead">Hand in Problem set 5. Keep your experiment log: week 6 explains its curvatures with the Hessian.</p>
+  <aside class="notes"><p>Nothing to install. Week 6's lab is all synthetic surfaces and runs in seconds.</p></aside>
 </section>

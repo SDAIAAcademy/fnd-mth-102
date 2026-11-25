@@ -1,93 +1,96 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">Today is theirs: keep your own talking to the opening and the closing. Confirm the running order and the demo setup (screen sharing, accounts, a recorded backup) first.</aside>
+  <aside class="notes">Today is theirs: keep your own talking to the clinic and the feedback. Before the room fills, check that every participant can load the data (the first call downloads it) and run the engine tests. The capstone is AI-full; the oral check is where understanding is shown.</aside>
 </section>
 
 <section class="slide" id="agenda" data-label="Agenda">
   <div class="kicker">Capstone</div>
-  <h2>How the presentations run</h2>
+  <h2>How the day runs</h2>
   <div class="agenda">
-    <div class="item now"><div><b>Expectations and final prep</b><small>the rubric, a last rehearsal, then the first presentations</small></div></div>
-    <div class="item"><div><b>Presentations</b><small>each one timed, with questions after it</small></div></div>
-    <div class="item"><div><b>Review and closing</b><small>peer feedback, the trainer's review, what next</small></div></div>
+    <div class="item now"><div><b>Brief and planning clinic</b><small>the rubric, the oral check, each participant's plan</small></div></div>
+    <div class="item"><div><b>Build, train and write</b><small>engine, network, runs, log and report</small></div></div>
+    <div class="item"><div><b>Gradient check and a test oral</b><small>in pairs, before the real one</small></div></div>
+    <div class="item"><div><b>Oral checks</b><small>one at a time, questions included</small></div></div>
+    <div class="item"><div><b>Written feedback</b><small>the trainer's review of each submission</small></div></div>
   </div>
 </section>
 
 <section class="slide" id="rubric" data-label="The rubric">
-  <div class="kicker">How presentations are scored</div>
+  <div class="kicker">Capstone score · 30% of the grade</div>
   <h2>The rubric</h2>
   <div class="bars">
-    <div class="row"><span>REPLACE: rubric criterion 1 and its weight (the weights add up to 100)</span><div class="bar c-teal" style="--w:100%"></div><span class="val">25%</span></div>
-    <div class="row"><span>REPLACE: rubric criterion 2 and its weight (the weights add up to 100)</span><div class="bar c-cyan" style="--w:100%"></div><span class="val">25%</span></div>
-    <div class="row"><span>REPLACE: rubric criterion 3 and its weight (the weights add up to 100)</span><div class="bar c-coral" style="--w:80%"></div><span class="val">20%</span></div>
-    <div class="row"><span>REPLACE: rubric criterion 4 and its weight (the weights add up to 100)</span><div class="bar c-purple" style="--w:80%"></div><span class="val">20%</span></div>
-    <div class="row"><span>REPLACE: rubric criterion 5 and its weight (the weights add up to 100)</span><div class="bar c-amber" style="--w:40%"></div><span class="val">10%</span></div>
+    <div class="row"><span>Engine tests and gradient checks pass</span><div class="bar c-teal" style="--w:100%"></div><span class="val">25%</span></div>
+    <div class="row"><span>Public data, held-out split, reproducible</span><div class="bar c-cyan" style="--w:80%"></div><span class="val">20%</span></div>
+    <div class="row"><span>Three optimisers, 3+ seeds, with curves</span><div class="bar c-coral" style="--w:100%"></div><span class="val">25%</span></div>
+    <div class="row"><span>Every run, seed and failure reported</span><div class="bar c-purple" style="--w:60%"></div><span class="val">15%</span></div>
+    <div class="row"><span>Each failed run diagnosed from its log</span><div class="bar c-amber" style="--w:60%"></div><span class="val">15%</span></div>
   </div>
-  <div class="callout tip mt"><b>Show results from at least two measured runs.</b> A claim without a number is a plan, not a result.</div>
-  <aside class="notes">Walk through each criterion with one example of what full marks look like.</aside>
+  <div class="callout tip mt"><b>Report every run.</b> A diagnosed failure earns marks; a hidden one costs them.</div>
+  <aside class="notes">Walk through each criterion with one example of full marks. The weights are percentages of the capstone score, which is 30% of the course grade; the oral check is a separate 10%. Brief: labs/capstone/BRIEF.md.</aside>
 </section>
 
-<section class="slide" id="format" data-label="Format">
-  <div class="kicker">Format</div>
-  <h2>10 minutes for each presentation</h2>
+<section class="slide" id="format" data-label="The oral check">
+  <div class="kicker">The oral check · 10% of the course grade</div>
+  <h2>10 minutes for each oral check, questions included</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>1 · The problem</h4><p class="small mb0">Who, what, why now. One slide.</p></div>
-    <div class="card c-cyan"><h4>2 · What you built</h4><p class="small mb0">Design, decisions, trade-offs. Then the live demo.</p></div>
-    <div class="card c-coral"><h4>3 · What you measured</h4><p class="small mb0">Baseline, improvement, failures found, what comes next.</p></div>
+    <div class="card c-teal"><h4>1 · A backward pass</h4><p class="small mb0">The trainer writes a small expression; you trace it through your own engine.</p></div>
+    <div class="card c-cyan"><h4>2 · A failed run</h4><p class="small mb0">Open your log, pick one, explain its curve and what you changed.</p></div>
+    <div class="card c-coral"><h4>3 · One choice</h4><p class="small mb0">One line of your code, and why it is written that way.</p></div>
   </div>
-  <div class="callout note mt"><b>Peer feedback.</b> After each talk, everyone writes one strength, one question and one suggestion.</div>
+  <div class="callout note mt"><b>Practise in pairs.</b> In the 30-minute block before the orals, ask each other a backward pass on an expression you did not prepare.</div>
+  <aside class="notes">Use the trainer's sheet: it holds the marking scheme and the authenticity note. Write a different expression for each participant, and check it against their engine on the spot.</aside>
 </section>
 
 <section class="slide order" id="running-order" data-label="Running order">
   <div class="kicker">Running order</div>
-  <h2>Who presents when</h2>
+  <h2>Who has the oral check when</h2>
   <table class="t small">
-    <tr><th>#</th><th>Presenter</th><th>Project</th></tr>
-    <tr><td>1</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>2</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>3</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>4</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>5</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>6</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>7</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>8</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
+    <tr><th>#</th><th>Participant</th><th>Repository</th></tr>
+    <tr><td>1</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>2</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>3</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>4</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>5</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>6</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>7</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
+    <tr><td>8</td><td><input placeholder="participant"></td><td><input placeholder="repository"></td></tr>
   </table>
-  <aside class="notes">Type the names in at the start; the fields can be edited live and are not saved, so keep the list in your notes too.</aside>
+  <aside class="notes">Type the order in at the start; the fields are not saved, so keep the list in your notes too.</aside>
 </section>
 
-<section class="slide dark" id="final-prep" data-label="Before the first presentation">
-  <div class="kicker">Before the first presentation</div>
-  <h1>Final prep · 20 minutes</h1>
-  <div class="timer" data-minutes="20"></div>
-  <p class="lead">Rehearse once, record a backup, try the demo on this screen.</p>
+<section class="slide dark" id="final-prep" data-label="Gradient check and test oral">
+  <div class="kicker">Before the first oral check</div>
+  <h1>Gradient check and a test oral · 30 minutes</h1>
+  <div class="timer" data-minutes="30"></div>
+  <p class="lead">Run the engine tests and the gradient check once more, push the repository, then practise in pairs.</p>
   <aside class="notes">Press T to start the timer. Breaks are not slides: press B when the room needs one.</aside>
 </section>
 
-<section class="slide dark presenting" id="now-presenting" data-label="Now presenting">
-  <div class="kicker center">Now presenting</div>
-  <div class="center"><input placeholder="Presenter · project"></div>
+<section class="slide dark presenting" id="now-presenting" data-label="Oral check">
+  <div class="kicker center">Oral check</div>
+  <div class="center"><input placeholder="Participant"></div>
   <div class="timers mt">
-    <div><h3>Talk and demo</h3><div class="timer" data-minutes="10"></div></div>
+    <div><h3>Oral check, questions included</h3><div class="timer" data-minutes="10"></div></div>
   </div>
-  <aside class="notes">Type the presenter's name and press T to start the timer. Reuse this slide for every presenter.</aside>
+  <aside class="notes">Type the participant's name and press T. Reuse this slide for each participant; keep to ten minutes, then five minutes of changeover.</aside>
 </section>
 
 <section class="slide" id="review" data-label="Trainer review">
   <div class="kicker">Trainer review</div>
-  <h2>What the presentations showed</h2>
+  <h2>What the submissions showed</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Strongest patterns</h4><p class="small mb0">What several projects got right.</p></div>
-    <div class="card c-coral"><h4>Common gaps</h4><p class="small mb0">What most projects would fix next.</p></div>
-    <div class="card c-purple"><h4>One surprise</h4><p class="small mb0">Something nobody expected.</p></div>
+    <div class="card c-teal"><h4>Strongest patterns</h4><p class="small mb0">What several submissions got right.</p></div>
+    <div class="card c-coral"><h4>Common gaps</h4><p class="small mb0">What most would fix next: often the diagnosis of failed runs.</p></div>
+    <div class="card c-purple"><h4>One surprise</h4><p class="small mb0">Something nobody expected in the logs.</p></div>
   </div>
-  <aside class="notes">Fill these in from your scoring notes during the last break. Name projects for strengths; keep gaps anonymous.</aside>
+  <aside class="notes">Fill these in from your scoring notes during the written-feedback block. Name submissions for strengths; keep gaps anonymous.</aside>
 </section>
 
 <section class="slide" id="what-next" data-label="After the course">
   <div class="kicker">After the course</div>
   <h2>Keep going</h2>
   <ul class="bullets">
-    <li><b>Your project stays yours:</b> keep it reproducible and add the next improvement you named today</li>
-    <li><b>Next Academy course:</b> REPLACE: the course that follows this one</li>
+    <li><b>Your engine stays yours:</b> keep the repository reproducible, and add the next experiment your log suggests</li>
+    <li><b>Next Academy course:</b> SPC-DLR-302 Deep Learning from First Principles, where differentiation moves from scalars to tensors and modern optimisers take over</li>
   </ul>
 </section>
 

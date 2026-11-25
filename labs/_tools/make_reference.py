@@ -313,6 +313,52 @@ def week7(C):
     save("w7_compare", [best[0], bool(any(r[3] < rows[0][3] for r in rows[1:]))])
 
 
+def week8(C):
+    D = C["districts"]
+    k = np.array([D[d]["k"] for d in D])
+    s = np.array([D[d]["s"] for d in D])
+    behind = np.array([D[d]["behind_share"] for d in D])
+    B, F = C["budget"], C["floor"]
+    E = lambda x: k * np.log1p(x / s)  # noqa: E731
+    x1 = 2600 / 112
+    save("w8_two", [x1, 40 - x1, 60 / (10 + x1)])
+
+    def allocate(budget, floor=0.0):
+        lo, hi = 1e-9, 1e3
+        for _ in range(200):
+            lam = (lo * hi) ** 0.5
+            if np.maximum(floor, k / lam - s).sum() > budget:
+                lo = lam
+            else:
+                hi = lam
+        return np.maximum(floor, k / lam - s), lam
+
+    x, lam = allocate(B)
+    save("w8_lagrange", [x.tolist(), lam])
+
+    def project(v, budget):
+        u = np.sort(v)[::-1]
+        css = np.cumsum(u) - budget
+        rho = np.nonzero(u - css / np.arange(1, len(v) + 1) > 0)[0][-1]
+        return np.maximum(v - css[rho] / (rho + 1), 0.0)
+
+    runs = {}
+    for eta in [1, 5, 20, 50]:
+        xe, reached = np.full(5, B / 5), None
+        for t in range(1, 501):
+            xe = project(xe + eta * k / (s + xe), B)
+            if reached is None and np.abs(xe - x).max() < 1e-3:
+                reached = t
+        runs[str(eta)] = {"x": xe.tolist(), "reached": reached}
+    save("w8_projected", runs)
+    save("w8_price", [float(E(allocate(B + 1)[0]).sum() - E(x).sum()), lam])
+    xf, lamf = allocate(B, F)
+    at = np.isclose(xf, F)
+    save("w8_floor", {"x": xf.tolist(), "lambda": lamf, "total": [E(x).sum(), E(xf).sum()],
+                      "behind": [(behind * E(x)).sum(), (behind * E(xf)).sum()],
+                      "floor_price": [float(lamf - k[i] / (s[i] + F)) if at[i] else None for i in range(5)]})
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

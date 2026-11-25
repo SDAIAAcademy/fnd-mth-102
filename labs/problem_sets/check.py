@@ -401,6 +401,70 @@ def _(m):
     return written(m.why_penalty)
 
 
+# ------------------------------------------------------------------ PS8 · week 8
+def _stationary(grad_f, grad_g, g, point, lam) -> bool:
+    """Lagrange conditions: grad f = lam * grad g and g = 0 at the point."""
+    p = np.asarray(point, float)
+    return close(grad_f(p), lam * np.asarray(grad_g(p), float), 1e-6) and abs(g(p)) < 1e-6
+
+
+@check("PS8", "1 · maximise x y on x + 2y = 8")
+def _(m):
+    x, y, lam = map(float, m.area_problem())
+    ok = _stationary(lambda p: np.array([p[1], p[0]]), lambda p: np.array([1.0, 2.0]),
+                     lambda p: p[0] + 2 * p[1] - 8, (x, y), lam)
+    return ok and x * y >= max(t * (8 - t) / 2 for t in np.linspace(0, 8, 801)) - 1e-6
+
+
+@check("PS8", "2 · the nearest point on a line")
+def _(m):
+    x, y, lam = map(float, m.nearest_on_line())
+    return _stationary(lambda p: 2 * p, lambda p: np.array([3.0, 4.0]), lambda p: 3 * p[0] + 4 * p[1] - 10, (x, y), lam)
+
+
+def _best(B):
+    t = np.linspace(0, B, 20001)
+    return float((10 * np.log1p(t) + 6 * np.log1p(B - t)).max())
+
+
+@check("PS8", "3 · the value of a budget and its multiplier")
+def _(m):
+    for B in (2.0, 10.0, 30.0):
+        if not abs(float(m.best_value(B)) - _best(B)) < 1e-4:
+            return False
+        if not close(float(m.best_lambda(B)), cdiff(lambda b: float(m.best_value(float(b))), B, 1e-4), 1e-4):
+            return False
+    return True
+
+
+@check("PS8", "4 · a district that gets nothing")
+def _(m):
+    x, y, lam = map(float, m.corner_case())
+    t = np.linspace(0, 4, 40001)
+    f = 10 * np.log1p(t) + np.log1p(4 - t)
+    best_x = float(t[np.argmax(f)])
+    return abs(x - best_x) < 1e-3 and abs(x + y - 4) < 1e-6 and close(lam, 10 / (1 + x), 1e-6)
+
+
+@check("PS8", "5 · projecting onto the budget")
+def _(m):
+    rng = np.random.default_rng(81)
+    for _ in range(4):
+        v, B = rng.normal(0, 3, 5), float(rng.uniform(1, 10))
+        p = np.asarray(m.project_budget(v, B), float)
+        if p.min() < -1e-9 or abs(p.sum() - B) > 1e-8:
+            return False
+        others = rng.dirichlet(np.ones(5), 3000) * B
+        if np.linalg.norm(v - p) > np.linalg.norm(v - others, axis=1).min() + 1e-9:
+            return False
+    return True
+
+
+@check("PS8", "6 · written: the multiplier as a price")
+def _(m):
+    return written(m.price_reading)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

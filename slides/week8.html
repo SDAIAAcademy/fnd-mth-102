@@ -1,56 +1,200 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Collect Problem set 7. Last teaching week. Announce Test 2 (after this week, AI-off, 40 minutes on paper and 50 at the keyboard) and the capstone brief, which participants receive at the end of today. Today's lab is the course's responsible-use moment: a correct optimisation of the wrong objective.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
+
+<section class="slide" id="review-week7" data-lo="LO1" data-minutes="4">
+  <div class="kicker">Review of week 7</div>
+  <h2>Where did this loss go wrong?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">A training run prints a finite loss for 300 steps, then <code>inf</code>, then <code>nan</code> for ever. The code computes <code>-log(softmax(z)[y])</code>. What is the most likely cause?</p>
+    <div class="opts">
+      <div class="opt" data-why="A rate that is too high makes the loss grow, but the inf here comes from taking the log of an exact 0">The learning rate is too low</div>
+      <div class="opt" data-why="A penalty bounds the weights; it does not create infinities in the loss">The L2 penalty is too strong</div>
+      <div class="opt" data-ok>A label's probability rounded to 0, and its log is −inf</div>
+      <div class="opt" data-why="Separable data make the weights grow slowly; the loss stays finite if computed from logits">The data can be separated perfectly, so the weights blew up</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Once one probability rounds to 0, the loss is inf and every gradient after it is nan. Compute it as logsumexp(z) − z_y.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Option D is close: separable data make logits large, which is how the probability gets to 0. The cure is the stable form, with or without a penalty.</p></aside>
+</section>
+
+<section class="slide" id="lab-7-1-debrief" data-lo="LO2" data-minutes="6">
+  <div class="kicker">Lab 7.1 · what your runs showed</div>
+  <h2>The penalty bounded the weights; it did not lower the held-out loss</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th class="num">λ</th><th class="num">‖W‖</th><th class="num">held-out loss</th><th class="num">accuracy</th></tr>
+      <tr class="hl"><td class="num">0</td><td class="num">16.22</td><td class="num">0.071</td><td class="num">1.000</td></tr>
+      <tr><td class="num">0.001</td><td class="num">11.10</td><td class="num">0.113</td><td class="num">1.000</td></tr>
+      <tr><td class="num">0.01</td><td class="num">4.90</td><td class="num">0.273</td><td class="num">0.980</td></tr>
+      <tr><td class="num">0.1</td><td class="num">1.70</td><td class="num">0.586</td><td class="num">0.880</td></tr>
+      <tr><td class="num">1</td><td class="num">0.39</td><td class="num">0.927</td><td class="num">0.787</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-coral flat"><h4>Naive: nan, nan, inf</h4><p class="small mb0">Stable cross-entropy on the planted rows: 22.00. Gradient check: 9e-10.</p></div>
+      <div class="card c-teal flat"><h4>Plain norm still growing</h4><p class="small mb0">3.70 at step 50, 16.22 at step 2,000. Smallest Hessian eigenvalue: about 0 plain, 0.01 with λ = 0.01.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>All from the solution run, 2,000 steps. The levels are thresholds on the entry score with no noise, so held-out learners look exactly like training ones and confidence costs nothing. Ask: when would the penalty pay? When labels are noisy or the held-out learners differ from the training ones. The habit to keep is measuring, not assuming.</p></aside>
+</section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" id="lagrangian" data-lo="LO3" data-minutes="7">
+  <div class="kicker">Block 1 · The Lagrangian</div>
+  <h2>At a constrained optimum, the gradient points across the constraint</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="stack">
+      <p>Maximise <code>f(x)</code> subject to <code>g(x) = c</code>. Moving along the constraint cannot improve f, so <code>∇f</code> is parallel to <code>∇g</code>:</p>
+      <div class="card c-navy"><h4>Lagrange conditions</h4><p class="mb0"><code>∇f = λ ∇g</code> and <code>g(x) = c</code></p><p class="small mb0">Equivalently: set the derivatives of <code>f − λ (g − c)</code> to zero.</p></div>
+    </div>
+    <table class="t small">
+      <tr><th>Maximise 2 log x + log y, x + y = 6</th><th class="num">value</th></tr>
+      <tr><td>conditions: 2 / x = λ, 1 / y = λ</td><td class="num">x = 2y</td></tr>
+      <tr><td>constraint: 3y = 6</td><td class="num">y = 2, x = 4</td></tr>
+      <tr class="hl"><td>multiplier</td><td class="num">λ = 0.5</td></tr>
+    </table>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Read the conditions in words: the marginal value of the last unit is the same in both places; otherwise moving a unit across would help. That reading is the whole of today's lab. Check the example: 2/4 = 0.5 = 1/2.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" id="multiplier-price" data-lo="LO3" data-minutes="6">
+  <div class="kicker">Block 1 · The multiplier</div>
+  <h2>The multiplier is the price of the constraint: value per extra unit</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Reading</h4><p class="mb0">If the best value is <code>V(c)</code>, then <code>dV/dc = λ</code>.</p><p class="small mb0">One more unit of budget is worth about λ units of the objective, for small changes.</p></div>
+    <div class="card c-purple flat"><h4>In the example</h4><p class="small mb0">λ = 0.5: raising the total from 6 to 6.1 adds about 0.05 to the best value. Its units are the objective's units per unit of the constraint.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <div class="callout tip mt"><b>Why it matters.</b> A finance officer asks "what would another thousand buy?" The multiplier answers without re-solving.</div>
+  <aside class="notes"><p>Exact check for the board: V(6.1) − V(6) = 2 log(4.0667/4) + log(2.0333/2) ≈ 0.0331 + 0.0165 = 0.0496. Close to 0.05. The multiplier is a derivative, so it is accurate for small changes only.</p></aside>
+</section>
+
+<section class="slide" id="check-lagrange" data-lo="LO3" data-minutes="3">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What does the multiplier say?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">A training team's best accuracy under a compute limit of 100 hours has multiplier λ = 0.002 accuracy points per hour. The limit is cut to 90 hours. What should the team expect?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads λ as the total value, not as a rate per hour">Accuracy falls by 0.002</div>
+      <div class="opt" data-ok>Accuracy falls by about 0.02</div>
+      <div class="opt" data-why="Thinks a cut moves only the multiplier: the best value moves at the rate λ">Accuracy is unchanged and λ rises</div>
+      <div class="opt" data-why="Divides instead of multiplying: the change is λ times the change in the limit">Accuracy falls by 0.0002</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Change in best value ≈ λ × change in the limit = 0.002 × 10.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. "About", because λ itself changes as the limit moves.</p></aside>
+</section>
+
+<section class="slide" id="equal-margins" data-lo="LO3" data-minutes="7">
+  <div class="kicker">Block 2 · Limits that bind</div>
+  <h2>With budgets that cannot be negative, a programme can get nothing</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w8-equal-margins.svg" alt="Three falling curves of marginal value against budget for programmes A, B and C, with a horizontal dashed line at lambda 1.163; A's curve crosses it at 20.8 and B's at 9.2, while C's curve starts at 0.8, below the line, so C gets nothing" width="640">
+      <div class="caption">Three programmes, value k log(1 + x/s), budget 30; labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <p class="small">Each funded programme gets <code>x = k/λ − s</code>: where its margin meets λ.</p>
+      <p class="small">C's margin at zero is 0.8, below λ = 1.163: its first unit is worth less than the last unit anywhere else, so <code>x_C = 0</code>.</p>
+      <div class="callout tip small"><b>Find λ</b> by bisection: raise it until the budgets fit.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>A parallel example; the lab's districts have their own numbers. The condition for a programme held at zero is an inequality: its margin at zero is at most λ. These are the Karush-Kuhn-Tucker conditions, named here for awareness only.</p></aside>
+</section>
+
+<section class="slide" id="projected-gradient" data-lo="LO3" data-minutes="6">
+  <div class="kicker">Block 2 · A second way</div>
+  <h2>Projected gradient: step uphill, then return to the nearest allowed point</h2>
+  <div class="cols cols-2">
+    <ol class="bullets">
+      <li><code>v = x + η ∇f(x)</code>: an ordinary gradient step.</li>
+      <li><code>x = project(v)</code>: the nearest point with <code>x ≥ 0</code> and sum = budget, which is <code>max(v − θ, 0)</code> for one θ.</li>
+      <li>Repeat until x stops moving.</li>
+    </ol>
+    <div class="card c-coral flat"><h4>Week 5 applies</h4><p class="small mb0">Too small a step crawls; too large a step overshoots and never settles. Both solutions should agree; if they do not, one of them is wrong.</p></div>
+  </div>
+  <aside class="notes"><p>Why two methods: the Lagrange route gives λ and insight, the projected route generalises to constraints with no closed form. Agreement between them is the check. Finding θ is a small sorting exercise in the lab.</p></aside>
+</section>
+
+<section class="slide" id="check-corner" data-lo="LO3" data-minutes="3">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>Who gets funded?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">At the optimum of an allocation, λ = 1.5. A fourth programme has margin k / s = 1.2 at zero budget. What should it receive?</p>
+    <div class="opts">
+      <div class="opt" data-why="Thinks every programme must share the budget: the conditions allow zero">An equal share of the budget</div>
+      <div class="opt" data-why="Reverses the comparison: a margin below λ means the money is worth more elsewhere">Enough budget to raise its margin up to λ = 1.5 first</div>
+      <div class="opt" data-why="Treats λ as a budget figure: λ is a rate, not an amount to give">1.5 units of budget</div>
+      <div class="opt" data-ok>Nothing: its first unit is worth less than λ</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A programme is funded only where its margin can equal λ; margins fall with budget, so 1.2 never rises to 1.5.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Ask what would have to change for it to be funded: a larger k (more value per unit) or a smaller budget elsewhere that lowers λ.</p></aside>
+</section>
+
+<section class="slide" id="proxy-harm" data-lo="LO3" data-minutes="7">
+  <div class="kicker">Block 3 · Responsible use</div>
+  <h2>Optimising a convenient proxy can harm the people a model serves</h2>
+  <div class="cols cols-3">
+    <div class="card c-coral flat"><h4>The proxy</h4><p class="small mb0">One number that is easy to count and maximise. The optimiser does exactly what it is told, including leaving out whoever the number does not see.</p></div>
+    <div class="card c-navy flat"><h4>The fix is a decision</h4><p class="small mb0">A floor, or weights by need, changes the answer. Which one, and how much, is policy: the mathematics prices it, it does not choose it.</p></div>
+    <div class="card c-teal flat"><h4>Separate the roles</h4><p class="small mb0">The analyst proposes options with their prices; the finance officer approves the budget; the programme lead decides the weights.</p></div>
+  </div>
+  <aside class="notes"><p>This is the course's responsible-use point for the allocation lab. Keep it concrete: in the lab, participants will see which districts the proxy leaves out and what a floor costs, in enrolments per thousand. Segregation of duties is not bureaucracy: the person who builds the model should not also be the one who decides whose outcomes count.</p></aside>
+</section>
+
+<section class="slide" id="check-roles" data-lo="LO3" data-minutes="3">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>Who decides?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">An analyst finds that adding a floor for two programmes costs 0.6 units of the objective per unit of budget. Which next step keeps the duties separate?</p>
+    <div class="opts">
+      <div class="opt" data-ok>Present both options with their prices to the person who sets the weights</div>
+      <div class="opt" data-why="The analyst would be making the policy choice that belongs to someone else">Adopt the floor, since it is fairer</div>
+      <div class="opt" data-why="The analyst would be dropping an option instead of pricing it">Drop the floor, since it lowers the objective</div>
+      <div class="opt" data-why="Approving a budget is the finance officer's duty, not the analyst's">Approve the cheaper option and inform finance</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The analyst's job is to show the trade-off and its price; choosing the weights belongs to the programme lead.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Then start the lab.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-8-1" data-auto="lab" data-lab="8.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>AI-tutor. Task 1 is on paper first; the code only checks it. In task 5, let participants find on their own who the proxy leaves out before you say anything. The recommendation in task 6 is the LO3 evidence form: numbers, each multiplier read as a price, and the three roles kept separate. Common mistakes: bisection with the comparison reversed (the sum of budgets falls as λ rises), and a projection that sums to the budget but leaves negative entries.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-8" data-label="Problem set 8">
+  <div class="kicker">Before Test 2</div>
+  <h2>Problem set 8: three constrained problems and their prices</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS8.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b></li>
+      <li>Read every multiplier as a price, in words, as in the lab.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash">cd labs
+uv run python problem_sets/check.py PS8</code></pre>
+  </div>
+  <aside class="notes"><p>Worked answers are in the trainer pack. Test 2 is AI-off: 40 minutes on paper, 50 at the keyboard.</p></aside>
 </section>
 
 <section class="slide" id="wrap-up">
   <div class="kicker">Week 8 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+    <div class="card c-teal"><h4>Equal margins</h4><p class="small mb0">At the optimum every funded option has the same marginal value, λ.</p></div>
+    <div class="card c-purple"><h4>λ is a price</h4><p class="small mb0">The best value moves by about λ per unit of the constraint.</p></div>
+    <div class="card c-coral"><h4>Price, then decide</h4><p class="small mb0">The analyst prices the options; the people accountable choose.</p></div>
   </div>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Capstone: Capstone project presentations</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Test 2, then the capstone</h2>
+  <p class="lead">Hand in Problem set 8. The capstone brief is in <code>labs/capstone/BRIEF.md</code>: a two-layer network trained with your own engine, every run reported.</p>
+  <aside class="notes"><p>Walk through the brief's rubric briefly; the planning clinic on capstone day goes into it.</p></aside>
 </section>

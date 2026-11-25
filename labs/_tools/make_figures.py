@@ -168,6 +168,27 @@ def week7() -> None:
     save(fig, "w7-penalty-shape.svg")
 
 
+def week8() -> None:
+    # parallel example: three programmes A, B, C with value k log(1 + x / s), budget 30; not the case districts
+    k, s, budget = np.array([30.0, 20.0, 8.0]), np.array([5.0, 8.0, 10.0]), 30.0
+    lo, hi = 1e-9, 1e3
+    for _ in range(200):
+        lam = (lo * hi) ** 0.5
+        lo, hi = (lam, hi) if np.maximum(0, k / lam - s).sum() > budget else (lo, lam)
+    x = np.maximum(0, k / lam - s)
+    xs = np.linspace(0, 30, 300)
+    fig, ax = plt.subplots(figsize=(7.5, 4.2))
+    for ki, si, xi, col, name in zip(k, s, x, [NAVY, TEAL, CORAL], "ABC"):
+        ax.plot(xs, ki / (si + xs), color=col, lw=2.2, label=f"margin of {name}: k / (s + x); gets {xi:.1f}")
+        if xi > 0:
+            ax.plot([xi], [lam], "o", color=col, ms=7)
+    ax.axhline(lam, color=PURPLE, ls="--", lw=1.8, label=f"lambda = {lam:.3f}")
+    ax.set_xlabel("budget given to the programme"), ax.set_ylabel("value of the next unit")
+    ax.set_ylim(0, 3.2), ax.legend(frameon=False, fontsize=10)
+    save(fig, "w8-equal-margins.svg")
+    print("allocation", np.round(x, 3), "lambda", lam, "margin of C at 0", k[2] / s[2])
+
+
 if __name__ == "__main__":
     for w in sys.argv[1:] or ["1"]:
         globals()[f"week{w}"]()

@@ -126,8 +126,9 @@ model serves.
 The lab solutions are public, in `labs/solutions/`, with the labs' answer key
 (`labs/solutions/answer_key.md`). The problem sets are checked by property in
 `labs/problem_sets/check.py`, which holds no answers. Worked problem-set answers, the capstone
-reference run and the oral-check sheet are kept by the trainer outside this repository, because
-publishing them would defeat the assessment.
+reference run, the oral-check sheet, the LO3 marking rubric and the papers and keys of the two
+supervised tests are kept by the trainer outside this repository, because publishing them would
+defeat the assessment.
 
 ## Running the labs
 

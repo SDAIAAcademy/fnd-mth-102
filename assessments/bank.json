@@ -150,7 +150,7 @@
       "options": [
         "Just below 0.5",
         "Just below 4",
-        "Just below 1",
+        "Just below 0.25",
         "Just below 2"
       ],
       "correct": [
@@ -160,7 +160,7 @@
       "misconceptions": [
         "",
         "Uses the largest curvature itself as the step",
-        "Uses 2 / λ_min / 2, mixing the two curvatures",
+        "Uses 1 / λ_max: it converges, but it is not the largest such step",
         "Uses 1 / λ_min = 2, the flat direction's scale"
       ],
       "lo": [
@@ -317,7 +317,7 @@
         "The data analyst, who built the model",
         "The finance officer, who approves budgets",
         "The programme lead, accountable for whom it serves",
-        "The optimiser, by maximising the total"
+        "The optimiser, by maximising the total number of enrolments"
       ],
       "correct": [
         2
@@ -355,7 +355,7 @@
       "misconceptions": [
         "",
         "Stops at ∂L/∂z and forgets the factor x",
-        "Uses −1/σ(z) and forgets σ′(z)",
+        "Multiplies −1/σ(z) by x and forgets σ′(z)",
         "Uses (y − σ(z)) x, reversing the sign"
       ],
       "lo": [

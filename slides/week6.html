@@ -66,7 +66,7 @@
     <div class="card c-amber flat"><h4>Plateau</h4><p class="small mb0">A wide region where the gradient is close to zero. Steps become tiny; the run looks converged and is not.</p></div>
   </div>
   <div class="callout warn mt"><b>What goes wrong.</b> Reading "the loss stopped falling" as "we found the minimum". A saddle or a plateau stops the loss too.</div>
-  <aside class="notes"><p>The count argument for saddles: at a critical point of a function of n variables, every one of n curvatures must be positive for a minimum; with random signs, mixed signs are far more likely. The lab has one surface of each kind, plus two convex ones and a curved valley.</p></aside>
+  <aside class="notes"><p>The count argument for saddles: at a critical point of a function of n variables, every one of n curvatures must be positive for a minimum; with random signs, mixed signs are far more likely. The lab has six surfaces; participants decide which kind each one is.</p></aside>
 </section>
 
 <section class="slide" id="check-convex" data-lo="LO2" data-minutes="3">
@@ -76,7 +76,7 @@
     <p class="lead">The charity's analyst fits a logistic regression twice, from two different starting weights, with a small enough step. Both runs stop. What can she conclude about the two end points?</p>
     <div class="opts">
       <div class="opt" data-why="Thinks every model has local traps: the logistic loss is convex in its weights">They may be different local minima</div>
-      <div class="opt" data-ok>They reach the same lowest loss</div>
+      <div class="opt" data-ok>Both runs reach the same lowest loss</div>
       <div class="opt" data-why="Confuses convex with linear: convex losses still need a small enough step">Any step size gives the same end point</div>
       <div class="opt" data-why="Confuses stopping with a saddle: a convex function has no saddle points">One of them may be a saddle point</div>
     </div>

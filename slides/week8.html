@@ -13,11 +13,11 @@
       <div class="opt" data-why="A rate that is too high makes the loss grow, but the inf here comes from taking the log of an exact 0">The learning rate is too low</div>
       <div class="opt" data-why="A penalty bounds the weights; it does not create infinities in the loss">The L2 penalty is too strong</div>
       <div class="opt" data-ok>A label's probability rounded to 0, and its log is −inf</div>
-      <div class="opt" data-why="Separable data make the weights grow slowly; the loss stays finite if computed from logits">The data can be separated perfectly, so the weights blew up</div>
+      <div class="opt" data-why="The order of the batches changes the path, not whether the code takes the log of an exact 0">The batches were not shuffled between the epochs of training</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Once one probability rounds to 0, the loss is inf and every gradient after it is nan. Compute it as logsumexp(z) − z_y.</div>
   </div>
-  <aside class="notes"><p>Answer: C. Option D is close: separable data make logits large, which is how the probability gets to 0. The cure is the stable form, with or without a penalty.</p></aside>
+  <aside class="notes"><p>Answer: C. Large logits, from separable data or a high rate, are how a probability gets to 0; the cure is the stable form, with or without a penalty.</p></aside>
 </section>
 
 <section class="slide" id="lab-7-1-debrief" data-lo="LO2" data-minutes="6">
@@ -156,7 +156,7 @@
       <div class="opt" data-ok>Present both options with their prices to the person who sets the weights</div>
       <div class="opt" data-why="The analyst would be making the policy choice that belongs to someone else">Adopt the floor, since it is fairer</div>
       <div class="opt" data-why="The analyst would be dropping an option instead of pricing it">Drop the floor, since it lowers the objective</div>
-      <div class="opt" data-why="Approving a budget is the finance officer's duty, not the analyst's">Approve the cheaper option and inform finance</div>
+      <div class="opt" data-why="Approving a budget is the finance officer's duty, not the analyst's">Approve the cheaper option now and tell the finance officer afterwards</div>
     </div>
     <div class="callout tip why"><b>Why.</b> The analyst's job is to show the trade-off and its price; choosing the weights belongs to the programme lead.</div>
   </div>

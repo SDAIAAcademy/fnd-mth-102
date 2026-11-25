@@ -91,6 +91,49 @@ def _(m):
     return written(m.why_not_smaller)
 
 
+# ------------------------------------------------------------------ PS2 · week 2
+_f2 = lambda v: v[0] ** 2 * v[1] + 3 * v[1] ** 3  # noqa: E731
+
+
+@check("PS2", "1 · gradient of x^2 y + 3y^3")
+def _(m):
+    return all(close(m.grad_f(x, y), cdiff(_f2, [x, y])) for x, y in ((1.0, 2.0), (-0.5, 0.3), (2.0, -1.0)))
+
+
+@check("PS2", "2 · gradient of log(1 + exp(w . z))")
+def _(m):
+    z = np.array([1.0, -2.0, 0.5])
+    g = lambda w: math.log1p(math.exp(float(w @ z)))  # noqa: E731
+    return all(close(m.grad_g(np.array(w)), cdiff(g, w)) for w in ([0.1, 0.2, -0.3], [1.0, -1.0, 2.0]))
+
+
+@check("PS2", "3 · directional derivative at (1, 2) along (3/5, 4/5)")
+def _(m):
+    u = np.array([0.6, 0.8])
+    return close(m.directional(), float(cdiff(_f2, [1.0, 2.0]) @ u))
+
+
+@check("PS2", "4 · Jacobian of (xy, x + y^2, sin x)")
+def _(m):
+    F = lambda v: np.array([v[0] * v[1], v[0] + v[1] ** 2, math.sin(v[0])])  # noqa: E731
+    def jfd(v):
+        v = np.asarray(v, float)
+        return np.column_stack([(F(v + e) - F(v - e)) / 2e-6 for e in np.eye(2) * 1e-6])
+    return all(close(m.jac_F(x, y), jfd([x, y])) for x, y in ((1.0, 2.0), (0.3, -0.7)))
+
+
+@check("PS2", "5 · unit direction of steepest descent at (1, 2)")
+def _(m):
+    d = np.asarray(m.steepest_descent_direction(), float)
+    g = cdiff(_f2, [1.0, 2.0])
+    return close(np.linalg.norm(d), 1.0) and close(d, -g / np.linalg.norm(g))
+
+
+@check("PS2", "6 · written: why a relative error")
+def _(m):
+    return written(m.why_relative)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

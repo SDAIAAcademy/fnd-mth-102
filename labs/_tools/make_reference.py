@@ -66,6 +66,30 @@ def week1(C):
     save("w1_reach", {"tangent": reach(T1), "quadratic": reach(T2)})
 
 
+def week2(C):
+    M, dist = C["completion_model"], C["districts"]
+    K = np.array([dist[d]["k"] for d in dist])
+    S = np.array([dist[d]["s"] for d in dist])
+    A0, H0 = 0.7, 5.0
+    s = U.sigmoid(M["w_a"] * A0 + M["w_h"] * H0 + M["b"])
+    g = np.array([M["w_a"] * s * (1 - s), M["w_h"] * s * (1 - s)])
+    save("w2_partials", g)
+    deg = int(round(math.degrees(math.atan2(g[1], g[0])))) % 360
+    save("w2_steepest", [deg, float(np.linalg.norm(g))])
+    save("w2_check", 0.0)
+    X0 = np.array([30.0, 25.0, 25.0, 20.0, 20.0])
+    JE = np.diag(K / (S + X0))
+    JF = np.array([[g[0], g[1]], [12 * H0, 12 * A0]])
+    save("w2_jacobians", {"JE": JE, "JF": JF})
+    E = lambda x: K * np.log1p(x / S)  # noqa: E731
+    shifts = {}
+    for amount in (5.0, 20.0):
+        d = np.array([-amount, 0, 0, amount, 0])
+        shifts[str(amount)] = {"predicted": float((JE @ d).sum()), "actual": float(E(X0 + d).sum() - E(X0).sum())}
+    save("w2_shifts", shifts)
+    save("w2_wrong", [1, 0.0])
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

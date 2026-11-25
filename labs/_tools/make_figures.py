@@ -73,6 +73,26 @@ def week1() -> None:
           "min errors", min(fwd), min(cen))
 
 
+def week2() -> None:
+    # parallel example on two inputs scaled to 0..1: r(u, v) = sigmoid(3u + 2v - 2.5), not the lab's model
+    r = lambda u, v: U.sigmoid(3 * u + 2 * v - 2.5)  # noqa: E731
+    A, H = np.meshgrid(np.linspace(0, 1, 120), np.linspace(0, 1, 120))
+    fig, ax = plt.subplots(figsize=(5.6, 5.0))
+    cs = ax.contour(A, H, r(A, H), levels=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8], colors=NAVY, linewidths=1.2)
+    ax.clabel(cs, fmt="%.1f", fontsize=10)
+    for u0, v0 in [(0.15, 0.2), (0.45, 0.45), (0.75, 0.7), (0.3, 0.85), (0.85, 0.15)]:
+        s = r(u0, v0)
+        g = np.array([3 * s * (1 - s), 2 * s * (1 - s)])
+        ax.annotate("", xy=(u0 + 0.22 * g[0], v0 + 0.22 * g[1]), xytext=(u0, v0),
+                    arrowprops=dict(arrowstyle="->", color=CORAL, lw=2))
+        ax.plot([u0], [v0], "o", color=CORAL, ms=5)
+    ax.set_aspect("equal"), ax.set_xlim(0, 1), ax.set_ylim(0, 1)
+    ax.set_xlabel("attendance share u"), ax.set_ylabel("hours, as a share of 8, v")
+    save(fig, "w2-gradient-contours.svg")
+    s = r(0.45, 0.45)
+    print("r(0.45,0.45)", s, "grad", 3 * s * (1 - s), 2 * s * (1 - s))
+
+
 if __name__ == "__main__":
     for w in sys.argv[1:] or ["1"]:
         globals()[f"week{w}"]()

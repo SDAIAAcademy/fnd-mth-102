@@ -222,7 +222,7 @@
             "href": "W3_1_backprop_by_hand.ipynb",
             "steps": [
               {
-                "text": "Draw the computational graph of the two-example loss",
+                "text": "Draw the graph of the two-example loss",
                 "minutes": 15
               },
               {
@@ -230,27 +230,27 @@
                 "minutes": 15
               },
               {
-                "text": "Run the backward pass by hand, node by node",
+                "text": "Run the backward pass by hand",
                 "minutes": 25
               },
               {
-                "text": "Enter your values and check the forward pass in code",
+                "text": "Check your forward pass in code",
                 "minutes": 10
               },
               {
-                "text": "Match your gradient to a numerical gradient check",
+                "text": "Match a numerical gradient check",
                 "minutes": 15
               },
               {
-                "text": "Compute one directional derivative in forward mode",
+                "text": "One directional derivative in forward mode",
                 "minutes": 15
               },
               {
-                "text": "Write where your hand values differed, and why",
+                "text": "Write where your values differed, and why",
                 "minutes": 10
               }
             ],
-            "stretch": "Add an L2 term to the loss and extend your backward pass by hand"
+            "stretch": "Add an L2 term and extend the backward pass by hand"
           }
         }
       ],

@@ -1,56 +1,263 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Collect Problem set 2. Today is the hinge of the course: the chain rule applied to a graph, by hand. Everything the engine of week 4 does, participants do on paper first today. Lab 3.1 is AI-off: say it now, and say it again before the lab.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
+
+<section class="slide" id="review-week2" data-lo="LO1" data-minutes="4">
+  <div class="kicker">Review of week 2</div>
+  <h2>What shape is this Jacobian?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">A map takes a learner's four features and returns two scores: the chance to complete and the expected hours attended. What is the shape of its Jacobian?</p>
+    <div class="opts">
+      <div class="opt" data-why="Transposes the convention: rows are outputs, columns are inputs">4 × 2</div>
+      <div class="opt" data-ok>2 × 4</div>
+      <div class="opt" data-why="Assumes a Jacobian is square: it is only when inputs and outputs are as many">4 × 4</div>
+      <div class="opt" data-why="Counts outputs twice: each output needs one partial per input, four of them">2 × 2</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> One row per output (2), one column per input (4): row i is the gradient of output i.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. The shape check is the cheapest bug detector in the engine next week.</p></aside>
+</section>
+
+<section class="slide" id="lab-2-1-debrief" data-lo="LO1" data-minutes="5">
+  <div class="kicker">Lab 2.1 · what your runs showed</div>
+  <h2>The Jacobian was right for 5 thousand and badly wrong for 20</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Move from D1 to D4</th><th class="num">Jacobian predicts</th><th class="num">Model gives</th></tr>
+      <tr><td>5 thousand</td><td class="num">-4.93</td><td class="num">-5.61</td></tr>
+      <tr class="hl"><td>20 thousand</td><td class="num">-19.71</td><td class="num">-33.45</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>Steepest direction</h4><p class="small mb0">4 degrees from the attendance axis, rate 0.858: the gradient's angle and length.</p></div>
+      <div class="card c-coral flat"><h4>Last term's notes</h4><p class="small mb0">The partial for w_h carried an extra factor a: relative error 0.29, caught at once.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Numbers from the solution run. Ask: what did the wrong partial do last term? It scaled the hours weight's update by attendance, so learners with low attendance barely moved it. Then the bridge: the gradients today are computed node by node, so a slip like that is local and findable.</p></aside>
+</section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" id="graph-of-operations" data-lo="LO4" data-minutes="7">
+  <div class="kicker">Block 1 · Computational graphs</div>
+  <h2>Any formula a program computes is a graph of simple operations</h2>
   <div class="cols cols-2">
+    <div class="stack">
+      <p><code>f(x, y) = (x + y) · y</code></p>
+      <div class="flow v">
+        <div class="step c-navy"><b>inputs</b>x = 2, y = 3</div>
+        <div class="arrow">↓</div>
+        <div class="step c-teal"><b>a = x + y</b>a = 5</div>
+        <div class="arrow">↓</div>
+        <div class="step c-cyan"><b>f = a · y</b>f = 15</div>
+      </div>
+    </div>
     <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+      <li>One <b>node</b> per operation, an <b>edge</b> from each input to its use.</li>
+      <li>Each node knows only its <b>local derivatives</b>: for <code>a · y</code>, they are <code>y</code> and <code>a</code>.</li>
+      <li>y is used <b>twice</b>: by the sum and by the product.</li>
+      <li>The forward pass evaluates nodes in an order where inputs come first.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Draw the graph on the board as a tree with y feeding two nodes. Ask what the order constraint is called: a topological order. The engine of week 4 builds this graph by itself as the code runs.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" id="chain-rule-on-a-chain" data-lo="LO4" data-minutes="7">
+  <div class="kicker">Block 1 · The chain rule, scalar</div>
+  <h2>Along a chain, multiply the local derivatives</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>A chain</h4><p class="mb0"><code>x → u = g(x) → f(u)</code><br><code>df/dx = f′(u) · g′(x)</code></p></div>
+      <p class="small">Example: <code>f = ln(1 + e^(2x))</code> at <code>x = 0</code>: <code>u = 1 + e^(2x) = 2</code>; <code>df/du = 1/u = 0.5</code>; <code>du/dx = 2 e^(2x) = 2</code>; so <code>df/dx = 1</code>.</p>
+    </div>
+    <div class="card c-coral flat"><h4>Two paths: add</h4><p class="small mb0">When an input reaches the output along several paths, the derivative is the <b>sum over paths</b> of the products along each. In <code>(x + y) · y</code>, y has two paths.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>Do the example on the board, then the two-path rule on (x + y) y: df/dy = (path through the sum) a-adjoint times 1, plus (direct path) a. That gives y + a = 3 + 5 = 8, which matches the formula's derivative x + 2y = 8. Multiplying along a path and adding over paths is the whole of backpropagation.</p></aside>
+</section>
+
+<section class="slide" id="backward-pass-example" data-lo="LO4" data-minutes="6">
+  <div class="kicker">Block 1 · A backward pass</div>
+  <h2>Go down the graph once, passing adjoints to inputs</h2>
+  <table class="t">
+    <tr><th>Node</th><th class="num">Value</th><th>Local derivative to its inputs</th><th class="num">Adjoint ∂f/∂node</th></tr>
+    <tr><td>f = a · y</td><td class="num">15</td><td>to a: y = 3; to y: a = 5</td><td class="num">1</td></tr>
+    <tr><td>a = x + y</td><td class="num">5</td><td>to x: 1; to y: 1</td><td class="num">1 · 3 = 3</td></tr>
+    <tr><td>x</td><td class="num">2</td><td></td><td class="num">3 · 1 = 3</td></tr>
+    <tr class="hl"><td>y</td><td class="num">3</td><td></td><td class="num">1 · 5 + 3 · 1 = 8</td></tr>
+  </table>
+  <div class="callout tip mt"><b>Accumulate.</b> y's adjoint is the sum of what each user sends it. Overwriting instead of adding is the classic engine bug.</div>
+  <aside class="notes"><p>Fill the last column row by row, top down. The adjoint of the output is 1. Every node multiplies its adjoint by its local derivative and sends the product to each input, which adds it to what it already has. Week 4's engine has a test for exactly this accumulation.</p></aside>
+</section>
+
+<section class="slide" id="check-reused-node" data-lo="LO4" data-minutes="3">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What is the adjoint of the reused input?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4">
+    <p class="lead">In g = u · v with u = 2w and v = w + 1, at w = 3 the values are u = 6, v = 4. What is dg/dw?</p>
+    <div class="opts">
+      <div class="opt" data-why="Keeps only the path through u: w also reaches g through v">8</div>
+      <div class="opt" data-why="Keeps only the path through v: w also reaches g through u">6</div>
+      <div class="opt" data-ok>14</div>
+      <div class="opt" data-why="Multiplies the two paths instead of adding them">48</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Through u: v · 2 = 8. Through v: u · 1 = 6. Paths add: 14. Check: g = 2w² + 2w, g′(3) = 12 + 2 = 14.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. The check line is the habit to build: when a closed form is easy, compare with it.</p></aside>
+</section>
+
+<section class="slide" id="forward-mode" data-lo="LO4" data-minutes="7">
+  <div class="kicker">Block 2 · Forward mode</div>
+  <h2>Forward mode carries one tangent up with the values</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>Pick one input direction. Each node computes its value <b>and</b> its tangent, <code>d node / d input</code>, from its inputs' tangents.</p>
+      <table class="t small">
+        <tr><th>(x + y) · y, tangent along x</th><th class="num">Value</th><th class="num">Tangent</th></tr>
+        <tr><td>x, y</td><td class="num">2, 3</td><td class="num">1, 0</td></tr>
+        <tr><td>a = x + y</td><td class="num">5</td><td class="num">1</td></tr>
+        <tr class="hl"><td>f = a · y</td><td class="num">15</td><td class="num">1 · 3 + 5 · 0 = 3</td></tr>
+      </table>
+    </div>
+    <div class="card c-teal flat"><h4>One pass, one direction</h4><p class="small mb0">A forward pass gives the derivative of <b>every output</b> along <b>one input direction</b>: one column of the Jacobian. For the full gradient of f you need a pass per input.</p></div>
+  </div>
+  <aside class="notes"><p>Forward mode is easy to implement with dual numbers: each number carries a value and a tangent, and every operation updates both. Its cost per pass is a small multiple of the function's cost. The lab has one forward-mode step so participants feel the difference.</p></aside>
+</section>
+
+<section class="slide" id="mode-costs" data-lo="LO4" data-minutes="6">
+  <div class="kicker">Block 2 · Which mode</div>
+  <h2>Reverse mode wins when many inputs feed one output, as a loss does</h2>
+  <table class="t">
+    <tr><th>Function</th><th class="num">Forward passes</th><th class="num">Backward passes</th></tr>
+    <tr><td>n inputs, m outputs (full Jacobian)</td><td class="num">n</td><td class="num">m</td></tr>
+    <tr class="hl"><td>A loss of a million weights</td><td class="num">1,000,000</td><td class="num">1</td></tr>
+    <tr><td>A curve: one input, many outputs</td><td class="num">1</td><td class="num">many</td></tr>
+  </table>
+  <div class="callout note mt"><b>The price of reverse mode.</b> The backward pass needs every value of the forward pass, so they are kept in memory until it runs. Saved activations are why training needs more memory than prediction.</div>
+  <aside class="notes"><p>The backward pass costs a small constant multiple of the forward pass, independent of the number of weights. Memory is the trade: depth in SPC-DLR-302 (saved activations and memory). Frameworks use reverse mode for training and offer forward mode for the cases in the last row.</p></aside>
+</section>
+
+<section class="slide" id="check-which-mode" data-lo="LO4" data-minutes="3">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>Which mode should the analyst use?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4">
+    <p class="lead">The analyst needs how all 600 learners' predicted completion chances change with the single attendance threshold the charity sets. One input, 600 outputs. Which costs fewer passes?</p>
+    <div class="opts">
+      <div class="opt" data-why="Applies 'reverse mode for machine learning' everywhere: with 600 outputs it needs 600 backward passes">Reverse mode, one backward pass per learner</div>
+      <div class="opt" data-ok>Forward mode, one pass along the threshold</div>
+      <div class="opt" data-why="Thinks the modes always cost the same: their costs scale with inputs and outputs differently">Either: they always cost the same</div>
+      <div class="opt" data-why="Uses finite differences as the method: they are a check, and still need two evaluations per input">Central differences instead of either mode</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Forward mode costs one pass per input, reverse mode one per output. One input, 600 outputs: forward.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. The scenario is the mirror image of training, where reverse mode wins.</p></aside>
+</section>
+
+<section class="slide" id="logistic-graph" data-lo="LO4" data-minutes="7">
+  <div class="kicker">Block 3 · Backpropagation by hand</div>
+  <h2>A logistic loss is four nodes per learner</h2>
+  <div class="flow">
+    <div class="step c-navy"><b>z = w · x + b</b>the score</div>
+    <div class="arrow">→</div>
+    <div class="step c-teal"><b>p = σ(z)</b>the chance</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>ℓ = −[y ln p + (1 − y) ln(1 − p)]</b>the loss</div>
+    <div class="arrow">→</div>
+    <div class="step c-purple"><b>L = mean of ℓ</b>over learners</div>
+  </div>
+  <table class="t small mt">
+    <tr><th>Edge</th><th>Local derivative</th></tr>
+    <tr><td>ℓ to p</td><td><code>−y/p + (1 − y)/(1 − p)</code></td></tr>
+    <tr><td>p to z</td><td><code>p (1 − p)</code></td></tr>
+    <tr class="hl"><td>ℓ to z, the product of the two</td><td><code>p − y</code></td></tr>
+    <tr><td>z to wⱼ, to b</td><td><code>xⱼ</code>, <code>1</code></td></tr>
+  </table>
+  <aside class="notes"><p>Derive p - y on the board for y = 1: -1/p times p(1 - p) = -(1 - p) = p - 1. For y = 0 it is p. The simplification is why frameworks fuse the sigmoid with the cross-entropy into one node, which is also more stable: week 7.</p></aside>
+</section>
+
+<section class="slide" id="one-learner-worked" data-lo="LO4" data-minutes="7">
+  <div class="kicker">Block 3 · One learner, worked</div>
+  <h2>Forward up, backward down: a worked example</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>x = (0.5, 1.0), y = 1; w = (0.8, −0.4), b = 0.2</th><th class="num">Value</th></tr>
+      <tr><td>z = 0.4 − 0.4 + 0.2</td><td class="num">0.2</td></tr>
+      <tr><td>p = σ(0.2)</td><td class="num">0.5498</td></tr>
+      <tr><td>ℓ = −ln 0.5498</td><td class="num">0.5981</td></tr>
+    </table>
+    <table class="t small">
+      <tr><th>Backward</th><th class="num">Adjoint</th></tr>
+      <tr><td>z: p − y</td><td class="num">−0.4502</td></tr>
+      <tr><td>w₁: −0.4502 · 0.5</td><td class="num">−0.2251</td></tr>
+      <tr><td>w₂: −0.4502 · 1.0</td><td class="num">−0.4502</td></tr>
+      <tr><td>b: −0.4502 · 1</td><td class="num">−0.4502</td></tr>
+    </table>
+  </div>
+  <div class="callout tip mt"><b>For two learners,</b> each learner sends its own adjoints and the mean node halves them: a weight's gradient is the average of the learners' pushes.</div>
+  <aside class="notes"><p>One learner, invented for the slide; the lab has two different learners and different weights. Work it at four decimals, the precision the lab asks for. Point out the sign: the learner completed (y = 1) but p is only 0.55, so the gradient is negative and a descent step raises z.</p></aside>
+</section>
+
+<section class="slide" id="hand-work-discipline" data-lo="LO4" data-minutes="5">
+  <div class="kicker">Block 3 · Why by hand, and how</div>
+  <h2>Do it by hand once, carefully, and check it against numbers</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal flat"><h4>Four decimals</h4><p class="small mb0">Carry four decimals all the way. Rounding early shows up as a relative error near 1e-3.</p></div>
+    <div class="card c-cyan flat"><h4>Check as you go</h4><p class="small mb0">After the forward pass, the code's values; after the backward pass, a numerical gradient check.</p></div>
+    <div class="card c-coral flat"><h4>AI-off, on purpose</h4><p class="small mb0">The tests and the oral check ask you to trace a backward pass alone. This lab is the practice.</p></div>
+  </div>
+  <aside class="notes"><p>Explain the AI level without moralising: the evidence for LO4 is a hand-worked backward pass, and the oral check asks for the same in the participant's own engine. A tutor that writes the numbers removes the practice the assessment measures.</p></aside>
+</section>
+
+<section class="slide" id="check-z-adjoint" data-lo="LO4" data-minutes="3">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>What does the learner who left send back?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4">
+    <p class="lead">A learner did not complete (y = 0) and the model gave p = 0.8. For this learner's loss, what is the adjoint of z?</p>
+    <div class="opts">
+      <div class="opt" data-why="Uses p − 1, the formula for a learner who completed">−0.2</div>
+      <div class="opt" data-why="Stops at the sigmoid's local derivative p(1 − p) and forgets the loss's">0.16</div>
+      <div class="opt" data-why="Stops at the loss's local derivative 1/(1 − p) and forgets the sigmoid's">5.0</div>
+      <div class="opt" data-ok>0.8</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The adjoint of z is p − y = 0.8 − 0: positive, so a descent step lowers this learner's score.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Then say the AI level once more and start the lab.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-3-1" data-auto="lab" data-lab="3.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>AI-off: no assistant and no tutor; paper, pencil and a calculator. Walk the room during task 3: the common errors are forgetting the 1/2 of the mean, a sign error in the loss's derivative for the learner with y = 0, and overwriting instead of adding the two learners' contributions to w. When a value fails task 4's check, ask the participant to recompute that node, not to look up the answer. Task 6 should take the last ten minutes for most.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-3" data-label="Problem set 3">
+  <div class="kicker">Before week 4</div>
+  <h2>Problem set 3: four backward passes and a cost</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS3.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b> Draw each graph before you code.</li>
+      <li>A reused input, a three-input graph, a logistic gradient, the adjoint of z, the passes of each mode.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash">cd labs
+uv run python problem_sets/check.py PS3</code></pre>
+  </div>
+  <aside class="notes"><p>Test 1 comes after week 4 and covers weeks 1 to 4: say so now, so the problem sets are read as practice for it.</p></aside>
 </section>
 
 <section class="slide" id="wrap-up">
   <div class="kicker">Week 3 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+    <div class="card c-teal"><h4>Multiply, then add</h4><p class="small mb0">Multiply local derivatives along a path; add over the paths that reach the same node.</p></div>
+    <div class="card c-coral"><h4>Reverse for a loss</h4><p class="small mb0">One backward pass gives the gradient for every weight; forward mode needs a pass per input.</p></div>
+    <div class="card c-purple"><h4>p − y</h4><p class="small mb0">Sigmoid and cross-entropy together send back the prediction error to the score.</p></div>
   </div>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Week 4: REPLACE: the theme of this unit, in a few words</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Week 4: Reverse mode in code</h2>
+  <p class="lead">Hand in Problem set 3. Keep your hand values from Lab 3.1: your engine's first test reproduces them.</p>
+  <aside class="notes"><p>Week 4 installs nothing new; the framework used as a reference (PyTorch on Colab and in the uv environment) is already there. Test 1, 90 minutes, follows week 4.</p></aside>
 </section>

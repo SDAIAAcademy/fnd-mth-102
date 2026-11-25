@@ -90,6 +90,30 @@ def week2(C):
     save("w2_wrong", [1, 0.0])
 
 
+def week3(C):
+    T = C["two_learners"]
+    X, Y, W, B = np.array(T["x"]), np.array(T["y"]), np.array(T["w"]), T["b"]
+    save("w3_graph", [["z1", "lin", ["0", "w1", "w2", "b"]], ["p1", "sigmoid", ["z1"]], ["l1", "bce", ["p1", "0"]],
+                      ["z2", "lin", ["1", "w1", "w2", "b"]], ["p2", "sigmoid", ["z2"]], ["l2", "bce", ["p2", "1"]],
+                      ["L", "mean", ["l1", "l2"]]])
+    z = X @ W + B
+    p = U.sigmoid(z)
+    l_ = -(Y * np.log(p) + (1 - Y) * np.log(1 - p))
+    ap = 0.5 * (-Y / p + (1 - Y) / (1 - p))
+    az = ap * p * (1 - p)
+    aw = X.T @ az
+    q = lambda v: round(float(v), 4)  # noqa: E731
+    fwd = {"z1": q(z[0]), "p1": q(p[0]), "l1": q(l_[0]), "z2": q(z[1]), "p2": q(p[1]), "l2": q(l_[1]), "L": q(l_.mean())}
+    bwd = {"L": 1.0, "l1": 0.5, "l2": 0.5, "p1": q(ap[0]), "p2": q(ap[1]), "z1": q(az[0]), "z2": q(az[1]),
+           "w1": q(aw[0]), "w2": q(aw[1]), "b": q(az.sum())}
+    save("w3_hand", {"forward": fwd, "backward": bwd})
+    zd = X[:, 0]
+    pd = p * (1 - p) * zd
+    ld = (-Y / p + (1 - Y) / (1 - p)) * pd
+    tang = {"z1": q(zd[0]), "p1": q(pd[0]), "l1": q(ld[0]), "z2": q(zd[1]), "p2": q(pd[1]), "l2": q(ld[1]), "L": q(ld.mean())}
+    save("w3_forward_mode", {"tangents": tang, "passes": {"forward": 3, "backward": 1}})
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

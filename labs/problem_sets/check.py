@@ -134,6 +134,53 @@ def _(m):
     return written(m.why_relative)
 
 
+# ------------------------------------------------------------------ PS3 · week 3
+@check("PS3", "1 · gradient of (xy + y)^2, y reused")
+def _(m):
+    q = lambda v: (v[0] * v[1] + v[1]) ** 2  # noqa: E731
+    return all(close(m.grad_q(x, y), cdiff(q, [x, y])) for x, y in ((2.0, 3.0), (-0.5, 1.5), (0.3, -2.0)))
+
+
+@check("PS3", "2 · gradient of (a + b) c + exp(a)")
+def _(m):
+    g = lambda v: (v[0] + v[1]) * v[2] + math.exp(v[0])  # noqa: E731
+    return all(close(m.grad_g(*v), cdiff(g, v)) for v in ([0.1, 0.2, 0.3], [1.0, -2.0, 0.5]))
+
+
+@check("PS3", "3 · gradient of a one-learner logistic loss")
+def _(m):
+    x = np.array([0.3, -1.2, 2.0])
+    def loss(th):
+        p = 1 / (1 + math.exp(-(float(th[:3] @ x) + th[3])))
+        return -math.log(1 - p)
+    ok = True
+    for th in ([0.5, 0.1, -0.2, 0.05], [-1.0, 0.4, 0.3, -0.2]):
+        gw, gb = m.logistic_grad(np.array(th[:3]), th[3])
+        num = cdiff(loss, th)
+        ok &= close(gw, num[:3]) and close(gb, num[3])
+    return ok
+
+
+@check("PS3", "4 · the adjoint of z")
+def _(m):
+    ok = True
+    for z in (-2.0, 0.3, 1.7):
+        for y in (0, 1):
+            f = lambda zz: -(y * math.log(1 / (1 + math.exp(-zz))) + (1 - y) * math.log(1 - 1 / (1 + math.exp(-zz))))  # noqa: E731
+            ok &= close(m.z_adjoint(1 / (1 + math.exp(-z)), y), cdiff(f, z))
+    return ok
+
+
+@check("PS3", "5 · passes per mode")
+def _(m):
+    return all(m.passes(n, k) == {"forward": n, "backward": k} for n, k in ((1000, 3), (2, 50), (7, 7)))
+
+
+@check("PS3", "6 · written: why the adjoint is a sum")
+def _(m):
+    return written(m.why_sum)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

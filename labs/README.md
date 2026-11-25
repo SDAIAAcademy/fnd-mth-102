@@ -16,8 +16,8 @@ Run `00_setup_check.ipynb` once first. No lab calls an AI model, so no key is ne
 `MTH_QUICK=1` for a short run (fewer steps and seeds).
 
 `uv sync` takes PyTorch from its CPU-only index on every platform (`pyproject.toml`), so no
-graphics libraries are downloaded: the PyTorch wheel is about 130 MB and the whole environment
-about 0.8 GB on disk. On Colab nothing is installed.
+graphics libraries are downloaded: the PyTorch wheel is about 210 MB on Linux and the whole
+environment stays under 1 GB on disk. On Colab nothing is installed.
 
 | Unit | Session | Notebook | AI level |
 |---|---|---|---|

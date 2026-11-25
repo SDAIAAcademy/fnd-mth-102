@@ -1,7 +1,7 @@
 """Convert percent-format Python sources (labs/_src/*.py) into clean notebooks.
 
     uv run python _tools/py2nb.py                 # all sources
-    uv run python _tools/py2nb.py D1_1_two_providers  # one source
+    uv run python _tools/py2nb.py W1_1_derivatives    # one source
 
 Cell markers:
     # %% [markdown]   -> markdown cell; leading "# " is stripped from each line

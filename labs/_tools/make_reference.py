@@ -114,6 +114,17 @@ def week3(C):
     save("w3_forward_mode", {"tangents": tang, "passes": {"forward": 3, "backward": 1}})
 
 
+def week4(C):
+    # gradient of the Lab 3.1 loss, computed in closed form ((p - y) / 2 per learner)
+    T = C["two_learners"]
+    X, Y, W, B = np.array(T["x"]), np.array(T["y"]), np.array(T["w"]), T["b"]
+    az = (U.sigmoid(X @ W + B) - Y) / 2
+    save("w4_torch_grad", [float(az @ X[:, 0]), float(az @ X[:, 1]), float(az.sum())])
+    save("w4_fd_worst", 1e-9)  # the order of the step error of central differences at h = 1e-6
+    save("w4_overwrite_fails", ["add_mul", "constants_both_sides", "same_node_twice", "random_expressions",
+                                "two_learner_loss", "zero_grad"])
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

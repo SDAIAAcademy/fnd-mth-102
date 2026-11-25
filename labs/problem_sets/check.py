@@ -181,6 +181,54 @@ def _(m):
     return written(m.why_sum)
 
 
+# ------------------------------------------------------------------ PS4 · week 4
+_RNG = np.random.default_rng(4)
+_A = _RNG.normal(size=(2, 3))
+_X = _RNG.normal(size=3)
+_G = _RNG.normal(size=2)
+
+
+@check("PS4", "1 · vector-Jacobian product of A x, with respect to x")
+def _(m):
+    return close(m.vjp_matvec_x(_A, _G), cdiff(lambda x: float(_G @ (_A @ x)), _X))
+
+
+@check("PS4", "2 · gradient of A x with respect to A")
+def _(m):
+    return close(m.vjp_matvec_A(_X, _G), cdiff(lambda A: float(_G @ (A @ _X)), _A))
+
+
+@check("PS4", "3 · vector-Jacobian product of tanh")
+def _(m):
+    g = np.array([0.3, -1.0, 2.0])
+    return close(m.vjp_tanh(_X, g), cdiff(lambda x: float(g @ np.tanh(x)), _X))
+
+
+@check("PS4", "4 · Jacobian of a composition")
+def _(m):
+    H = lambda x: np.array([math.sin(x[0] * x[1]), (x[0] * x[1]) * (x[0] + x[1]), math.exp(x[0] + x[1])])  # noqa: E731
+    x = np.array([0.4, -0.7])
+    J = np.column_stack([(H(x + e) - H(x - e)) / 2e-6 for e in np.eye(2) * 1e-6])
+    return close(m.jac_composite(x), J)
+
+
+@check("PS4", "5 · a sin node for the engine")
+def _(m):
+    sys.path.insert(0, str(HERE.parent / "solutions"))
+    from engine_reference import Value
+    sin = m.make_sin(Value)
+    a = Value(0.8)
+    out = sin(a * a) * a
+    out.backward()
+    f = lambda v: math.sin(v * v) * v  # noqa: E731
+    return close(out.data, f(0.8)) and close(a.grad, cdiff(f, 0.8))
+
+
+@check("PS4", "6 · written: why vector-Jacobian products")
+def _(m):
+    return written(m.why_vjp)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

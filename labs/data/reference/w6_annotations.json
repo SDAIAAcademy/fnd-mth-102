@@ -1,0 +1,32 @@
+{
+ "bowl": {
+  "convex": true,
+  "outcome": "minimum",
+  "global": true
+ },
+ "narrow": {
+  "convex": true,
+  "outcome": "diverged",
+  "global": null
+ },
+ "valley": {
+  "convex": false,
+  "outcome": "minimum",
+  "global": true
+ },
+ "saddle": {
+  "convex": false,
+  "outcome": "saddle",
+  "global": null
+ },
+ "bumpy": {
+  "convex": false,
+  "outcome": "minimum",
+  "global": false
+ },
+ "plateau": {
+  "convex": false,
+  "outcome": "plateau",
+  "global": null
+ }
+}

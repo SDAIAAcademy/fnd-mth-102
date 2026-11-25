@@ -1,0 +1,8 @@
+{
+ "bowl": true,
+ "narrow": true,
+ "valley": false,
+ "saddle": false,
+ "bumpy": false,
+ "plateau": false
+}

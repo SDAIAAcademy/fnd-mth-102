@@ -1,0 +1,27 @@
+[project]
+name = "fnd-mth-102-labs"
+version = "2027.1.0"
+description = "Lab notebooks for the SDAIA Academy course Calculus and Optimisation for Machine Learning"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "numpy>=2.0",
+    "sympy>=1.13",
+    "matplotlib>=3.9",
+    "torch>=2.5",
+    "jupyterlab>=4.4",
+    "nbclient>=0.10",
+    "ipykernel>=6.29",
+]
+
+[tool.uv]
+package = false
+
+# CPU wheels of PyTorch on every platform: nothing in the labs needs a graphics processor, and the
+# default Linux wheel would pull several gigabytes of CUDA libraries
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]

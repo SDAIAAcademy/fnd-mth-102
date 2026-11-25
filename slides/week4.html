@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="foundations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 4 · Reverse mode in code · Calculus and Optimisation for Machine Learning</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="week4.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Calculus and Optimisation for Machine Learning" data-track="foundations" data-day="Week 4">
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Calculus and Optimisation for Machine Learning</div>
+  <h1>Reverse mode in code</h1>
+  <p class="lead mt">Week 4: The chain rule with vectors and matrices, and a small automatic differentiation engine</p>
+  <div class="meta"><span class="track">Data &amp; AI Foundations Track</span><span>8 weeks + capstone</span><span>1 session · 1 lab</span><span>FND-MTH-102</span></div>
+  <aside class="notes"><p>Collect Problem set 3. Today participants turn last week's paper procedure into about sixty lines of Python. The engine they write is the one the capstone trains with, so the lab matters more than any other. Test 1 (90 minutes, AI-off, weeks 1 to 4) follows this week. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">This week</div>
+  <h2>Reverse mode in code</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · A reverse-mode engine</b><small>Reverse mode multiplies vector-Jacobian products from the output back; a small engine records operations and replays them backwards</small></div></div></div>
+</section>
+
+<section class="slide" id="review-week3" data-lo="LO4" data-minutes="7" data-n="3">
+  <div class="kicker">Review of week 3</div>
+  <h2>Where does the second path go?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4" data-id="review-week3-q1">
+    <p class="lead">In h = (a · b) + a, at a = 4 and b = −1, what is ∂h/∂a?</p>
+    <div class="opts">
+      <div class="opt" data-why="Keeps only the direct path through the sum" data-k="A">1</div>
+      <div class="opt" data-ok data-k="B">0</div>
+      <div class="opt" data-why="Keeps only the path through the product" data-k="C">−1</div>
+      <div class="opt" data-why="Uses the value of a instead of its local derivative on the product path" data-k="D">5</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Through the product: b = −1. Directly: 1. The paths add to 0.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. A zero gradient that is the sum of two non-zero paths: a good reminder that accumulation, not overwriting, is the rule the engine must follow.</p></aside>
+</section>
+
+<section class="slide" id="lab-3-1-debrief" data-lo="LO4" data-minutes="8" data-n="4">
+  <div class="kicker">Lab 3.1 · what your runs showed</div>
+  <h2>Four decimals by hand matched the code to about 1e-4</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Two-learner loss, reference run</th><th class="num">Value</th></tr>
+      <tr><td>L</td><td class="num">0.7616</td></tr>
+      <tr><td>dL/dw₁, dL/dw₂, dL/db</td><td class="num">−0.0207, −0.0361, 0.1626</td></tr>
+      <tr class="hl"><td>Relative error against central differences</td><td class="num">1.4e-4</td></tr>
+      <tr><td>Passes: forward mode, reverse mode</td><td class="num">3, 1</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>1.4e-4 is rounding</h4><p class="small mb0">Four decimals on a gradient of size 0.17 leave an error near 1e-4. A wrong formula shows up near 1e-1.</p></div>
+      <div class="card c-coral flat"><h4>Most common slip</h4><p class="small mb0">Forgetting the ½ of the mean, which doubles every adjoint below it.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Values from the solution run. Ask the room which node they got wrong first and collect the answers on the board: sign of the y = 0 learner's derivative, the missing half, an overwritten sum. These are exactly the bugs an engine can have, and today's test suite has a test for each.</p></aside>
+</section>
+
+<!-- Session 1 -->
+
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="5">
+  <div class="kicker">Session 1</div>
+  <h1>A reverse-mode engine</h1>
+  <ul class="bullets outcomes"><li>Apply the chain rule to vector functions as products of Jacobians</li><li>Design a scalar reverse-mode engine: nodes, local derivatives, topological order and accumulation</li><li>Verify an engine with finite-difference checks and against a framework's gradients</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" id="jacobians-multiply" data-lo="LO4" data-minutes="12" data-n="6" data-session="1">
+  <div class="kicker">Block 1 · The chain rule with vectors</div>
+  <h2>For vector functions, the chain rule multiplies Jacobians</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>Composition</h4><p class="mb0"><code>J(F∘G)(x) = J_F(G(x)) · J_G(x)</code></p></div>
+      <p class="small">Shapes chain like the maps: <code>(m × k) · (k × n) = m × n</code>. Matrix products as composition of maps, from FND-MTH-101.</p>
+      <p class="small">A network is a long composition: <code>L = ℓ(f₃(f₂(f₁(x))))</code>.</p>
+    </div>
+    <div class="card c-coral flat"><h4>Two orders of multiplying</h4><p class="small mb0"><b>Forward</b>: start at the input, <code>J₃ (J₂ (J₁ v))</code>, one direction v at a time.<br><b>Reverse</b>: start at the loss, <code>((gᵀ J₃) J₂) J₁</code>, with gᵀ a row vector. Same product, very different cost.</p></div>
+  </div>
+  <aside class="notes"><p>The parenthesisation is the whole story of forward against reverse mode. Because L is a scalar, gᵀ is a single row, and each product in the reverse order is a vector times a matrix: never a matrix times a matrix.</p></aside>
+</section>
+
+<section class="slide" id="vector-jacobian-products" data-lo="LO4" data-minutes="12" data-n="7" data-session="1">
+  <div class="kicker">Block 1 · What a backward pass passes</div>
+  <h2>A layer never builds its Jacobian; it passes a vector-Jacobian product</h2>
+  <table class="t">
+    <tr><th>Operation</th><th>Upstream g = ∂L/∂y</th><th>Sends back</th></tr>
+    <tr><td>Sum, <code>y = a + b</code></td><td>g</td><td>g to a, g to b</td></tr>
+    <tr><td>Elementwise, <code>y = f(x)</code></td><td>vector g</td><td><code>g ⊙ f′(x)</code></td></tr>
+    <tr><td>Dot, <code>y = w · x</code></td><td>number g</td><td><code>g x</code> to w, <code>g w</code> to x</td></tr>
+    <tr class="hl"><td>Matrix–vector, <code>y = A x</code></td><td>vector g</td><td>to x: Aᵀg; to A: g xᵀ</td></tr>
+  </table>
+  <div class="callout note mt"><b>Tensors.</b> Reverse mode on whole arrays, with broadcasting, is the subject of SPC-DLR-302. This course stays with scalars and small vectors.</div>
+  <aside class="notes"><p>Derive Aᵀg on the board for a 2 by 3 A: each x_j reaches every y_i with local derivative A_ij, so its adjoint sums g_i A_ij over i. Problem set 4 asks for the A-side, so leave that row's derivation to them. The hand-over to SPC-DLR-302 is deliberate: tensor-level differentiation is not taught here.</p></aside>
+</section>
+
+<section class="slide" id="check-gradient-shape" data-lo="LO4" data-minutes="5" data-n="8" data-session="1">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What shape is the weight gradient?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4" data-id="check-gradient-shape-q1">
+    <p class="lead">A layer computes y = A x with A of shape 3 × 5, then a scalar loss L follows. What shape is ∂L/∂A?</p>
+    <div class="opts">
+      <div class="opt" data-why="Confuses the gradient with the input: x has 5 entries, A has 15" data-k="A">5</div>
+      <div class="opt" data-why="Transposes the convention: a gradient has the shape of the thing it is taken with respect to" data-k="B">5 × 3</div>
+      <div class="opt" data-why="Builds a full Jacobian of y with respect to A: reverse mode never forms it" data-k="C">3 × 15</div>
+      <div class="opt" data-ok data-k="D">3 × 5</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> L is a scalar, so ∂L/∂A has one entry per entry of A: the outer product g xᵀ is 3 × 5.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Rule worth repeating: the gradient of a scalar has the shape of the variable. A shape mismatch is the first thing to check when a backward pass crashes.</p></aside>
+</section>
+
+<section class="slide" id="value-node" data-lo="LO5" data-minutes="11" data-n="9" data-session="1">
+  <div class="kicker">Block 2 · The engine's one idea</div>
+  <h2>Each operation returns a node that knows how to pass its gradient back</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="a node the lab does not ask for"><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">sqrt</span>(<span class="hljs-params">self</span>):
+    s = math.sqrt(<span class="hljs-variable language_">self</span>.data)
+    out = Value(s, (<span class="hljs-variable language_">self</span>,), <span class="hljs-string">&quot;sqrt&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_backward</span>():
+        <span class="hljs-comment"># local derivative 1 / (2 sqrt(x))</span>
+        <span class="hljs-variable language_">self</span>.grad += out.grad / (<span class="hljs-number">2</span> * s)
+    out._backward = _backward
+    <span class="hljs-keyword">return</span> out</code></pre>
+    <ul class="bullets">
+      <li><b>Value</b>: the forward result, computed now.</li>
+      <li><b>Parents</b>: the inputs, so the graph can be walked.</li>
+      <li><b>_backward</b>: a closure that remembers what it needs (here <code>s</code>).</li>
+      <li><b>+=</b>: a node may receive from several users.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The square root is not one of the lab's operations, on purpose: the lab asks for addition, multiplication, power, exp, log, tanh and ReLU. Every one of them has this same shape; only the value and the local derivative change. Point at the closure: _backward runs later, after the forward pass, and must not recompute anything it can remember.</p></aside>
+</section>
+
+<section class="slide" id="topological-order" data-lo="LO5" data-minutes="11" data-n="10" data-session="1">
+  <div class="kicker">Block 2 · Walking the graph</div>
+  <h2>backward() visits nodes in reverse topological order</h2>
+  <div class="flow">
+    <div class="step c-navy"><b>1 · Order</b>list every node after its inputs</div>
+    <div class="arrow">→</div>
+    <div class="step c-teal"><b>2 · Seed</b>the output's grad = 1</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>3 · Reverse</b>call each node's _backward, last to first</div>
+  </div>
+  <div class="cols cols-2 mt">
+    <div class="card c-coral flat"><h4>Why the order</h4><p class="small mb0">A node may pass its gradient on only after <b>every</b> user has sent its share. Reverse topological order guarantees it.</p></div>
+    <div class="card c-purple flat"><h4>Why not recursion</h4><p class="small mb0">A recursive sort fails on a chain deeper than Python's recursion limit (about 1,000). The test suite has a 5,000-node chain: use a loop and a stack.</p></div>
+  </div>
+  <aside class="notes"><p>Draw a diamond graph (a feeds b and c, both feed d) and show what goes wrong if a's _backward runs before c's: a passes on an incomplete gradient. Do not write the topological sort on the board: it is task 2. A depth-first search with an explicit stack and a "done" marker is the usual way.</p></aside>
+</section>
+
+<section class="slide" id="check-backward-order" data-lo="LO5" data-minutes="5" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>What goes wrong in this backward pass?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5" data-id="check-backward-order-q1">
+    <p class="lead">An engine calls every node's _backward in the order the nodes were created (inputs first), after setting the output's grad to 1. What do the inputs end with?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes the order of calls does not matter: a node passes on only what it has received so far" data-k="A">The correct gradients</div>
+      <div class="opt" data-ok data-k="B">Zero, or only part of their gradient</div>
+      <div class="opt" data-why="Thinks the order flips signs: it changes which contributions arrive, not their signs" data-k="C">The correct gradients with flipped signs</div>
+      <div class="opt" data-why="Thinks the engine detects the order: nothing checks it, the numbers are simply wrong" data-k="D">An error about the graph's order</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Inputs run their _backward before their users have sent anything, so they pass on zeros; only the output's direct parents receive anything.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. Silent wrong numbers, not a crash: the reason every engine needs a test suite and a referee.</p></aside>
+</section>
+
+<section class="slide" id="two-referees" data-lo="LO5" data-minutes="11" data-n="12" data-session="1">
+  <div class="kicker">Block 3 · Testing an engine</div>
+  <h2>Two referees: finite differences and a framework's autograd</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="reference with PyTorch autograd"><code class="language-python"><span class="hljs-keyword">import</span> torch
+f64 = <span class="hljs-built_in">dict</span>(dtype=torch.float64, requires_grad=<span class="hljs-literal">True</span>)
+x = torch.tensor(<span class="hljs-number">0.5</span>, **f64)
+y = torch.tensor(-<span class="hljs-number">1.2</span>, **f64)
+f = torch.tanh(x * y) + y ** <span class="hljs-number">2</span>
+f.backward()
+<span class="hljs-built_in">print</span>(x.grad.item(), y.grad.item())
+<span class="hljs-comment"># -0.8539 -2.0442</span></code></pre>
+    <table class="t small">
+      <tr><th>Referee</th><th>Agrees to about</th><th>Catches</th></tr>
+      <tr><td>Central differences</td><td>1e-9</td><td>wrong formulas, any code</td></tr>
+      <tr class="hl"><td>Framework autograd, float64</td><td>1e-13</td><td>also errors of 1e-8</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>The expression is not one of the lab's; the numbers are from a run of the code shown. Use float64 in the framework, or its default float32 rounding (about 1e-7) hides small errors. Any framework with reverse-mode autodiff fills this tool slot (PyTorch autograd, JAX); the lab uses PyTorch because Colab and the uv environment ship it.</p></aside>
+</section>
+
+<section class="slide" id="random-expressions" data-lo="LO5" data-minutes="10" data-n="13" data-session="1">
+  <div class="kicker">Block 3 · What the suite tests</div>
+  <h2>Ten tests, each aimed at one way an engine goes wrong</h2>
+  <div class="cols cols-2">
+    <ul class="bullets tight">
+      <li><b>Values and gradients</b> of +, ×, constants on either side</li>
+      <li><b>A reused node</b>, and one node used twice in a product</li>
+      <li><b>Each unary operation</b> against central differences</li>
+      <li><b>ReLU</b> on both sides of zero</li>
+      <li><b>20 random expressions</b>, seeded</li>
+      <li><b>Your Lab 3.1 loss</b>: the hand gradient again</li>
+      <li><b>A 5,000-node chain</b>, and <b>zero_grad</b></li>
+    </ul>
+    <div class="card c-coral flat"><h4>What goes wrong at a kink</h4><p class="small mb0">ReLU has no derivative at 0. The engine must choose (0, here); a central difference straddling 0 returns 0.5. A "failed" check exactly at a kink is not a bug.</p></div>
+  </div>
+  <aside class="notes"><p>The suite is labs/engine_tests.py; read it with the room for a minute. The capstone runs the same suite on each participant's engine, and the oral check asks them to trace a backward pass through it: their code, their explanation.</p></aside>
+</section>
+
+<section class="slide" id="check-relu-kink" data-lo="LO5" data-minutes="5" data-n="14" data-session="1">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>Is this engine wrong?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5" data-id="check-relu-kink-q1">
+    <p class="lead">Every test passes except a finite-difference check of relu(x) at exactly x = 0, where the engine says 0 and the central difference says 0.5. What should you do?</p>
+    <div class="opts">
+      <div class="opt" data-why="Treats the central difference as the truth everywhere: at a kink it averages two one-sided slopes" data-k="A">Change ReLU's derivative to 0.5</div>
+      <div class="opt" data-why="Blames the step: any step straddling 0 gives the same 0.5" data-k="B">Use a smaller step for the check</div>
+      <div class="opt" data-ok data-k="C">Keep it, and check ReLU away from 0</div>
+      <div class="opt" data-why="Thinks a kink breaks reverse mode: the engine only needs a choice at one point" data-k="D">Remove ReLU from the engine</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> ReLU has no derivative at 0; any value between 0 and 1 is a valid choice there. The check is only meaningful away from the kink.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Frameworks choose 0 at the kink too. Then start the lab.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-4-1" data-auto="lab" data-lab="4.1" data-label="Lab 4.1" data-n="15" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 4.1 · 105 min</div><h2>A scalar reverse-mode engine</h2><p class="lead small">A scalar reverse-mode differentiation engine built and tested</p><a class="nb" href="../labs/W4_1_autodiff_engine.ipynb">W4_1_autodiff_engine.ipynb</a></div><ul class="checklist"><li>Read the interface and run the test suite <span class="min">5 min</span></li><li>Implement addition, multiplication and backward <span class="min">25 min</span></li><li>Add power, exp, log, tanh and ReLU <span class="min">20 min</span></li><li>Pass the finite-difference checks on random expressions <span class="min">15 min</span></li><li>Compare your gradients with a framework's <span class="min">15 min</span></li><li>Fix gradient accumulation for a reused node <span class="min">15 min</span></li><li>Write three findings in the lab log <span class="min">10 min</span></li><li class="stretch">✱ Stretch: Add a dot-product node with its vector-Jacobian product</li></ul></div>
+  <aside class="notes"><p>AI-tutor: hints, not code. The oral check asks participants to trace a backward pass through their engine, so a tutor that writes the class defeats the capstone. Typical failures: a recursive topological sort (the deep-chain test says so), forgetting to wrap a plain number in Value, writing = instead of +=, calling backward twice without zero_grad. A participant whose engine fails tests still reaches the end of the notebook: the safety net uses solutions/engine_reference.py for tasks 4 to 6. Remind everyone to copy their class into engine.py for the capstone.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-4" data-label="Problem set 4" data-minutes="3" data-n="16" data-session="1">
+  <div class="kicker">Before week 5</div>
+  <h2>Problem set 4, and Test 1</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>PS4, 50 minutes</b>, AI-off first: three vector-Jacobian products, a composite Jacobian, a sin node for your engine.</li>
+      <li><b>Test 1, 90 minutes, supervised and AI-off</b>: 40 minutes on paper, 50 at the keyboard, weeks 1 to 4.</li>
+      <li>To pass the course: at least 50% on each test.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash"><span class="hljs-built_in">cd</span> labs
+uv run python problem_sets/check.py PS4</code></pre>
+  </div>
+  <aside class="notes"><p>The test papers are not written yet; when they are, the trainer keeps them outside the repository. The practice page of the course site and the problem sets are the preparation. Tell the room when and where Test 1 is held.</p></aside>
+</section>
+
+<section class="slide" id="wrap-up" data-minutes="3" data-n="17" data-session="1">
+  <div class="kicker">Week 4 · wrap-up</div>
+  <h2>Three things to keep</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal"><h4>Vector-Jacobian products</h4><p class="small mb0">Reverse mode multiplies from the loss end: a vector times each Jacobian, never a matrix product.</p></div>
+    <div class="card c-coral"><h4>Node, closure, +=</h4><p class="small mb0">Each operation records its inputs and a closure that adds its share of the gradient.</p></div>
+    <div class="card c-purple"><h4>Two referees</h4><p class="small mb0">Finite differences catch wrong formulas; a framework's autograd also catches small errors.</p></div>
+  </div>
+</section>
+
+<section class="slide dark" id="next" data-label="Next" data-minutes="2" data-n="18" data-session="1">
+  <div class="kicker">Next</div>
+  <h2>Week 5: Gradient descent</h2>
+  <p class="lead">Hand in Problem set 4 and sit Test 1. Week 5 uses the gradients: run the setup check again if it has been a while, since Lab 5.1 downloads public data.</p>
+  <aside class="notes"><p>Lab 5.1 downloads the UCI airfoil data at its first run; on a network that blocks the download the helper falls back to a labelled synthetic stand-in. Ask anyone on a restricted network to run 00_setup_check.ipynb before the session.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-25T07:57:24Z","version":"2027.1.0","commit":"413d7b3"},"course":{"id":"fnd-mth-102","code":"FND-MTH-102","title":"Calculus and Optimisation for Machine Learning","track":"foundations","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/fnd-mth-102/","repo":"SDAIAAcademy/fnd-mth-102","home":"../index.html"},"deck":{"id":"week4","kind":"day","day":4,"label":"Week 4","title":"Reverse mode in code","prev":"week3.html","next":"week5.html","md":"week4.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"A reverse-mode engine","slide":"s1","outcomes":["Apply the chain rule to vector functions as products of Jacobians","Design a scalar reverse-mode engine: nodes, local derivatives, topological order and accumulation","Verify an engine with finite-difference checks and against a framework's gradients"],"minutes":210,"lab":{"id":"4.1","title":"A scalar reverse-mode engine","minutes":105,"href":"../labs/W4_1_autodiff_engine.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Reverse mode in code","kind":"title","session":0,"hash":"d71d747c","md":"#### [week4#title] Reverse mode in code\n\n*SDAIA Academy · Calculus and Optimisation for Machine Learning*\n\nWeek 4: The chain rule with vectors and matrices, and a small automatic differentiation engine\n\nData & AI Foundations Track · 8 weeks + capstone · 1 session · 1 lab · FND-MTH-102","notes":"Collect Problem set 3. Today participants turn last week's paper procedure into about sixty lines of Python. The engine they write is the one the capstone trains with, so the lab matters more than any other. Test 1 (90 minutes, AI-off, weeks 1 to 4) follows this week. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"Reverse mode in code","kind":"content","session":0,"hash":"77b72d3c","md":"#### [week4#agenda] Reverse mode in code\n\n*This week*\n\n- **Session 1 · A reverse-mode engine**: Reverse mode multiplies vector-Jacobian products from the output back; a small engine records operations and replays them backwards","notes":"","minutes":null,"lo":[]},{"id":"review-week3","n":3,"title":"Where does the second path go?","kind":"quiz","session":0,"hash":"102ffb2e","md":"#### [week4#review-week3] Where does the second path go?\n\n*Review of week 3*\n\n**Question:** In h = (a · b) + a, at a = 4 and b = −1, what is ∂h/∂a?\n\n- A. 1\n- B. 0\n- C. −1\n- D. 5","notes":"Answer: B. A zero gradient that is the sum of two non-zero paths: a good reminder that accumulation, not overwriting, is the rule the engine must follow.","minutes":7,"lo":["LO4"]},{"id":"lab-3-1-debrief","n":4,"title":"Four decimals by hand matched the code to about 1e-4","kind":"content","session":0,"hash":"ee45b9f2","md":"#### [week4#lab-3-1-debrief] Four decimals by hand matched the code to about 1e-4\n\n*Lab 3.1 · what your runs showed*\n\n| Two-learner loss, reference run | Value |\n| --- | --- |\n| L | 0.7616 |\n| dL/dw₁, dL/dw₂, dL/db | −0.0207, −0.0361, 0.1626 |\n| Relative error against central differences | 1.4e-4 |\n| Passes: forward mode, reverse mode | 3, 1 |\n\n- **1.4e-4 is rounding.** Four decimals on a gradient of size 0.17 leave an error near 1e-4. A wrong formula shows up near 1e-1.\n- **Most common slip.** Forgetting the ½ of the mean, which doubles every adjoint below it.","notes":"Values from the solution run. Ask the room which node they got wrong first and collect the answers on the board: sign of the y = 0 learner's derivative, the missing half, an overwritten sum. These are exactly the bugs an engine can have, and today's test suite has a test for each.","minutes":8,"lo":["LO4"]},{"id":"s1","n":5,"title":"A reverse-mode engine","kind":"section","session":1,"hash":"51b2f9ac","md":"#### [week4#s1] A reverse-mode engine\n\n*Session 1*\n\n- Apply the chain rule to vector functions as products of Jacobians\n- Design a scalar reverse-mode engine: nodes, local derivatives, topological order and accumulation\n- Verify an engine with finite-difference checks and against a framework's gradients","notes":"","minutes":null,"lo":["LO5","LO4"]},{"id":"jacobians-multiply","n":6,"title":"For vector functions, the chain rule multiplies Jacobians","kind":"content","session":1,"hash":"d2f3b88f","md":"#### [week4#jacobians-multiply] For vector functions, the chain rule multiplies Jacobians\n\n*Block 1 · The chain rule with vectors*\n\n- **Composition.** `J(F∘G)(x) = J_F(G(x)) · J_G(x)`\n\nShapes chain like the maps: `(m × k) · (k × n) = m × n`. Matrix products as composition of maps, from FND-MTH-101.\n\nA network is a long composition: `L = ℓ(f₃(f₂(f₁(x))))`.\n\n- **Two orders of multiplying.** **Forward**: start at the input, `J₃ (J₂ (J₁ v))`, one direction v at a time.\n  **Reverse**: start at the loss, `((gᵀ J₃) J₂) J₁`, with gᵀ a row vector. Same product, very different cost.","notes":"The parenthesisation is the whole story of forward against reverse mode. Because L is a scalar, gᵀ is a single row, and each product in the reverse order is a vector times a matrix: never a matrix times a matrix.","minutes":12,"lo":["LO4"]},{"id":"vector-jacobian-products","n":7,"title":"A layer never builds its Jacobian; it passes a vector-Jacobian product","kind":"content","session":1,"hash":"30522d72","md":"#### [week4#vector-jacobian-products] A layer never builds its Jacobian; it passes a vector-Jacobian product\n\n*Block 1 · What a backward pass passes*\n\n| Operation | Upstream g = ∂L/∂y | Sends back |\n| --- | --- | --- |\n| Sum, `y = a + b` | g | g to a, g to b |\n| Elementwise, `y = f(x)` | vector g | `g ⊙ f′(x)` |\n| Dot, `y = w · x` | number g | `g x` to w, `g w` to x |\n| Matrix–vector, `y = A x` | vector g | to x: Aᵀg; to A: g xᵀ |\n\n> **Tensors.** Reverse mode on whole arrays, with broadcasting, is the subject of SPC-DLR-302. This course stays with scalars and small vectors.","notes":"Derive Aᵀg on the board for a 2 by 3 A: each x_j reaches every y_i with local derivative A_ij, so its adjoint sums g_i A_ij over i. Problem set 4 asks for the A-side, so leave that row's derivation to them. The hand-over to SPC-DLR-302 is deliberate: tensor-level differentiation is not taught here.","minutes":12,"lo":["LO4"]},{"id":"check-gradient-shape","n":8,"title":"What shape is the weight gradient?","kind":"quiz","session":1,"hash":"365c330b","md":"#### [week4#check-gradient-shape] What shape is the weight gradient?\n\n*Checkpoint 1*\n\n**Question:** A layer computes y = A x with A of shape 3 × 5, then a scalar loss L follows. What shape is ∂L/∂A?\n\n- A. 5\n- B. 5 × 3\n- C. 3 × 15\n- D. 3 × 5","notes":"Answer: D. Rule worth repeating: the gradient of a scalar has the shape of the variable. A shape mismatch is the first thing to check when a backward pass crashes.","minutes":5,"lo":["LO4"]},{"id":"value-node","n":9,"title":"Each operation returns a node that knows how to pass its gradient back","kind":"content","session":1,"hash":"8d993ae0","md":"#### [week4#value-node] Each operation returns a node that knows how to pass its gradient back\n\n*Block 2 · The engine's one idea*\n\n```python\n# file: a node the lab does not ask for\ndef sqrt(self):\n    s = math.sqrt(self.data)\n    out = Value(s, (self,), \"sqrt\")\n\n    def _backward():\n        # local derivative 1 / (2 sqrt(x))\n        self.grad += out.grad / (2 * s)\n    out._backward = _backward\n    return out\n```\n\n- **Value**: the forward result, computed now.\n- **Parents**: the inputs, so the graph can be walked.\n- **_backward**: a closure that remembers what it needs (here `s`).\n- **+=**: a node may receive from several users.","notes":"The square root is not one of the lab's operations, on purpose: the lab asks for addition, multiplication, power, exp, log, tanh and ReLU. Every one of them has this same shape; only the value and the local derivative change. Point at the closure: _backward runs later, after the forward pass, and must not recompute anything it can remember.","minutes":11,"lo":["LO5"]},{"id":"topological-order","n":10,"title":"backward() visits nodes in reverse topological order","kind":"content","session":1,"hash":"5ed8892a","md":"#### [week4#topological-order] backward() visits nodes in reverse topological order\n\n*Block 2 · Walking the graph*\n\n1. **1 · Order** list every node after its inputs\n2. **2 · Seed** the output's grad = 1\n3. **3 · Reverse** call each node's _backward, last to first\n\n- **Why the order.** A node may pass its gradient on only after **every** user has sent its share. Reverse topological order guarantees it.\n- **Why not recursion.** A recursive sort fails on a chain deeper than Python's recursion limit (about 1,000). The test suite has a 5,000-node chain: use a loop and a stack.","notes":"Draw a diamond graph (a feeds b and c, both feed d) and show what goes wrong if a's _backward runs before c's: a passes on an incomplete gradient. Do not write the topological sort on the board: it is task 2. A depth-first search with an explicit stack and a \"done\" marker is the usual way.","minutes":11,"lo":["LO5"]},{"id":"check-backward-order","n":11,"title":"What goes wrong in this backward pass?","kind":"quiz","session":1,"hash":"024f15e7","md":"#### [week4#check-backward-order] What goes wrong in this backward pass?\n\n*Checkpoint 2*\n\n**Question:** An engine calls every node's _backward in the order the nodes were created (inputs first), after setting the output's grad to 1. What do the inputs end with?\n\n- A. The correct gradients\n- B. Zero, or only part of their gradient\n- C. The correct gradients with flipped signs\n- D. An error about the graph's order","notes":"Answer: B. Silent wrong numbers, not a crash: the reason every engine needs a test suite and a referee.","minutes":5,"lo":["LO5"]},{"id":"two-referees","n":12,"title":"Two referees: finite differences and a framework's autograd","kind":"content","session":1,"hash":"f0e77797","md":"#### [week4#two-referees] Two referees: finite differences and a framework's autograd\n\n*Block 3 · Testing an engine*\n\n```python\n# file: reference with PyTorch autograd\nimport torch\nf64 = dict(dtype=torch.float64, requires_grad=True)\nx = torch.tensor(0.5, **f64)\ny = torch.tensor(-1.2, **f64)\nf = torch.tanh(x * y) + y ** 2\nf.backward()\nprint(x.grad.item(), y.grad.item())\n# -0.8539 -2.0442\n```\n\n| Referee | Agrees to about | Catches |\n| --- | --- | --- |\n| Central differences | 1e-9 | wrong formulas, any code |\n| Framework autograd, float64 | 1e-13 | also errors of 1e-8 |","notes":"The expression is not one of the lab's; the numbers are from a run of the code shown. Use float64 in the framework, or its default float32 rounding (about 1e-7) hides small errors. Any framework with reverse-mode autodiff fills this tool slot (PyTorch autograd, JAX); the lab uses PyTorch because Colab and the uv environment ship it.","minutes":11,"lo":["LO5"]},{"id":"random-expressions","n":13,"title":"Ten tests, each aimed at one way an engine goes wrong","kind":"content","session":1,"hash":"200027b1","md":"#### [week4#random-expressions] Ten tests, each aimed at one way an engine goes wrong\n\n*Block 3 · What the suite tests*\n\n- **Values and gradients** of +, ×, constants on either side\n- **A reused node**, and one node used twice in a product\n- **Each unary operation** against central differences\n- **ReLU** on both sides of zero\n- **20 random expressions**, seeded\n- **Your Lab 3.1 loss**: the hand gradient again\n- **A 5,000-node chain**, and **zero_grad**\n\n- **What goes wrong at a kink.** ReLU has no derivative at 0. The engine must choose (0, here); a central difference straddling 0 returns 0.5. A \"failed\" check exactly at a kink is not a bug.","notes":"The suite is labs/engine_tests.py; read it with the room for a minute. The capstone runs the same suite on each participant's engine, and the oral check asks them to trace a backward pass through it: their code, their explanation.","minutes":10,"lo":["LO5"]},{"id":"check-relu-kink","n":14,"title":"Is this engine wrong?","kind":"quiz","session":1,"hash":"9c1eb6a9","md":"#### [week4#check-relu-kink] Is this engine wrong?\n\n*Checkpoint 3*\n\n**Question:** Every test passes except a finite-difference check of relu(x) at exactly x = 0, where the engine says 0 and the central difference says 0.5. What should you do?\n\n- A. Change ReLU's derivative to 0.5\n- B. Use a smaller step for the check\n- C. Keep it, and check ReLU away from 0\n- D. Remove ReLU from the engine","notes":"Answer: C. Frameworks choose 0 at the kink too. Then start the lab.","minutes":5,"lo":["LO5"]},{"id":"lab-4-1","n":15,"title":"A scalar reverse-mode engine","kind":"lab","session":1,"hash":"ceb2e1a2","md":"#### [week4#lab-4-1] A scalar reverse-mode engine\n\nLab 4.1 · 105 min\n\nA scalar reverse-mode differentiation engine built and tested\n\n[W4_1_autodiff_engine.ipynb](https://sdaiaacademy.github.io/fnd-mth-102/labs/W4_1_autodiff_engine.ipynb)\n\n- [ ] Read the interface and run the test suite (5 min)\n- [ ] Implement addition, multiplication and backward (25 min)\n- [ ] Add power, exp, log, tanh and ReLU (20 min)\n- [ ] Pass the finite-difference checks on random expressions (15 min)\n- [ ] Compare your gradients with a framework's (15 min)\n- [ ] Fix gradient accumulation for a reused node (15 min)\n- [ ] Write three findings in the lab log (10 min)\n- [ ] ✱ Stretch: Add a dot-product node with its vector-Jacobian product","notes":"AI-tutor: hints, not code. The oral check asks participants to trace a backward pass through their engine, so a tutor that writes the class defeats the capstone. Typical failures: a recursive topological sort (the deep-chain test says so), forgetting to wrap a plain number in Value, writing = instead of +=, calling backward twice without zero_grad. A participant whose engine fails tests still reaches the end of the notebook: the safety net uses solutions/engine_reference.py for tasks 4 to 6. Remind everyone to copy their class into engine.py for the capstone.","minutes":null,"lo":[]},{"id":"problem-set-4","n":16,"title":"Problem set 4, and Test 1","kind":"content","session":1,"hash":"a7659cde","md":"#### [week4#problem-set-4] Problem set 4, and Test 1\n\n*Before week 5*\n\n- **PS4, 50 minutes**, AI-off first: three vector-Jacobian products, a composite Jacobian, a sin node for your engine.\n- **Test 1, 90 minutes, supervised and AI-off**: 40 minutes on paper, 50 at the keyboard, weeks 1 to 4.\n- To pass the course: at least 50% on each test.\n\n```bash\n# file: terminal\ncd labs\nuv run python problem_sets/check.py PS4\n```","notes":"The test papers are not written yet; when they are, the trainer keeps them outside the repository. The practice page of the course site and the problem sets are the preparation. Tell the room when and where Test 1 is held.","minutes":3,"lo":[]},{"id":"wrap-up","n":17,"title":"Three things to keep","kind":"content","session":1,"hash":"5255aa9e","md":"#### [week4#wrap-up] Three things to keep\n\n*Week 4 · wrap-up*\n\n- **Vector-Jacobian products.** Reverse mode multiplies from the loss end: a vector times each Jacobian, never a matrix product.\n- **Node, closure, +=.** Each operation records its inputs and a closure that adds its share of the gradient.\n- **Two referees.** Finite differences catch wrong formulas; a framework's autograd also catches small errors.","notes":"","minutes":3,"lo":[]},{"id":"next","n":18,"title":"Week 5: Gradient descent","kind":"content","session":1,"hash":"aa69a027","md":"#### [week4#next] Week 5: Gradient descent\n\n*Next*\n\nHand in Problem set 4 and sit Test 1. Week 5 uses the gradients: run the setup check again if it has been a while, since Lab 5.1 downloads public data.","notes":"Lab 5.1 downloads the UCI airfoil data at its first run; on a network that blocks the download the helper falls back to a labelled synthetic stand-in. Ask anyone on a restricted network to run 00_setup_check.ipynb before the session.","minutes":2,"lo":[]}],"activities":[{"id":"review-week3-q1","slide":"review-week3","type":"single","prompt":"In h = (a · b) + a, at a = 4 and b = −1, what is ∂h/∂a?","options":[{"key":"A","text":"1"},{"key":"B","text":"0"},{"key":"C","text":"−1"},{"key":"D","text":"5"}],"correct":[1],"explanation":"Through the product: b = −1. Directly: 1. The paths add to 0.","misconceptions":["Keeps only the direct path through the sum","","Keeps only the path through the product","Uses the value of a instead of its local derivative on the product path"],"lo":["LO4"]},{"id":"check-gradient-shape-q1","slide":"check-gradient-shape","type":"single","prompt":"A layer computes y = A x with A of shape 3 × 5, then a scalar loss L follows. What shape is ∂L/∂A?","options":[{"key":"A","text":"5"},{"key":"B","text":"5 × 3"},{"key":"C","text":"3 × 15"},{"key":"D","text":"3 × 5"}],"correct":[3],"explanation":"L is a scalar, so ∂L/∂A has one entry per entry of A: the outer product g xᵀ is 3 × 5.","misconceptions":["Confuses the gradient with the input: x has 5 entries, A has 15","Transposes the convention: a gradient has the shape of the thing it is taken with respect to","Builds a full Jacobian of y with respect to A: reverse mode never forms it",""],"lo":["LO4"]},{"id":"check-backward-order-q1","slide":"check-backward-order","type":"single","prompt":"An engine calls every node's _backward in the order the nodes were created (inputs first), after setting the output's grad to 1. What do the inputs end with?","options":[{"key":"A","text":"The correct gradients"},{"key":"B","text":"Zero, or only part of their gradient"},{"key":"C","text":"The correct gradients with flipped signs"},{"key":"D","text":"An error about the graph's order"}],"correct":[1],"explanation":"Inputs run their _backward before their users have sent anything, so they pass on zeros; only the output's direct parents receive anything.","misconceptions":["Assumes the order of calls does not matter: a node passes on only what it has received so far","","Thinks the order flips signs: it changes which contributions arrive, not their signs","Thinks the engine detects the order: nothing checks it, the numbers are simply wrong"],"lo":["LO5"]},{"id":"check-relu-kink-q1","slide":"check-relu-kink","type":"single","prompt":"Every test passes except a finite-difference check of relu(x) at exactly x = 0, where the engine says 0 and the central difference says 0.5. What should you do?","options":[{"key":"A","text":"Change ReLU's derivative to 0.5"},{"key":"B","text":"Use a smaller step for the check"},{"key":"C","text":"Keep it, and check ReLU away from 0"},{"key":"D","text":"Remove ReLU from the engine"}],"correct":[2],"explanation":"ReLU has no derivative at 0; any value between 0 and 1 is a valid choice there. The check is only meaningful away from the kink.","misconceptions":["Treats the central difference as the truth everywhere: at a kink it averages two one-sided slopes","Blames the step: any step straddling 0 gives the same 0.5","","Thinks a kink breaks reverse mode: the engine only needs a choice at one point"],"lo":["LO5"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"week4.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

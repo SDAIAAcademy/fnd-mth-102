@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="foundations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 2 · Several variables · Calculus and Optimisation for Machine Learning</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="week2.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Calculus and Optimisation for Machine Learning" data-track="foundations" data-day="Week 2">
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Calculus and Optimisation for Machine Learning</div>
+  <h1>Several variables</h1>
+  <p class="lead mt">Week 2: Partial derivatives, gradients and Jacobians, and how to check them</p>
+  <div class="meta"><span class="track">Data &amp; AI Foundations Track</span><span>8 weeks + capstone</span><span>1 session · 1 lab</span><span>FND-MTH-102</span></div>
+  <aside class="notes"><p>Collect Problem set 1 first, or check that it was handed in. This week extends every idea of week 1 from one input to many: a partial derivative is a week 1 derivative with the other inputs frozen, and the gradient and the Jacobian are the local linear approximation in several variables. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">This week</div>
+  <h2>Several variables</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Gradients and Jacobians</b><small>Hold all inputs but one still to get a partial derivative; stack them into a gradient, or into a Jacobian for a map with several outputs</small></div></div></div>
+</section>
+
+<section class="slide" id="review-week1" data-lo="LO1" data-minutes="6" data-n="3">
+  <div class="kicker">Review of week 1</div>
+  <h2>How does the central difference's error change when you halve h?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="review-week1-q1">
+    <p class="lead">With h = 0.01, the central difference of a smooth function is off by 4 × 10⁻⁵. You halve the step to 0.005, still far above the rounding region. About how large is the error now?</p>
+    <div class="opts">
+      <div class="opt" data-why="Applies the forward difference's first-order rate: the central difference's error falls like h squared" data-k="A">2 × 10⁻⁵</div>
+      <div class="opt" data-why="Thinks a step that is already small changes nothing: truncation error still depends on h here" data-k="B">4 × 10⁻⁵</div>
+      <div class="opt" data-ok data-k="C">1 × 10⁻⁵</div>
+      <div class="opt" data-why="Expects rounding to take over: at a step of 0.005 rounding error is many orders smaller" data-k="D">8 × 10⁻⁵</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Its truncation error is about h²/6 · |f‴|: half the step, a quarter of the error.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Anyone who chose A is still thinking of the forward difference; point back to the Taylor cancellation.</p></aside>
+</section>
+
+<section class="slide" id="lab-1-1-debrief" data-lo="LO1" data-minutes="8" data-n="4">
+  <div class="kicker">Lab 1.1 · what your runs showed</div>
+  <h2>Theory predicted the best steps within a factor of five</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>From the reference run</th><th class="num">Value</th></tr>
+      <tr><td>Hand against SymPy, largest difference</td><td class="num">4e-16</td></tr>
+      <tr><td>Best central step, measured (theory)</td><td class="num">1e-5 (6e-6)</td></tr>
+      <tr><td>Best forward step, measured (theory)</td><td class="num">7e-8 (1.5e-8)</td></tr>
+      <tr class="hl"><td>Tangent of D1 at 20 within 1% up to</td><td class="num">5 thousand</td></tr>
+      <tr><td>Quadratic within 1% up to</td><td class="num">10 thousand</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>E′(20) = 2.0 exactly</h4><p class="small mb0">60 / (10 + 20): two enrolments per extra thousand, for small changes only.</p></div>
+      <div class="card c-coral flat"><h4>At 5 thousand, just</h4><p class="small mb0">The tangent's error at a 5-thousand change is 0.999%: it sits on the edge.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Numbers from the solution run (MTH_QUICK makes no difference to Lab 1.1). Ask two participants whose measured steps differed from these why: the geometric mean over three functions hides the spread, which runs from 3e-8 to 3e-7 for forward differences. Collect one finding from the logs and read it aloud.</p></aside>
+</section>
+
+<!-- Session 1 -->
+
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="5">
+  <div class="kicker">Session 1</div>
+  <h1>Gradients and Jacobians</h1>
+  <ul class="bullets outcomes"><li>Compute partial derivatives and assemble the gradient of a function of several variables</li><li>Explain the gradient as the direction of steepest increase and a Jacobian as the best local linear map</li><li>Check a hand-derived gradient or Jacobian with central differences and a relative-error tolerance</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" id="partial-derivative" data-lo="LO1" data-minutes="11" data-n="6" data-session="1">
+  <div class="kicker">Block 1 · Partial derivatives</div>
+  <h2>A partial derivative freezes every input but one</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>For <code>f(u, v)</code>, the partial <b>∂f/∂u</b> is the week 1 derivative of <code>u ↦ f(u, v)</code> with <code>v</code> held fixed.</p>
+      <p>Geometrically: slice the surface along the u-direction and take the slope of the slice.</p>
+      <div class="card c-navy"><h4>Example</h4><p class="small mb0"><code>f(u, v) = u² v + e^v</code><br><code>∂f/∂u = 2uv</code>, <code>∂f/∂v = u² + e^v</code></p></div>
+    </div>
+    <div class="card c-coral flat"><h4>What goes wrong</h4><p class="small mb0">Forgetting that the frozen input is still in the formula. In <code>∂f/∂u = 2uv</code>, the value of v matters: the slope along u differs from slice to slice.</p></div>
+  </div>
+  <aside class="notes"><p>Work the example on the board. Then the case's version, without numbers: the completion model's two partials share the factor sigmoid times one minus sigmoid, and differ only by their weight. Leave the computation to the lab.</p></aside>
+</section>
+
+<section class="slide" id="partials-in-a-model" data-lo="LO1" data-minutes="9" data-n="7" data-session="1">
+  <div class="kicker">Block 1 · In a model</div>
+  <h2>In a logistic model every partial shares the factor σ(1 - σ)</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="re-enrolment model (parallel example)"><code class="language-python">r(u, v) = sigmoid(<span class="hljs-number">3</span>*u + <span class="hljs-number">2</span>*v - <span class="hljs-number">2.5</span>)
+
+dr/du = <span class="hljs-number">3</span> * r * (<span class="hljs-number">1</span> - r)
+dr/dv = <span class="hljs-number">2</span> * r * (<span class="hljs-number">1</span> - r)
+
+<span class="hljs-comment"># at (u, v) = (0.45, 0.45): r = 0.438</span>
+<span class="hljs-comment"># dr/du = 0.738, dr/dv = 0.492</span></code></pre>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>The ratio is the weights'</h4><p class="small mb0">dr/du ÷ dr/dv = 3 ÷ 2 at every point.</p></div>
+      <div class="card c-purple flat"><h4>The size is the curve's</h4><p class="small mb0">σ(1 - σ) is largest, 0.25, where r = 0.5, and near 0 when the model is sure. Sure models learn slowly: week 7.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>This is a re-enrolment model invented for the slide, scaled so both inputs run from 0 to 1, not the completion model of the lab. The numbers come from labs/_tools/make_figures.py. The flat ends of the sigmoid come back when softmax saturates in week 7.</p></aside>
+</section>
+
+<section class="slide" id="check-partials" data-lo="LO1" data-minutes="4" data-n="8" data-session="1">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>Which partial derivative follows?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-partials-q1">
+    <p class="lead">A model p = σ(3a + 0.4h - 2) gives a learner p = 0.5, and the analyst computes ∂p/∂h = 0.1 for that learner. What is ∂p/∂a for the same learner?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes all partials of a function are equal: each carries its own weight" data-k="A">0.1</div>
+      <div class="opt" data-why="Forgets the sigmoid's own derivative: the weight is multiplied by σ(1 - σ) = 0.25" data-k="B">3</div>
+      <div class="opt" data-why="Keeps the sigmoid factor but drops the weight of a" data-k="C">0.25</div>
+      <div class="opt" data-ok data-k="D">0.75</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> ∂p/∂a = 3 · σ(1 - σ) = 3 · 0.25. Also: 0.1 ÷ 0.4 × 3 gives the same.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. The quick route is the ratio of weights from the previous slide.</p></aside>
+</section>
+
+<section class="slide" id="gradient-vector" data-lo="LO1" data-minutes="11" data-n="9" data-session="1">
+  <div class="kicker">Block 2 · The gradient</div>
+  <h2>The gradient turns week 1's line into a plane</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>Local linear approximation, n inputs</h4><p class="mb0"><code>f(x + δ) ≈ f(x) + ∇f(x) · δ</code></p></div>
+      <p class="small"><code>∇f = (∂f/∂x₁, …, ∂f/∂xₙ)</code>: one number per input, stacked into a vector.</p>
+      <p class="small">The dot product adds the effect of each input's change, as if each acted alone. Near <code>x</code> that is accurate.</p>
+    </div>
+    <div class="card c-teal flat"><h4>Directional derivative</h4><p class="small mb0">The rate of change along a unit vector <code>u</code> is <code>∇f · u</code>. For the re-enrolment model at (0.45, 0.45): along u alone 0.738; along (0.6, 0.8) it is 0.837.</p></div>
+  </div>
+  <aside class="notes"><p>Compute 0.738 × 0.6 + 0.492 × 0.8 = 0.837 on the board. The dot product is from FND-MTH-101; here it is the whole of the first-order effect. Ask: which unit direction gives the largest value? Hold the answer for the next slide.</p></aside>
+</section>
+
+<section class="slide" id="steepest-ascent" data-lo="LO1" data-minutes="11" data-n="10" data-session="1">
+  <div class="kicker">Block 2 · Direction of steepest increase</div>
+  <h2>The gradient points uphill, across the level sets</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w2-gradient-contours.svg" alt="Contour lines of the re-enrolment model, parallel diagonal lines from 0.2 to 0.8; at five points arrows show the gradient, each crossing the contour line at a right angle, longest where the lines are closest together" width="560">
+      <div class="caption">r(u, v) = σ(3u + 2v - 2.5), a parallel example; labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <p class="small"><code>∇f · u = |∇f| cos θ</code>: largest when <code>u</code> points along <code>∇f</code>.</p>
+      <p class="small">The largest rate is <b>|∇f|</b>: 0.887 at (0.45, 0.45).</p>
+      <p class="small">Along a level set <code>f</code> does not change, so the gradient is perpendicular to it.</p>
+      <div class="callout tip small"><b>Descent.</b> −∇f is the steepest way down: week 5.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>The arrows are longest where contours are dense: the function changes fast there. The figure uses equal axes on purpose: with stretched axes the arrows stop looking perpendicular, a classic misreading of contour plots. The lab finds the best direction numerically over 360 angles and compares it with the gradient.</p></aside>
+</section>
+
+<section class="slide" id="check-steepest" data-lo="LO1" data-minutes="4" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>Which small change raises the score most?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-steepest-q1">
+    <p class="lead">At (0.45, 0.45) the re-enrolment model has gradient (0.738, 0.492). You may change (u, v) by a step of length 0.1. Which step raises r the most?</p>
+    <div class="opts">
+      <div class="opt" data-why="Puts the whole step on the larger partial: mixing in v gains more than it costs" data-k="A">(0.1, 0)</div>
+      <div class="opt" data-why="Splits the step evenly: the best split follows the gradient's proportions, not equal shares" data-k="B">(0.071, 0.071)</div>
+      <div class="opt" data-ok data-k="C">(0.083, 0.055)</div>
+      <div class="opt" data-why="Puts the whole step on the smaller partial" data-k="D">(0, 0.1)</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> (0.083, 0.055) is 0.1 times the gradient's unit vector: gain ≈ 0.1 × 0.887 = 0.089, against 0.074 for (0.1, 0).</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Gains, to first order: A 0.074, B 0.087, C 0.089, D 0.049. B is close because the gradient is not far from the diagonal; the gradient's direction is still the best.</p></aside>
+</section>
+
+<section class="slide" id="jacobian-matrix" data-lo="LO1" data-minutes="11" data-n="12" data-session="1">
+  <div class="kicker">Block 3 · Several outputs</div>
+  <h2>A Jacobian stacks one gradient per output</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>For <code>F: ℝⁿ → ℝᵐ</code>, the Jacobian <b>J</b> is <code>m × n</code>: row i is <code>∇Fᵢ</code>, entry <code>(i, j)</code> is <code>∂Fᵢ/∂xⱼ</code>.</p>
+      <div class="card c-navy"><h4>Local linear map</h4><p class="mb0"><code>F(x + δ) ≈ F(x) + J δ</code></p></div>
+      <p class="small">A matrix times a vector, as in FND-MTH-101: J is the best linear map near x.</p>
+    </div>
+    <div class="card c-cyan flat"><h4>The district map</h4><p class="small mb0">Five budgets in, five enrolment counts out. Each district depends only on its own budget, so every off-diagonal entry is 0: <b>J is diagonal</b>, with <code>kᵢ / (sᵢ + xᵢ)</code> on the diagonal.</p></div>
+  </div>
+  <aside class="notes"><p>Write the 2 by 2 Jacobian of (u v, u + v²) on the board: rows (v, u) and (1, 2v). Then the district map, whose diagonal shape is a modelling assumption: no spill-over between districts. The lab asks participants to say whether they believe it.</p></aside>
+</section>
+
+<section class="slide" id="jacobian-predicts" data-lo="LO1" data-minutes="9" data-n="13" data-session="1">
+  <div class="kicker">Block 3 · Using a Jacobian</div>
+  <h2>The Jacobian predicts a budget shift well when the shift is small</h2>
+  <table class="t">
+    <tr><th>Split (40, 30, 20, 15, 15); move from D2 to D5</th><th class="num">Jacobian predicts</th><th class="num">Model gives</th></tr>
+    <tr><td>5 thousand</td><td class="num">-4.19</td><td class="num">-4.72</td></tr>
+    <tr><td>15 thousand</td><td class="num">-12.57</td><td class="num">-17.98</td></tr>
+  </table>
+  <p class="small mt">Diagonal of J at this split: 1.20, 1.24, 1.61, 0.60, 0.40 enrolments per thousand.</p>
+  <div class="callout warn mt"><b>What goes wrong.</b> Trusting a linear prediction for a large move. Both curves bend, so the error grows faster than the move.</div>
+  <aside class="notes"><p>A parallel example: a different split and different districts from the lab's, computed with the case's curves. Predicted change = 1.24 × (-5) + 0.40 × 5. Ask why the model gives a bigger loss than the prediction: D2 loses more than its slope says as its budget falls (the curve is concave, so the slope rises as you go down), and D5 gains less than its slope says as its budget rises.</p></aside>
+</section>
+
+<section class="slide" id="gradient-checking" data-lo="LO1" data-minutes="9" data-n="14" data-session="1">
+  <div class="kicker">Block 3 · Checking a gradient</div>
+  <h2>Check every coordinate with central differences and a relative error</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="check.py"><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">rel_err</span>(<span class="hljs-params">g, g_num</span>):
+    <span class="hljs-keyword">return</span> norm(g - g_num) / <span class="hljs-built_in">max</span>(norm(g), norm(g_num))
+
+<span class="hljs-comment"># g_num[i] = (f(x + h e_i) - f(x - h e_i)) / (2h)</span>
+<span class="hljs-comment"># h = 1e-6, one pair of evaluations per input</span></code></pre>
+    <table class="t small">
+      <tr><th>Relative error</th><th>Read it as</th></tr>
+      <tr><td>below 1e-7</td><td>correct</td></tr>
+      <tr><td>1e-7 to 1e-2</td><td>suspicious: a kink, a large step, or a small slip</td></tr>
+      <tr class="hl"><td>above 1e-2</td><td>a wrong formula</td></tr>
+    </table>
+  </div>
+  <div class="callout tip mt"><b>Look per coordinate.</b> One wrong entry among correct ones points at one formula.</div>
+  <aside class="notes"><p>The bands are rules of thumb for float64 and smooth functions with values of moderate size, not laws; a function near a kink (ReLU at 0) breaks them. The lab builds this checker and finds a planted mistake in last term's notes with it; do not say which component.</p></aside>
+</section>
+
+<section class="slide" id="check-gradient-reading" data-lo="LO1" data-minutes="4" data-n="15" data-session="1">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>What does this gradient check say?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-gradient-reading-q1">
+    <p class="lead">A three-parameter gradient is checked with central differences, h = 1e-6. The relative errors of the components are 2e-10, 0.4 and 3e-10. What is the most likely cause?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">The formula for the second component is wrong</div>
+      <div class="opt" data-why="Blames the step: a bad step would spoil every component, not one" data-k="B">The step h is too small for float64</div>
+      <div class="opt" data-why="Accepts any small-looking numbers: 0.4 is a 40% error, far beyond rounding" data-k="C">The gradient is fine; the errors are rounding</div>
+      <div class="opt" data-why="Blames the checker: central differences agree to 1e-10 on the other two" data-k="D">Central differences cannot check this function</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Two components agree to 1e-10, so step and checker work; one is off by 40%, so its formula is wrong.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Then introduce the lab: the same reading on a real mistake.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-2-1" data-auto="lab" data-lab="2.1" data-label="Lab 2.1" data-n="16" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 2.1 · 105 min</div><h2>Gradients and a Jacobian, checked</h2><p class="lead small">Partial derivatives, a gradient, two Jacobians and a reusable gradient checker on the charity's completion and enrolment models</p><a class="nb" href="../labs/W2_1_gradients.ipynb">W2_1_gradients.ipynb</a></div><ul class="checklist"><li>Derive the partial derivatives of the completion model <span class="min">15 min</span></li><li>Build the gradient and test the steepest direction <span class="min">15 min</span></li><li>Write a gradient checker for any function of n inputs <span class="min">15 min</span></li><li>Build two Jacobians and check them <span class="min">20 min</span></li><li>Predict a budget shift with the Jacobian and compare <span class="min">15 min</span></li><li>Find the planted wrong partial derivative <span class="min">15 min</span></li><li>Write three findings in the lab log <span class="min">10 min</span></li><li class="stretch">✱ Stretch: Check the symmetry of second partial derivatives numerically</li></ul></div>
+  <aside class="notes"><p>AI-tutor lab. Task 2 surprises people who expect the best direction to be "more attendance": it is, almost, but not exactly. In task 4, some build the Jacobian transposed: the shape check (rows are outputs) catches it. Task 6: let them find the wrong component themselves with the checker; then ask what its error would have done to the tuning last term. The checker of task 3 is reused in weeks 3, 4 and 7: make sure everyone keeps it.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-2" data-label="Problem set 2" data-minutes="3" data-n="17" data-session="1">
+  <div class="kicker">Before week 3</div>
+  <h2>Problem set 2: gradients, a Jacobian and a direction</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS2.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b> Paper first, then code.</li>
+      <li>Two gradients, a directional derivative, a 3 × 2 Jacobian, a steepest-descent direction, one written answer.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash"><span class="hljs-built_in">cd</span> labs
+uv run python problem_sets/check.py PS2</code></pre>
+  </div>
+  <aside class="notes"><p>Question 2's function is the logistic loss's cousin: its gradient is sigmoid times z. It prepares week 3, where that gradient is found by the chain rule on a graph.</p></aside>
+</section>
+
+<section class="slide" id="wrap-up" data-minutes="3" data-n="18" data-session="1">
+  <div class="kicker">Week 2 · wrap-up</div>
+  <h2>Three things to keep</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal"><h4>Gradient as a plane</h4><p class="small mb0">f(x + δ) ≈ f(x) + ∇f · δ: one partial per input, added up.</p></div>
+    <div class="card c-coral"><h4>Uphill, across level sets</h4><p class="small mb0">The gradient is the steepest direction and its length the steepest rate; −∇f points down.</p></div>
+    <div class="card c-purple"><h4>Jacobian as a map</h4><p class="small mb0">One row per output; checked column by column with central differences and a relative error.</p></div>
+  </div>
+</section>
+
+<section class="slide dark" id="next" data-label="Next" data-minutes="2" data-n="19" data-session="1">
+  <div class="kicker">Next</div>
+  <h2>Week 3: The chain rule on graphs</h2>
+  <p class="lead">Hand in Problem set 2. Bring paper and a pencil: Lab 3.1 is done by hand, AI-off.</p>
+  <aside class="notes"><p>Remind the room that Lab 3.1 is AI-off: no assistant, and the notebook only checks hand values. A calculator is fine.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-25T07:57:24Z","version":"2027.1.0","commit":"413d7b3"},"course":{"id":"fnd-mth-102","code":"FND-MTH-102","title":"Calculus and Optimisation for Machine Learning","track":"foundations","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/fnd-mth-102/","repo":"SDAIAAcademy/fnd-mth-102","home":"../index.html"},"deck":{"id":"week2","kind":"day","day":2,"label":"Week 2","title":"Several variables","prev":"week1.html","next":"week3.html","md":"week2.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Gradients and Jacobians","slide":"s1","outcomes":["Compute partial derivatives and assemble the gradient of a function of several variables","Explain the gradient as the direction of steepest increase and a Jacobian as the best local linear map","Check a hand-derived gradient or Jacobian with central differences and a relative-error tolerance"],"minutes":210,"lab":{"id":"2.1","title":"Gradients and a Jacobian, checked","minutes":105,"href":"../labs/W2_1_gradients.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Several variables","kind":"title","session":0,"hash":"db0d7d9b","md":"#### [week2#title] Several variables\n\n*SDAIA Academy · Calculus and Optimisation for Machine Learning*\n\nWeek 2: Partial derivatives, gradients and Jacobians, and how to check them\n\nData & AI Foundations Track · 8 weeks + capstone · 1 session · 1 lab · FND-MTH-102","notes":"Collect Problem set 1 first, or check that it was handed in. This week extends every idea of week 1 from one input to many: a partial derivative is a week 1 derivative with the other inputs frozen, and the gradient and the Jacobian are the local linear approximation in several variables. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"Several variables","kind":"content","session":0,"hash":"72010193","md":"#### [week2#agenda] Several variables\n\n*This week*\n\n- **Session 1 · Gradients and Jacobians**: Hold all inputs but one still to get a partial derivative; stack them into a gradient, or into a Jacobian for a map with several outputs","notes":"","minutes":null,"lo":[]},{"id":"review-week1","n":3,"title":"How does the central difference's error change when you halve h?","kind":"quiz","session":0,"hash":"5099aa1f","md":"#### [week2#review-week1] How does the central difference's error change when you halve h?\n\n*Review of week 1*\n\n**Question:** With h = 0.01, the central difference of a smooth function is off by 4 × 10⁻⁵. You halve the step to 0.005, still far above the rounding region. About how large is the error now?\n\n- A. 2 × 10⁻⁵\n- B. 4 × 10⁻⁵\n- C. 1 × 10⁻⁵\n- D. 8 × 10⁻⁵","notes":"Answer: C. Anyone who chose A is still thinking of the forward difference; point back to the Taylor cancellation.","minutes":6,"lo":["LO1"]},{"id":"lab-1-1-debrief","n":4,"title":"Theory predicted the best steps within a factor of five","kind":"content","session":0,"hash":"5530eca3","md":"#### [week2#lab-1-1-debrief] Theory predicted the best steps within a factor of five\n\n*Lab 1.1 · what your runs showed*\n\n| From the reference run | Value |\n| --- | --- |\n| Hand against SymPy, largest difference | 4e-16 |\n| Best central step, measured (theory) | 1e-5 (6e-6) |\n| Best forward step, measured (theory) | 7e-8 (1.5e-8) |\n| Tangent of D1 at 20 within 1% up to | 5 thousand |\n| Quadratic within 1% up to | 10 thousand |\n\n- **E′(20) = 2.0 exactly.** 60 / (10 + 20): two enrolments per extra thousand, for small changes only.\n- **At 5 thousand, just.** The tangent's error at a 5-thousand change is 0.999%: it sits on the edge.","notes":"Numbers from the solution run (MTH_QUICK makes no difference to Lab 1.1). Ask two participants whose measured steps differed from these why: the geometric mean over three functions hides the spread, which runs from 3e-8 to 3e-7 for forward differences. Collect one finding from the logs and read it aloud.","minutes":8,"lo":["LO1"]},{"id":"s1","n":5,"title":"Gradients and Jacobians","kind":"section","session":1,"hash":"3cdcff6a","md":"#### [week2#s1] Gradients and Jacobians\n\n*Session 1*\n\n- Compute partial derivatives and assemble the gradient of a function of several variables\n- Explain the gradient as the direction of steepest increase and a Jacobian as the best local linear map\n- Check a hand-derived gradient or Jacobian with central differences and a relative-error tolerance","notes":"","minutes":null,"lo":["LO1"]},{"id":"partial-derivative","n":6,"title":"A partial derivative freezes every input but one","kind":"content","session":1,"hash":"e23982c2","md":"#### [week2#partial-derivative] A partial derivative freezes every input but one\n\n*Block 1 · Partial derivatives*\n\nFor `f(u, v)`, the partial **∂f/∂u** is the week 1 derivative of `u ↦ f(u, v)` with `v` held fixed.\n\nGeometrically: slice the surface along the u-direction and take the slope of the slice.\n\n- **Example.** `f(u, v) = u² v + e^v`\n  `∂f/∂u = 2uv`, `∂f/∂v = u² + e^v`\n\n- **What goes wrong.** Forgetting that the frozen input is still in the formula. In `∂f/∂u = 2uv`, the value of v matters: the slope along u differs from slice to slice.","notes":"Work the example on the board. Then the case's version, without numbers: the completion model's two partials share the factor sigmoid times one minus sigmoid, and differ only by their weight. Leave the computation to the lab.","minutes":11,"lo":["LO1"]},{"id":"partials-in-a-model","n":7,"title":"In a logistic model every partial shares the factor σ(1 - σ)","kind":"content","session":1,"hash":"83f5c98e","md":"#### [week2#partials-in-a-model] In a logistic model every partial shares the factor σ(1 - σ)\n\n*Block 1 · In a model*\n\n```python\n# file: re-enrolment model (parallel example)\nr(u, v) = sigmoid(3*u + 2*v - 2.5)\n\ndr/du = 3 * r * (1 - r)\ndr/dv = 2 * r * (1 - r)\n\n# at (u, v) = (0.45, 0.45): r = 0.438\n# dr/du = 0.738, dr/dv = 0.492\n```\n\n- **The ratio is the weights'.** dr/du ÷ dr/dv = 3 ÷ 2 at every point.\n- **The size is the curve's.** σ(1 - σ) is largest, 0.25, where r = 0.5, and near 0 when the model is sure. Sure models learn slowly: week 7.","notes":"This is a re-enrolment model invented for the slide, scaled so both inputs run from 0 to 1, not the completion model of the lab. The numbers come from labs/_tools/make_figures.py. The flat ends of the sigmoid come back when softmax saturates in week 7.","minutes":9,"lo":["LO1"]},{"id":"check-partials","n":8,"title":"Which partial derivative follows?","kind":"quiz","session":1,"hash":"791cd48a","md":"#### [week2#check-partials] Which partial derivative follows?\n\n*Checkpoint 1*\n\n**Question:** A model p = σ(3a + 0.4h - 2) gives a learner p = 0.5, and the analyst computes ∂p/∂h = 0.1 for that learner. What is ∂p/∂a for the same learner?\n\n- A. 0.1\n- B. 3\n- C. 0.25\n- D. 0.75","notes":"Answer: D. The quick route is the ratio of weights from the previous slide.","minutes":4,"lo":["LO1"]},{"id":"gradient-vector","n":9,"title":"The gradient turns week 1's line into a plane","kind":"content","session":1,"hash":"e04456ac","md":"#### [week2#gradient-vector] The gradient turns week 1's line into a plane\n\n*Block 2 · The gradient*\n\n- **Local linear approximation, n inputs.** `f(x + δ) ≈ f(x) + ∇f(x) · δ`\n\n`∇f = (∂f/∂x₁, …, ∂f/∂xₙ)`: one number per input, stacked into a vector.\n\nThe dot product adds the effect of each input's change, as if each acted alone. Near `x` that is accurate.\n\n- **Directional derivative.** The rate of change along a unit vector `u` is `∇f · u`. For the re-enrolment model at (0.45, 0.45): along u alone 0.738; along (0.6, 0.8) it is 0.837.","notes":"Compute 0.738 × 0.6 + 0.492 × 0.8 = 0.837 on the board. The dot product is from FND-MTH-101; here it is the whole of the first-order effect. Ask: which unit direction gives the largest value? Hold the answer for the next slide.","minutes":11,"lo":["LO1"]},{"id":"steepest-ascent","n":10,"title":"The gradient points uphill, across the level sets","kind":"content","session":1,"hash":"ea31e6f8","md":"#### [week2#steepest-ascent] The gradient points uphill, across the level sets\n\n*Block 2 · Direction of steepest increase*\n\nFigure: r(u, v) = σ(3u + 2v - 2.5), a parallel example; labs/_tools/make_figures.py.\n\n`∇f · u = |∇f| cos θ`: largest when `u` points along `∇f`.\n\nThe largest rate is **|∇f|**: 0.887 at (0.45, 0.45).\n\nAlong a level set `f` does not change, so the gradient is perpendicular to it.\n\n> **Descent.** −∇f is the steepest way down: week 5.","notes":"The arrows are longest where contours are dense: the function changes fast there. The figure uses equal axes on purpose: with stretched axes the arrows stop looking perpendicular, a classic misreading of contour plots. The lab finds the best direction numerically over 360 angles and compares it with the gradient.","minutes":11,"lo":["LO1"]},{"id":"check-steepest","n":11,"title":"Which small change raises the score most?","kind":"quiz","session":1,"hash":"935f1a2b","md":"#### [week2#check-steepest] Which small change raises the score most?\n\n*Checkpoint 2*\n\n**Question:** At (0.45, 0.45) the re-enrolment model has gradient (0.738, 0.492). You may change (u, v) by a step of length 0.1. Which step raises r the most?\n\n- A. (0.1, 0)\n- B. (0.071, 0.071)\n- C. (0.083, 0.055)\n- D. (0, 0.1)","notes":"Answer: C. Gains, to first order: A 0.074, B 0.087, C 0.089, D 0.049. B is close because the gradient is not far from the diagonal; the gradient's direction is still the best.","minutes":4,"lo":["LO1"]},{"id":"jacobian-matrix","n":12,"title":"A Jacobian stacks one gradient per output","kind":"content","session":1,"hash":"055af19d","md":"#### [week2#jacobian-matrix] A Jacobian stacks one gradient per output\n\n*Block 3 · Several outputs*\n\nFor `F: ℝⁿ → ℝᵐ`, the Jacobian **J** is `m × n`: row i is `∇Fᵢ`, entry `(i, j)` is `∂Fᵢ/∂xⱼ`.\n\n- **Local linear map.** `F(x + δ) ≈ F(x) + J δ`\n\nA matrix times a vector, as in FND-MTH-101: J is the best linear map near x.\n\n- **The district map.** Five budgets in, five enrolment counts out. Each district depends only on its own budget, so every off-diagonal entry is 0: **J is diagonal**, with `kᵢ / (sᵢ + xᵢ)` on the diagonal.","notes":"Write the 2 by 2 Jacobian of (u v, u + v²) on the board: rows (v, u) and (1, 2v). Then the district map, whose diagonal shape is a modelling assumption: no spill-over between districts. The lab asks participants to say whether they believe it.","minutes":11,"lo":["LO1"]},{"id":"jacobian-predicts","n":13,"title":"The Jacobian predicts a budget shift well when the shift is small","kind":"content","session":1,"hash":"2821b3ba","md":"#### [week2#jacobian-predicts] The Jacobian predicts a budget shift well when the shift is small\n\n*Block 3 · Using a Jacobian*\n\n| Split (40, 30, 20, 15, 15); move from D2 to D5 | Jacobian predicts | Model gives |\n| --- | --- | --- |\n| 5 thousand | -4.19 | -4.72 |\n| 15 thousand | -12.57 | -17.98 |\n\nDiagonal of J at this split: 1.20, 1.24, 1.61, 0.60, 0.40 enrolments per thousand.\n\n> **What goes wrong.** Trusting a linear prediction for a large move. Both curves bend, so the error grows faster than the move.","notes":"A parallel example: a different split and different districts from the lab's, computed with the case's curves. Predicted change = 1.24 × (-5) + 0.40 × 5. Ask why the model gives a bigger loss than the prediction: D2 loses more than its slope says as its budget falls (the curve is concave, so the slope rises as you go down), and D5 gains less than its slope says as its budget rises.","minutes":9,"lo":["LO1"]},{"id":"gradient-checking","n":14,"title":"Check every coordinate with central differences and a relative error","kind":"content","session":1,"hash":"1303ce8a","md":"#### [week2#gradient-checking] Check every coordinate with central differences and a relative error\n\n*Block 3 · Checking a gradient*\n\n```python\n# file: check.py\ndef rel_err(g, g_num):\n    return norm(g - g_num) / max(norm(g), norm(g_num))\n\n# g_num[i] = (f(x + h e_i) - f(x - h e_i)) / (2h)\n# h = 1e-6, one pair of evaluations per input\n```\n\n| Relative error | Read it as |\n| --- | --- |\n| below 1e-7 | correct |\n| 1e-7 to 1e-2 | suspicious: a kink, a large step, or a small slip |\n| above 1e-2 | a wrong formula |\n\n> **Look per coordinate.** One wrong entry among correct ones points at one formula.","notes":"The bands are rules of thumb for float64 and smooth functions with values of moderate size, not laws; a function near a kink (ReLU at 0) breaks them. The lab builds this checker and finds a planted mistake in last term's notes with it; do not say which component.","minutes":9,"lo":["LO1"]},{"id":"check-gradient-reading","n":15,"title":"What does this gradient check say?","kind":"quiz","session":1,"hash":"8eb03bed","md":"#### [week2#check-gradient-reading] What does this gradient check say?\n\n*Checkpoint 3*\n\n**Question:** A three-parameter gradient is checked with central differences, h = 1e-6. The relative errors of the components are 2e-10, 0.4 and 3e-10. What is the most likely cause?\n\n- A. The formula for the second component is wrong\n- B. The step h is too small for float64\n- C. The gradient is fine; the errors are rounding\n- D. Central differences cannot check this function","notes":"Answer: A. Then introduce the lab: the same reading on a real mistake.","minutes":4,"lo":["LO1"]},{"id":"lab-2-1","n":16,"title":"Gradients and a Jacobian, checked","kind":"lab","session":1,"hash":"8101ee70","md":"#### [week2#lab-2-1] Gradients and a Jacobian, checked\n\nLab 2.1 · 105 min\n\nPartial derivatives, a gradient, two Jacobians and a reusable gradient checker on the charity's completion and enrolment models\n\n[W2_1_gradients.ipynb](https://sdaiaacademy.github.io/fnd-mth-102/labs/W2_1_gradients.ipynb)\n\n- [ ] Derive the partial derivatives of the completion model (15 min)\n- [ ] Build the gradient and test the steepest direction (15 min)\n- [ ] Write a gradient checker for any function of n inputs (15 min)\n- [ ] Build two Jacobians and check them (20 min)\n- [ ] Predict a budget shift with the Jacobian and compare (15 min)\n- [ ] Find the planted wrong partial derivative (15 min)\n- [ ] Write three findings in the lab log (10 min)\n- [ ] ✱ Stretch: Check the symmetry of second partial derivatives numerically","notes":"AI-tutor lab. Task 2 surprises people who expect the best direction to be \"more attendance\": it is, almost, but not exactly. In task 4, some build the Jacobian transposed: the shape check (rows are outputs) catches it. Task 6: let them find the wrong component themselves with the checker; then ask what its error would have done to the tuning last term. The checker of task 3 is reused in weeks 3, 4 and 7: make sure everyone keeps it.","minutes":null,"lo":[]},{"id":"problem-set-2","n":17,"title":"Problem set 2: gradients, a Jacobian and a direction","kind":"content","session":1,"hash":"8726da83","md":"#### [week2#problem-set-2] Problem set 2: gradients, a Jacobian and a direction\n\n*Before week 3*\n\n- **50 minutes**, graded, auto-checked: `labs/problem_sets/PS2.py`.\n- **AI-off for the first attempt.** Paper first, then code.\n- Two gradients, a directional derivative, a 3 × 2 Jacobian, a steepest-descent direction, one written answer.\n\n```bash\n# file: terminal\ncd labs\nuv run python problem_sets/check.py PS2\n```","notes":"Question 2's function is the logistic loss's cousin: its gradient is sigmoid times z. It prepares week 3, where that gradient is found by the chain rule on a graph.","minutes":3,"lo":[]},{"id":"wrap-up","n":18,"title":"Three things to keep","kind":"content","session":1,"hash":"f2808e69","md":"#### [week2#wrap-up] Three things to keep\n\n*Week 2 · wrap-up*\n\n- **Gradient as a plane.** f(x + δ) ≈ f(x) + ∇f · δ: one partial per input, added up.\n- **Uphill, across level sets.** The gradient is the steepest direction and its length the steepest rate; −∇f points down.\n- **Jacobian as a map.** One row per output; checked column by column with central differences and a relative error.","notes":"","minutes":3,"lo":[]},{"id":"next","n":19,"title":"Week 3: The chain rule on graphs","kind":"content","session":1,"hash":"90f3f23e","md":"#### [week2#next] Week 3: The chain rule on graphs\n\n*Next*\n\nHand in Problem set 2. Bring paper and a pencil: Lab 3.1 is done by hand, AI-off.","notes":"Remind the room that Lab 3.1 is AI-off: no assistant, and the notebook only checks hand values. A calculator is fine.","minutes":2,"lo":[]}],"activities":[{"id":"review-week1-q1","slide":"review-week1","type":"single","prompt":"With h = 0.01, the central difference of a smooth function is off by 4 × 10⁻⁵. You halve the step to 0.005, still far above the rounding region. About how large is the error now?","options":[{"key":"A","text":"2 × 10⁻⁵"},{"key":"B","text":"4 × 10⁻⁵"},{"key":"C","text":"1 × 10⁻⁵"},{"key":"D","text":"8 × 10⁻⁵"}],"correct":[2],"explanation":"Its truncation error is about h²/6 · |f‴|: half the step, a quarter of the error.","misconceptions":["Applies the forward difference's first-order rate: the central difference's error falls like h squared","Thinks a step that is already small changes nothing: truncation error still depends on h here","","Expects rounding to take over: at a step of 0.005 rounding error is many orders smaller"],"lo":["LO1"]},{"id":"check-partials-q1","slide":"check-partials","type":"single","prompt":"A model p = σ(3a + 0.4h - 2) gives a learner p = 0.5, and the analyst computes ∂p/∂h = 0.1 for that learner. What is ∂p/∂a for the same learner?","options":[{"key":"A","text":"0.1"},{"key":"B","text":"3"},{"key":"C","text":"0.25"},{"key":"D","text":"0.75"}],"correct":[3],"explanation":"∂p/∂a = 3 · σ(1 - σ) = 3 · 0.25. Also: 0.1 ÷ 0.4 × 3 gives the same.","misconceptions":["Assumes all partials of a function are equal: each carries its own weight","Forgets the sigmoid's own derivative: the weight is multiplied by σ(1 - σ) = 0.25","Keeps the sigmoid factor but drops the weight of a",""],"lo":["LO1"]},{"id":"check-steepest-q1","slide":"check-steepest","type":"single","prompt":"At (0.45, 0.45) the re-enrolment model has gradient (0.738, 0.492). You may change (u, v) by a step of length 0.1. Which step raises r the most?","options":[{"key":"A","text":"(0.1, 0)"},{"key":"B","text":"(0.071, 0.071)"},{"key":"C","text":"(0.083, 0.055)"},{"key":"D","text":"(0, 0.1)"}],"correct":[2],"explanation":"(0.083, 0.055) is 0.1 times the gradient's unit vector: gain ≈ 0.1 × 0.887 = 0.089, against 0.074 for (0.1, 0).","misconceptions":["Puts the whole step on the larger partial: mixing in v gains more than it costs","Splits the step evenly: the best split follows the gradient's proportions, not equal shares","","Puts the whole step on the smaller partial"],"lo":["LO1"]},{"id":"check-gradient-reading-q1","slide":"check-gradient-reading","type":"single","prompt":"A three-parameter gradient is checked with central differences, h = 1e-6. The relative errors of the components are 2e-10, 0.4 and 3e-10. What is the most likely cause?","options":[{"key":"A","text":"The formula for the second component is wrong"},{"key":"B","text":"The step h is too small for float64"},{"key":"C","text":"The gradient is fine; the errors are rounding"},{"key":"D","text":"Central differences cannot check this function"}],"correct":[0],"explanation":"Two components agree to 1e-10, so step and checker work; one is off by 40%, so its formula is wrong.","misconceptions":["","Blames the step: a bad step would spoil every component, not one","Accepts any small-looking numbers: 0.4 is a 40% error, far beyond rounding","Blames the checker: central differences agree to 1e-10 on the other two"],"lo":["LO1"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"week2.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

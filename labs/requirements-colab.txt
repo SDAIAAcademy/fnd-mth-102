@@ -1,0 +1,2 @@
+# Colab already ships numpy, sympy, matplotlib and torch: nothing to install there.
+# For a local run use uv (see labs/README.md).

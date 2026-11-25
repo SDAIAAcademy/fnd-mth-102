@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="foundations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 · Constraints · Calculus and Optimisation for Machine Learning</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="week8.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Calculus and Optimisation for Machine Learning" data-track="foundations" data-day="Week 8">
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Calculus and Optimisation for Machine Learning</div>
+  <h1>Constraints</h1>
+  <p class="lead mt">Week 8: Lagrange multipliers, projected gradients and the price of a constraint</p>
+  <div class="meta"><span class="track">Data &amp; AI Foundations Track</span><span>8 weeks + capstone</span><span>1 session · 1 lab</span><span>FND-MTH-102</span></div>
+  <aside class="notes"><p>Collect Problem set 7. Last teaching week. Announce Test 2 (after this week, AI-off, 40 minutes on paper and 50 at the keyboard) and the capstone brief, which participants receive at the end of today. Today's lab is the course's responsible-use moment: a correct optimisation of the wrong objective. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">This week</div>
+  <h2>Constraints</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Constraints and prices</b><small>A constraint moves the optimum; the Lagrange multiplier prices it, and projected gradients reach the same answer by stepping and projecting</small></div></div></div>
+</section>
+
+<section class="slide" id="review-week7" data-lo="LO1" data-minutes="7" data-n="3">
+  <div class="kicker">Review of week 7</div>
+  <h2>Where did this loss go wrong?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="review-week7-q1">
+    <p class="lead">A training run prints a finite loss for 300 steps, then <code>inf</code>, then <code>nan</code> for ever. The code computes <code>-log(softmax(z)[y])</code>. What is the most likely cause?</p>
+    <div class="opts">
+      <div class="opt" data-why="A rate that is too high makes the loss grow, but the inf here comes from taking the log of an exact 0" data-k="A">The learning rate is too low</div>
+      <div class="opt" data-why="A penalty bounds the weights; it does not create infinities in the loss" data-k="B">The L2 penalty is too strong</div>
+      <div class="opt" data-ok data-k="C">A label's probability rounded to 0, and its log is −inf</div>
+      <div class="opt" data-why="The order of the batches changes the path, not whether the code takes the log of an exact 0" data-k="D">The batches were not shuffled between the epochs of training</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Once one probability rounds to 0, the loss is inf and every gradient after it is nan. Compute it as logsumexp(z) − z_y.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Large logits, from separable data or a high rate, are how a probability gets to 0; the cure is the stable form, with or without a penalty.</p></aside>
+</section>
+
+<section class="slide" id="lab-7-1-debrief" data-lo="LO2" data-minutes="11" data-n="4">
+  <div class="kicker">Lab 7.1 · what your runs showed</div>
+  <h2>The penalty bounded the weights; whether it lowered held-out loss depended on the labels</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th class="num">λ</th><th class="num">‖W‖</th><th class="num">held-out loss, first results</th><th class="num">held-out loss, re-test</th></tr>
+      <tr><td class="num">0</td><td class="num">16.22</td><td class="num">0.071</td><td class="num">0.700</td></tr>
+      <tr><td class="num">0.001</td><td class="num">11.10</td><td class="num">0.113</td><td class="num">0.541</td></tr>
+      <tr class="hl"><td class="num">0.01</td><td class="num">4.90</td><td class="num">0.273</td><td class="num">0.462</td></tr>
+      <tr><td class="num">0.1</td><td class="num">1.70</td><td class="num">0.586</td><td class="num">0.653</td></tr>
+      <tr><td class="num">1</td><td class="num">0.39</td><td class="num">0.927</td><td class="num">0.943</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-coral flat"><h4>Naive: nan, nan, inf</h4><p class="small mb0">Stable cross-entropy on the planted rows: 22.00. Gradient check: 9e-10.</p></div>
+      <div class="card c-teal flat"><h4>Plain norm still growing</h4><p class="small mb0">3.70 at step 50, 16.22 at step 2,000. Smallest Hessian eigenvalue: about 0 plain, 0.01 with λ = 0.01.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>All from the solution run, 2,000 steps. The first results are thresholds on the entry score with no noise, so held-out learners scored the same way look exactly like training ones and confidence costs nothing: the plain model wins that column. On the re-test, 10 of 150 learners land one level away; the plain model is near-certain and wrong on them, and λ = 0.01 gives the lowest loss. Ask which column the charity will meet in use. The habit to keep is measuring, not assuming.</p></aside>
+</section>
+
+<!-- Session 1 -->
+
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="5">
+  <div class="kicker">Session 1</div>
+  <h1>Constraints and prices</h1>
+  <ul class="bullets outcomes"><li>Solve a small equality-constrained problem with the Lagrangian</li><li>Read a multiplier as the price of its constraint</li><li>Explain how optimising a convenient proxy can harm the people a model serves</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" id="lagrangian" data-lo="LO3" data-minutes="13" data-n="6" data-session="1">
+  <div class="kicker">Block 1 · The Lagrangian</div>
+  <h2>At a constrained optimum, the gradient points across the constraint</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>Maximise <code>f(x)</code> subject to <code>g(x) = c</code>. Moving along the constraint cannot improve f, so <code>∇f</code> is parallel to <code>∇g</code>:</p>
+      <div class="card c-navy"><h4>Lagrange conditions</h4><p class="mb0"><code>∇f = λ ∇g</code> and <code>g(x) = c</code></p><p class="small mb0">Equivalently: set the derivatives of <code>f − λ (g − c)</code> to zero.</p></div>
+    </div>
+    <table class="t small">
+      <tr><th>Maximise 2 log x + log y, x + y = 6</th><th class="num">value</th></tr>
+      <tr><td>conditions: 2 / x = λ, 1 / y = λ</td><td class="num">x = 2y</td></tr>
+      <tr><td>constraint: 3y = 6</td><td class="num">y = 2, x = 4</td></tr>
+      <tr class="hl"><td>multiplier</td><td class="num">λ = 0.5</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Read the conditions in words: the marginal value of the last unit is the same in both places; otherwise moving a unit across would help. That reading is the whole of today's lab. Check the example: 2/4 = 0.5 = 1/2.</p></aside>
+</section>
+
+<section class="slide" id="multiplier-price" data-lo="LO3" data-minutes="11" data-n="7" data-session="1">
+  <div class="kicker">Block 1 · The multiplier</div>
+  <h2>The multiplier is the price of the constraint: value per extra unit</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Reading</h4><p class="mb0">If the best value is <code>V(c)</code>, then <code>dV/dc = λ</code>.</p><p class="small mb0">One more unit of budget is worth about λ units of the objective, for small changes.</p></div>
+    <div class="card c-purple flat"><h4>In the example</h4><p class="small mb0">λ = 0.5: raising the total from 6 to 6.1 adds about 0.05 to the best value. Its units are the objective's units per unit of the constraint.</p></div>
+  </div>
+  <div class="callout tip mt"><b>Why it matters.</b> A finance officer asks "what would another thousand buy?" The multiplier answers without re-solving.</div>
+  <aside class="notes"><p>Exact check for the board: V(6.1) − V(6) = 2 log(4.0667/4) + log(2.0333/2) ≈ 0.0331 + 0.0165 = 0.0496. Close to 0.05. The multiplier is a derivative, so it is accurate for small changes only.</p></aside>
+</section>
+
+<section class="slide" id="check-lagrange" data-lo="LO3" data-minutes="6" data-n="8" data-session="1">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What does the multiplier say?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-lagrange-q1">
+    <p class="lead">A training team's best accuracy under a compute limit of 100 hours has multiplier λ = 0.002 accuracy points per hour. The limit is cut to 90 hours. What should the team expect?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads λ as the total value, not as a rate per hour" data-k="A">Accuracy falls by 0.002</div>
+      <div class="opt" data-ok data-k="B">Accuracy falls by about 0.02</div>
+      <div class="opt" data-why="Thinks a cut moves only the multiplier: the best value moves at the rate λ" data-k="C">Accuracy is unchanged and λ rises</div>
+      <div class="opt" data-why="Divides instead of multiplying: the change is λ times the change in the limit" data-k="D">Accuracy falls by 0.0002</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Change in best value ≈ λ × change in the limit = 0.002 × 10.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. "About", because λ itself changes as the limit moves.</p></aside>
+</section>
+
+<section class="slide" id="equal-margins" data-lo="LO3" data-minutes="13" data-n="9" data-session="1">
+  <div class="kicker">Block 2 · Limits that bind</div>
+  <h2>With budgets that cannot be negative, a programme can get nothing</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w8-equal-margins.svg" alt="Three falling curves of marginal value against budget for programmes A, B and C, with a horizontal dashed line at lambda 1.163; A's curve crosses it at 20.8 and B's at 9.2, while C's curve starts at 0.8, below the line, so C gets nothing" width="640">
+      <div class="caption">Three programmes, value k log(1 + x/s), budget 30; labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <p class="small">Each funded programme gets <code>x = k/λ − s</code>: where its margin meets λ.</p>
+      <p class="small">C's margin at zero is 0.8, below λ = 1.163: its first unit is worth less than the last unit anywhere else, so <code>x_C = 0</code>.</p>
+      <div class="callout tip small"><b>Find λ</b> by bisection: raise it until the budgets fit.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>A parallel example; the lab's districts have their own numbers. The condition for a programme held at zero is an inequality: its margin at zero is at most λ. These are the Karush-Kuhn-Tucker conditions, named here for awareness only.</p></aside>
+</section>
+
+<section class="slide" id="projected-gradient" data-lo="LO3" data-minutes="11" data-n="10" data-session="1">
+  <div class="kicker">Block 2 · A second way</div>
+  <h2>Projected gradient: step uphill, then return to the nearest allowed point</h2>
+  <div class="cols cols-2">
+    <ol class="bullets">
+      <li><code>v = x + η ∇f(x)</code>: an ordinary gradient step.</li>
+      <li><code>x = project(v)</code>: the nearest point with <code>x ≥ 0</code> and sum = budget, which is <code>max(v − θ, 0)</code> for one θ.</li>
+      <li>Repeat until x stops moving.</li>
+    </ol>
+    <div class="card c-coral flat"><h4>Week 5 applies</h4><p class="small mb0">Too small a step crawls; too large a step overshoots and never settles. Both solutions should agree; if they do not, one of them is wrong.</p></div>
+  </div>
+  <aside class="notes"><p>Why two methods: the Lagrange route gives λ and insight, the projected route generalises to constraints with no closed form. Agreement between them is the check. Finding θ is a small sorting exercise in the lab.</p></aside>
+</section>
+
+<section class="slide" id="check-corner" data-lo="LO3" data-minutes="6" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>Who gets funded?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-corner-q1">
+    <p class="lead">At the optimum of an allocation, λ = 1.5. A fourth programme has margin k / s = 1.2 at zero budget. What should it receive?</p>
+    <div class="opts">
+      <div class="opt" data-why="Thinks every programme must share the budget: the conditions allow zero" data-k="A">An equal share of the budget</div>
+      <div class="opt" data-why="Reverses the comparison: a margin below λ means the money is worth more elsewhere" data-k="B">Enough budget to raise its margin up to λ = 1.5 first</div>
+      <div class="opt" data-why="Treats λ as a budget figure: λ is a rate, not an amount to give" data-k="C">1.5 units of budget</div>
+      <div class="opt" data-ok data-k="D">Nothing: its first unit is worth less than λ</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A programme is funded only where its margin can equal λ; margins fall with budget, so 1.2 never rises to 1.5.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Ask what would have to change for it to be funded: a larger k (more value per unit) or a smaller budget elsewhere that lowers λ.</p></aside>
+</section>
+
+<section class="slide" id="proxy-harm" data-lo="LO3" data-minutes="13" data-n="12" data-session="1">
+  <div class="kicker">Block 3 · Responsible use</div>
+  <h2>Optimising a convenient proxy can harm the people a model serves</h2>
+  <div class="cols cols-3">
+    <div class="card c-coral flat"><h4>The proxy</h4><p class="small mb0">One number that is easy to count and maximise. The optimiser does exactly what it is told, including leaving out whoever the number does not see.</p></div>
+    <div class="card c-navy flat"><h4>The fix is a decision</h4><p class="small mb0">A floor, or weights by need, changes the answer. Which one, and how much, is policy: the mathematics prices it, it does not choose it.</p></div>
+    <div class="card c-teal flat"><h4>Separate the roles</h4><p class="small mb0">The analyst proposes options with their prices; the finance officer approves the budget; the programme lead decides the weights.</p></div>
+  </div>
+  <aside class="notes"><p>This is the course's responsible-use point for the allocation lab. Keep it concrete: in the lab, participants will see which districts the proxy leaves out and what a floor costs, in enrolments per thousand. Segregation of duties is not bureaucracy: the person who builds the model should not also be the one who decides whose outcomes count.</p></aside>
+</section>
+
+<section class="slide" id="check-roles" data-lo="LO3" data-minutes="6" data-n="13" data-session="1">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>Who decides?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-roles-q1">
+    <p class="lead">An analyst finds that adding a floor for two programmes costs 0.6 units of the objective per unit of budget. Which next step keeps the duties separate?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">Present both options with their prices to the person who sets the weights</div>
+      <div class="opt" data-why="The analyst would be making the policy choice that belongs to someone else" data-k="B">Adopt the floor, since it is fairer</div>
+      <div class="opt" data-why="The analyst would be dropping an option instead of pricing it" data-k="C">Drop the floor, since it lowers the objective</div>
+      <div class="opt" data-why="Approving a budget is the finance officer's duty, not the analyst's" data-k="D">Approve the cheaper option now and tell the finance officer afterwards</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The analyst's job is to show the trade-off and its price; choosing the weights belongs to the programme lead.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Then start the lab.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-8-1" data-auto="lab" data-lab="8.1" data-label="Lab 8.1" data-n="14" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 8.1 · 105 min</div><h2>A budget allocation two ways</h2><p class="lead small">A budget allocation solved with Lagrange multipliers and with projected gradients</p><a class="nb" href="../labs/W8_1_budget_allocation.ipynb">W8_1_budget_allocation.ipynb</a></div><ul class="checklist"><li>Write the Lagrangian for two districts and solve it by hand <span class="min">15 min</span></li><li>Solve the five-district problem from the Lagrange conditions <span class="min">20 min</span></li><li>Solve it again with projected gradient ascent <span class="min">20 min</span></li><li>Compare the answers and read the multiplier <span class="min">15 min</span></li><li>Find who the proxy leaves out and add a floor <span class="min">20 min</span></li><li>Write the recommendation for the finance officer <span class="min">15 min</span></li><li class="stretch">✱ Stretch: Weight each district by need and see how the multiplier moves</li></ul></div>
+  <aside class="notes"><p>AI-tutor. Task 1 is on paper first; the code only checks it. In task 5, let participants find on their own who the proxy leaves out before you say anything. The recommendation in task 6 is the LO3 evidence form: numbers, each multiplier read as a price, and the three roles kept separate. Common mistakes: bisection with the comparison reversed (the sum of budgets falls as λ rises), and a projection that sums to the budget but leaves negative entries.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-8" data-label="Problem set 8" data-minutes="3" data-n="15" data-session="1">
+  <div class="kicker">Before Test 2</div>
+  <h2>Problem set 8: three constrained problems and their prices</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS8.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b></li>
+      <li>Read every multiplier as a price, in words, as in the lab.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash"><span class="hljs-built_in">cd</span> labs
+uv run python problem_sets/check.py PS8</code></pre>
+  </div>
+  <aside class="notes"><p>Worked answers are in the trainer pack. Test 2 is AI-off: 40 minutes on paper, 50 at the keyboard.</p></aside>
+</section>
+
+<section class="slide" id="wrap-up" data-minutes="3" data-n="16" data-session="1">
+  <div class="kicker">Week 8 · wrap-up</div>
+  <h2>Three things to keep</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal"><h4>Equal margins</h4><p class="small mb0">At the optimum every funded option has the same marginal value, λ.</p></div>
+    <div class="card c-purple"><h4>λ is a price</h4><p class="small mb0">The best value moves by about λ per unit of the constraint.</p></div>
+    <div class="card c-coral"><h4>Price, then decide</h4><p class="small mb0">The analyst prices the options; the people accountable choose.</p></div>
+  </div>
+</section>
+
+<section class="slide dark" id="next" data-label="Next" data-minutes="2" data-n="17" data-session="1">
+  <div class="kicker">Next</div>
+  <h2>Test 2, then the capstone</h2>
+  <p class="lead">Hand in Problem set 8. The capstone brief is in <code>labs/capstone/BRIEF.md</code>: a two-layer network trained with your own engine, every run reported.</p>
+  <aside class="notes"><p>Walk through the brief's rubric briefly; the planning clinic on capstone day goes into it.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-25T07:57:24Z","version":"2027.1.0","commit":"413d7b3"},"course":{"id":"fnd-mth-102","code":"FND-MTH-102","title":"Calculus and Optimisation for Machine Learning","track":"foundations","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/fnd-mth-102/","repo":"SDAIAAcademy/fnd-mth-102","home":"../index.html"},"deck":{"id":"week8","kind":"day","day":8,"label":"Week 8","title":"Constraints","prev":"week7.html","next":"capstone.html","md":"week8.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Constraints and prices","slide":"s1","outcomes":["Solve a small equality-constrained problem with the Lagrangian","Read a multiplier as the price of its constraint","Explain how optimising a convenient proxy can harm the people a model serves"],"minutes":210,"lab":{"id":"8.1","title":"A budget allocation two ways","minutes":105,"href":"../labs/W8_1_budget_allocation.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Constraints","kind":"title","session":0,"hash":"fe55e057","md":"#### [week8#title] Constraints\n\n*SDAIA Academy · Calculus and Optimisation for Machine Learning*\n\nWeek 8: Lagrange multipliers, projected gradients and the price of a constraint\n\nData & AI Foundations Track · 8 weeks + capstone · 1 session · 1 lab · FND-MTH-102","notes":"Collect Problem set 7. Last teaching week. Announce Test 2 (after this week, AI-off, 40 minutes on paper and 50 at the keyboard) and the capstone brief, which participants receive at the end of today. Today's lab is the course's responsible-use moment: a correct optimisation of the wrong objective. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"Constraints","kind":"content","session":0,"hash":"9c379e32","md":"#### [week8#agenda] Constraints\n\n*This week*\n\n- **Session 1 · Constraints and prices**: A constraint moves the optimum; the Lagrange multiplier prices it, and projected gradients reach the same answer by stepping and projecting","notes":"","minutes":null,"lo":[]},{"id":"review-week7","n":3,"title":"Where did this loss go wrong?","kind":"quiz","session":0,"hash":"815b527d","md":"#### [week8#review-week7] Where did this loss go wrong?\n\n*Review of week 7*\n\n**Question:** A training run prints a finite loss for 300 steps, then `inf`, then `nan` for ever. The code computes `-log(softmax(z)[y])`. What is the most likely cause?\n\n- A. The learning rate is too low\n- B. The L2 penalty is too strong\n- C. A label's probability rounded to 0, and its log is −inf\n- D. The batches were not shuffled between the epochs of training","notes":"Answer: C. Large logits, from separable data or a high rate, are how a probability gets to 0; the cure is the stable form, with or without a penalty.","minutes":7,"lo":["LO1"]},{"id":"lab-7-1-debrief","n":4,"title":"The penalty bounded the weights; whether it lowered held-out loss depended on the labels","kind":"content","session":0,"hash":"5684aa60","md":"#### [week8#lab-7-1-debrief] The penalty bounded the weights; whether it lowered held-out loss depended on the labels\n\n*Lab 7.1 · what your runs showed*\n\n| λ | ‖W‖ | held-out loss, first results | held-out loss, re-test |\n| --- | --- | --- | --- |\n| 0 | 16.22 | 0.071 | 0.700 |\n| 0.001 | 11.10 | 0.113 | 0.541 |\n| 0.01 | 4.90 | 0.273 | 0.462 |\n| 0.1 | 1.70 | 0.586 | 0.653 |\n| 1 | 0.39 | 0.927 | 0.943 |\n\n- **Naive: nan, nan, inf.** Stable cross-entropy on the planted rows: 22.00. Gradient check: 9e-10.\n- **Plain norm still growing.** 3.70 at step 50, 16.22 at step 2,000. Smallest Hessian eigenvalue: about 0 plain, 0.01 with λ = 0.01.","notes":"All from the solution run, 2,000 steps. The first results are thresholds on the entry score with no noise, so held-out learners scored the same way look exactly like training ones and confidence costs nothing: the plain model wins that column. On the re-test, 10 of 150 learners land one level away; the plain model is near-certain and wrong on them, and λ = 0.01 gives the lowest loss. Ask which column the charity will meet in use. The habit to keep is measuring, not assuming.","minutes":11,"lo":["LO2"]},{"id":"s1","n":5,"title":"Constraints and prices","kind":"section","session":1,"hash":"fac53ce2","md":"#### [week8#s1] Constraints and prices\n\n*Session 1*\n\n- Solve a small equality-constrained problem with the Lagrangian\n- Read a multiplier as the price of its constraint\n- Explain how optimising a convenient proxy can harm the people a model serves","notes":"","minutes":null,"lo":["LO3"]},{"id":"lagrangian","n":6,"title":"At a constrained optimum, the gradient points across the constraint","kind":"content","session":1,"hash":"9209fb4a","md":"#### [week8#lagrangian] At a constrained optimum, the gradient points across the constraint\n\n*Block 1 · The Lagrangian*\n\nMaximise `f(x)` subject to `g(x) = c`. Moving along the constraint cannot improve f, so `∇f` is parallel to `∇g`:\n\n- **Lagrange conditions.** `∇f = λ ∇g` and `g(x) = c` Equivalently: set the derivatives of `f − λ (g − c)` to zero.\n\n| Maximise 2 log x + log y, x + y = 6 | value |\n| --- | --- |\n| conditions: 2 / x = λ, 1 / y = λ | x = 2y |\n| constraint: 3y = 6 | y = 2, x = 4 |\n| multiplier | λ = 0.5 |","notes":"Read the conditions in words: the marginal value of the last unit is the same in both places; otherwise moving a unit across would help. That reading is the whole of today's lab. Check the example: 2/4 = 0.5 = 1/2.","minutes":13,"lo":["LO3"]},{"id":"multiplier-price","n":7,"title":"The multiplier is the price of the constraint: value per extra unit","kind":"content","session":1,"hash":"d8035db7","md":"#### [week8#multiplier-price] The multiplier is the price of the constraint: value per extra unit\n\n*Block 1 · The multiplier*\n\n- **Reading.** If the best value is `V(c)`, then `dV/dc = λ`. One more unit of budget is worth about λ units of the objective, for small changes.\n- **In the example.** λ = 0.5: raising the total from 6 to 6.1 adds about 0.05 to the best value. Its units are the objective's units per unit of the constraint.\n\n> **Why it matters.** A finance officer asks \"what would another thousand buy?\" The multiplier answers without re-solving.","notes":"Exact check for the board: V(6.1) − V(6) = 2 log(4.0667/4) + log(2.0333/2) ≈ 0.0331 + 0.0165 = 0.0496. Close to 0.05. The multiplier is a derivative, so it is accurate for small changes only.","minutes":11,"lo":["LO3"]},{"id":"check-lagrange","n":8,"title":"What does the multiplier say?","kind":"quiz","session":1,"hash":"76b962eb","md":"#### [week8#check-lagrange] What does the multiplier say?\n\n*Checkpoint 1*\n\n**Question:** A training team's best accuracy under a compute limit of 100 hours has multiplier λ = 0.002 accuracy points per hour. The limit is cut to 90 hours. What should the team expect?\n\n- A. Accuracy falls by 0.002\n- B. Accuracy falls by about 0.02\n- C. Accuracy is unchanged and λ rises\n- D. Accuracy falls by 0.0002","notes":"Answer: B. \"About\", because λ itself changes as the limit moves.","minutes":6,"lo":["LO3"]},{"id":"equal-margins","n":9,"title":"With budgets that cannot be negative, a programme can get nothing","kind":"content","session":1,"hash":"e61b752c","md":"#### [week8#equal-margins] With budgets that cannot be negative, a programme can get nothing\n\n*Block 2 · Limits that bind*\n\nFigure: Three programmes, value k log(1 + x/s), budget 30; labs/_tools/make_figures.py.\n\nEach funded programme gets `x = k/λ − s`: where its margin meets λ.\n\nC's margin at zero is 0.8, below λ = 1.163: its first unit is worth less than the last unit anywhere else, so `x_C = 0`.\n\n> **Find λ** by bisection: raise it until the budgets fit.","notes":"A parallel example; the lab's districts have their own numbers. The condition for a programme held at zero is an inequality: its margin at zero is at most λ. These are the Karush-Kuhn-Tucker conditions, named here for awareness only.","minutes":13,"lo":["LO3"]},{"id":"projected-gradient","n":10,"title":"Projected gradient: step uphill, then return to the nearest allowed point","kind":"content","session":1,"hash":"3e2aa9cb","md":"#### [week8#projected-gradient] Projected gradient: step uphill, then return to the nearest allowed point\n\n*Block 2 · A second way*\n\n1. `v = x + η ∇f(x)`: an ordinary gradient step.\n2. `x = project(v)`: the nearest point with `x ≥ 0` and sum = budget, which is `max(v − θ, 0)` for one θ.\n3. Repeat until x stops moving.\n\n- **Week 5 applies.** Too small a step crawls; too large a step overshoots and never settles. Both solutions should agree; if they do not, one of them is wrong.","notes":"Why two methods: the Lagrange route gives λ and insight, the projected route generalises to constraints with no closed form. Agreement between them is the check. Finding θ is a small sorting exercise in the lab.","minutes":11,"lo":["LO3"]},{"id":"check-corner","n":11,"title":"Who gets funded?","kind":"quiz","session":1,"hash":"7c0a55b1","md":"#### [week8#check-corner] Who gets funded?\n\n*Checkpoint 2*\n\n**Question:** At the optimum of an allocation, λ = 1.5. A fourth programme has margin k / s = 1.2 at zero budget. What should it receive?\n\n- A. An equal share of the budget\n- B. Enough budget to raise its margin up to λ = 1.5 first\n- C. 1.5 units of budget\n- D. Nothing: its first unit is worth less than λ","notes":"Answer: D. Ask what would have to change for it to be funded: a larger k (more value per unit) or a smaller budget elsewhere that lowers λ.","minutes":6,"lo":["LO3"]},{"id":"proxy-harm","n":12,"title":"Optimising a convenient proxy can harm the people a model serves","kind":"content","session":1,"hash":"08f8998c","md":"#### [week8#proxy-harm] Optimising a convenient proxy can harm the people a model serves\n\n*Block 3 · Responsible use*\n\n- **The proxy.** One number that is easy to count and maximise. The optimiser does exactly what it is told, including leaving out whoever the number does not see.\n- **The fix is a decision.** A floor, or weights by need, changes the answer. Which one, and how much, is policy: the mathematics prices it, it does not choose it.\n- **Separate the roles.** The analyst proposes options with their prices; the finance officer approves the budget; the programme lead decides the weights.","notes":"This is the course's responsible-use point for the allocation lab. Keep it concrete: in the lab, participants will see which districts the proxy leaves out and what a floor costs, in enrolments per thousand. Segregation of duties is not bureaucracy: the person who builds the model should not also be the one who decides whose outcomes count.","minutes":13,"lo":["LO3"]},{"id":"check-roles","n":13,"title":"Who decides?","kind":"quiz","session":1,"hash":"506374f3","md":"#### [week8#check-roles] Who decides?\n\n*Checkpoint 3*\n\n**Question:** An analyst finds that adding a floor for two programmes costs 0.6 units of the objective per unit of budget. Which next step keeps the duties separate?\n\n- A. Present both options with their prices to the person who sets the weights\n- B. Adopt the floor, since it is fairer\n- C. Drop the floor, since it lowers the objective\n- D. Approve the cheaper option now and tell the finance officer afterwards","notes":"Answer: A. Then start the lab.","minutes":6,"lo":["LO3"]},{"id":"lab-8-1","n":14,"title":"A budget allocation two ways","kind":"lab","session":1,"hash":"bd36ebad","md":"#### [week8#lab-8-1] A budget allocation two ways\n\nLab 8.1 · 105 min\n\nA budget allocation solved with Lagrange multipliers and with projected gradients\n\n[W8_1_budget_allocation.ipynb](https://sdaiaacademy.github.io/fnd-mth-102/labs/W8_1_budget_allocation.ipynb)\n\n- [ ] Write the Lagrangian for two districts and solve it by hand (15 min)\n- [ ] Solve the five-district problem from the Lagrange conditions (20 min)\n- [ ] Solve it again with projected gradient ascent (20 min)\n- [ ] Compare the answers and read the multiplier (15 min)\n- [ ] Find who the proxy leaves out and add a floor (20 min)\n- [ ] Write the recommendation for the finance officer (15 min)\n- [ ] ✱ Stretch: Weight each district by need and see how the multiplier moves","notes":"AI-tutor. Task 1 is on paper first; the code only checks it. In task 5, let participants find on their own who the proxy leaves out before you say anything. The recommendation in task 6 is the LO3 evidence form: numbers, each multiplier read as a price, and the three roles kept separate. Common mistakes: bisection with the comparison reversed (the sum of budgets falls as λ rises), and a projection that sums to the budget but leaves negative entries.","minutes":null,"lo":[]},{"id":"problem-set-8","n":15,"title":"Problem set 8: three constrained problems and their prices","kind":"content","session":1,"hash":"75d977ba","md":"#### [week8#problem-set-8] Problem set 8: three constrained problems and their prices\n\n*Before Test 2*\n\n- **50 minutes**, graded, auto-checked: `labs/problem_sets/PS8.py`.\n- **AI-off for the first attempt.**\n- Read every multiplier as a price, in words, as in the lab.\n\n```bash\n# file: terminal\ncd labs\nuv run python problem_sets/check.py PS8\n```","notes":"Worked answers are in the trainer pack. Test 2 is AI-off: 40 minutes on paper, 50 at the keyboard.","minutes":3,"lo":[]},{"id":"wrap-up","n":16,"title":"Three things to keep","kind":"content","session":1,"hash":"1f94bae0","md":"#### [week8#wrap-up] Three things to keep\n\n*Week 8 · wrap-up*\n\n- **Equal margins.** At the optimum every funded option has the same marginal value, λ.\n- **λ is a price.** The best value moves by about λ per unit of the constraint.\n- **Price, then decide.** The analyst prices the options; the people accountable choose.","notes":"","minutes":3,"lo":[]},{"id":"next","n":17,"title":"Test 2, then the capstone","kind":"content","session":1,"hash":"a3881279","md":"#### [week8#next] Test 2, then the capstone\n\n*Next*\n\nHand in Problem set 8. The capstone brief is in `labs/capstone/BRIEF.md`: a two-layer network trained with your own engine, every run reported.","notes":"Walk through the brief's rubric briefly; the planning clinic on capstone day goes into it.","minutes":2,"lo":[]}],"activities":[{"id":"review-week7-q1","slide":"review-week7","type":"single","prompt":"A training run prints a finite loss for 300 steps, then inf, then nan for ever. The code computes -log(softmax(z)[y]). What is the most likely cause?","options":[{"key":"A","text":"The learning rate is too low"},{"key":"B","text":"The L2 penalty is too strong"},{"key":"C","text":"A label's probability rounded to 0, and its log is −inf"},{"key":"D","text":"The batches were not shuffled between the epochs of training"}],"correct":[2],"explanation":"Once one probability rounds to 0, the loss is inf and every gradient after it is nan. Compute it as logsumexp(z) − z_y.","misconceptions":["A rate that is too high makes the loss grow, but the inf here comes from taking the log of an exact 0","A penalty bounds the weights; it does not create infinities in the loss","","The order of the batches changes the path, not whether the code takes the log of an exact 0"],"lo":["LO1"]},{"id":"check-lagrange-q1","slide":"check-lagrange","type":"single","prompt":"A training team's best accuracy under a compute limit of 100 hours has multiplier λ = 0.002 accuracy points per hour. The limit is cut to 90 hours. What should the team expect?","options":[{"key":"A","text":"Accuracy falls by 0.002"},{"key":"B","text":"Accuracy falls by about 0.02"},{"key":"C","text":"Accuracy is unchanged and λ rises"},{"key":"D","text":"Accuracy falls by 0.0002"}],"correct":[1],"explanation":"Change in best value ≈ λ × change in the limit = 0.002 × 10.","misconceptions":["Reads λ as the total value, not as a rate per hour","","Thinks a cut moves only the multiplier: the best value moves at the rate λ","Divides instead of multiplying: the change is λ times the change in the limit"],"lo":["LO3"]},{"id":"check-corner-q1","slide":"check-corner","type":"single","prompt":"At the optimum of an allocation, λ = 1.5. A fourth programme has margin k / s = 1.2 at zero budget. What should it receive?","options":[{"key":"A","text":"An equal share of the budget"},{"key":"B","text":"Enough budget to raise its margin up to λ = 1.5 first"},{"key":"C","text":"1.5 units of budget"},{"key":"D","text":"Nothing: its first unit is worth less than λ"}],"correct":[3],"explanation":"A programme is funded only where its margin can equal λ; margins fall with budget, so 1.2 never rises to 1.5.","misconceptions":["Thinks every programme must share the budget: the conditions allow zero","Reverses the comparison: a margin below λ means the money is worth more elsewhere","Treats λ as a budget figure: λ is a rate, not an amount to give",""],"lo":["LO3"]},{"id":"check-roles-q1","slide":"check-roles","type":"single","prompt":"An analyst finds that adding a floor for two programmes costs 0.6 units of the objective per unit of budget. Which next step keeps the duties separate?","options":[{"key":"A","text":"Present both options with their prices to the person who sets the weights"},{"key":"B","text":"Adopt the floor, since it is fairer"},{"key":"C","text":"Drop the floor, since it lowers the objective"},{"key":"D","text":"Approve the cheaper option now and tell the finance officer afterwards"}],"correct":[0],"explanation":"The analyst's job is to show the trade-off and its price; choosing the weights belongs to the programme lead.","misconceptions":["","The analyst would be making the policy choice that belongs to someone else","The analyst would be dropping an option instead of pricing it","Approving a budget is the finance officer's duty, not the analyst's"],"lo":["LO3"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"week8.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

@@ -1,0 +1,1632 @@
+{
+  "format": "academy-bank",
+  "version": 1,
+  "course": {
+    "id": "fnd-mth-102",
+    "code": "FND-MTH-102",
+    "title": "Calculus and Optimisation for Machine Learning",
+    "lang": "en",
+    "version": "2027.1.0"
+  },
+  "questions": [
+    {
+      "id": "check-local-estimate-q1",
+      "type": "single",
+      "prompt": "District D2's curve has E(15) = 50 enrolments and E′(15) = 1.8 per thousand. The finance officer asks what 2 more thousand of outreach would bring. Which answer is best?",
+      "options": [
+        "About 1.8 more enrolments",
+        "About 3.6 more, slightly fewer since the curve flattens",
+        "Exactly 3.6 more enrolments",
+        "About 90 more enrolments"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Change ≈ E′(15) × 2 = 3.6. The curve bends down as budget grows, so the true gain is a little smaller.",
+      "misconceptions": [
+        "Uses the derivative as the change for any step: it is a rate per thousand, so a 2-thousand step needs it twice",
+        "",
+        "Treats the linear estimate as exact: the tangent only matches the curve at the point itself",
+        "Multiplies the level by the rate: the derivative scales the change in budget, not the current enrolments"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 1,
+      "slide": "check-local-estimate",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-concave-tangent-q1",
+      "type": "single",
+      "prompt": "A completion-rate curve r(h) of weekly hours h has r″(h) < 0 for every h. The analyst uses the tangent line at h = 3 to predict r at h = 6. What can you say before computing anything?",
+      "options": [
+        "The prediction is too low",
+        "The prediction is exact",
+        "It depends on which side of 3 we predict",
+        "The prediction is too high"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A concave curve lies below every tangent line, so any linear prediction away from the point overestimates.",
+      "misconceptions": [
+        "Reverses the sign rule: a negative second derivative bends the curve below the tangent, not above",
+        "Assumes knowing the slope makes the line exact: it matches the curve only at h = 3",
+        "Thinks the side depends on direction: a concave curve lies below its tangent on both sides",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 1,
+      "slide": "check-concave-tangent",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-step-size-q1",
+      "type": "single",
+      "prompt": "A colleague checks a hand-coded derivative with a forward difference. With h = 1e-14 the mismatch is 1e-2; with h = 1e-3 it is 1e-4. She concludes the derivative is wrong. Which step should she try first?",
+      "options": [
+        "A forward step near 1e-8",
+        "A forward step of 1e-16",
+        "A forward step of 1e-1",
+        "A central step of 1e-14"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Both of her steps sit on the walls of the V. The best forward step is near √ε, about 1e-8 for a function of moderate size.",
+      "misconceptions": [
+        "",
+        "Believes a smaller step is always more accurate: below about 1e-8 rounding error grows as the step shrinks",
+        "Thinks a larger step averages away the noise: truncation error grows with the step",
+        "Thinks the central formula cures rounding: at 1e-14 both formulas divide noise by a tiny step"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 1,
+      "slide": "check-step-size",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week1-q1",
+      "type": "single",
+      "prompt": "With h = 0.01, the central difference of a smooth function is off by 4 × 10⁻⁵. You halve the step to 0.005, still far above the rounding region. About how large is the error now?",
+      "options": [
+        "2 × 10⁻⁵",
+        "4 × 10⁻⁵",
+        "1 × 10⁻⁵",
+        "8 × 10⁻⁵"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Its truncation error is about h²/6 · |f‴|: half the step, a quarter of the error.",
+      "misconceptions": [
+        "Applies the forward difference's first-order rate: the central difference's error falls like h squared",
+        "Thinks a step that is already small changes nothing: truncation error still depends on h here",
+        "",
+        "Expects rounding to take over: at a step of 0.005 rounding error is many orders smaller"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "slide": "review-week1",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-partials-q1",
+      "type": "single",
+      "prompt": "A model p = σ(3a + 0.4h - 2) gives a learner p = 0.5, and the analyst computes ∂p/∂h = 0.1 for that learner. What is ∂p/∂a for the same learner?",
+      "options": [
+        "0.1",
+        "3",
+        "0.25",
+        "0.75"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "∂p/∂a = 3 · σ(1 - σ) = 3 · 0.25. Also: 0.1 ÷ 0.4 × 3 gives the same.",
+      "misconceptions": [
+        "Assumes all partials of a function are equal: each carries its own weight",
+        "Forgets the sigmoid's own derivative: the weight is multiplied by σ(1 - σ) = 0.25",
+        "Keeps the sigmoid factor but drops the weight of a",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "session": 1,
+      "slide": "check-partials",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-steepest-q1",
+      "type": "single",
+      "prompt": "At (0.45, 0.45) the re-enrolment model has gradient (0.738, 0.492). You may change (u, v) by a step of length 0.1. Which step raises r the most?",
+      "options": [
+        "(0.1, 0)",
+        "(0.071, 0.071)",
+        "(0.083, 0.055)",
+        "(0, 0.1)"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "(0.083, 0.055) is 0.1 times the gradient's unit vector: gain ≈ 0.1 × 0.887 = 0.089, against 0.074 for (0.1, 0).",
+      "misconceptions": [
+        "Puts the whole step on the larger partial: mixing in v gains more than it costs",
+        "Splits the step evenly: the best split follows the gradient's proportions, not equal shares",
+        "",
+        "Puts the whole step on the smaller partial"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "session": 1,
+      "slide": "check-steepest",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-gradient-reading-q1",
+      "type": "single",
+      "prompt": "A three-parameter gradient is checked with central differences, h = 1e-6. The relative errors of the components are 2e-10, 0.4 and 3e-10. What is the most likely cause?",
+      "options": [
+        "The formula for the second component is wrong",
+        "The step h is too small for float64",
+        "The gradient is fine; the errors are rounding",
+        "Central differences cannot check this function"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Two components agree to 1e-10, so step and checker work; one is off by 40%, so its formula is wrong.",
+      "misconceptions": [
+        "",
+        "Blames the step: a bad step would spoil every component, not one",
+        "Accepts any small-looking numbers: 0.4 is a 40% error, far beyond rounding",
+        "Blames the checker: central differences agree to 1e-10 on the other two"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "session": 1,
+      "slide": "check-gradient-reading",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week2-q1",
+      "type": "single",
+      "prompt": "A map takes a learner's four features and returns two scores: the chance to complete and the expected hours attended. What is the shape of its Jacobian?",
+      "options": [
+        "4 × 2",
+        "2 × 4",
+        "4 × 4",
+        "2 × 2"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "One row per output (2), one column per input (4): row i is the gradient of output i.",
+      "misconceptions": [
+        "Transposes the convention: rows are outputs, columns are inputs",
+        "",
+        "Assumes a Jacobian is square: it is only when inputs and outputs are as many",
+        "Counts outputs twice: each output needs one partial per input, four of them"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 3,
+      "slide": "review-week2",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-reused-node-q1",
+      "type": "single",
+      "prompt": "In g = u · v with u = 2w and v = w + 1, at w = 3 the values are u = 6, v = 4. What is dg/dw?",
+      "options": [
+        "8",
+        "6",
+        "14",
+        "48"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Through u: v · 2 = 8. Through v: u · 1 = 6. Paths add: 14. Check: g = 2w² + 2w, g′(3) = 12 + 2 = 14.",
+      "misconceptions": [
+        "Keeps only the path through u: w also reaches g through v",
+        "Keeps only the path through v: w also reaches g through u",
+        "",
+        "Multiplies the two paths instead of adding them"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "slide": "check-reused-node",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-which-mode-q1",
+      "type": "single",
+      "prompt": "The analyst needs how all 600 learners' predicted completion chances change with the single attendance threshold the charity sets. One input, 600 outputs. Which costs fewer passes?",
+      "options": [
+        "Reverse mode, one backward pass per learner",
+        "Forward mode, one pass along the threshold",
+        "Either: they always cost the same",
+        "Central differences instead of either mode"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Forward mode costs one pass per input, reverse mode one per output. One input, 600 outputs: forward.",
+      "misconceptions": [
+        "Applies 'reverse mode for machine learning' everywhere: with 600 outputs it needs 600 backward passes",
+        "",
+        "Thinks the modes always cost the same: their costs scale with inputs and outputs differently",
+        "Uses finite differences as the method: they are a check, and still need two evaluations per input"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "slide": "check-which-mode",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-z-adjoint-q1",
+      "type": "single",
+      "prompt": "A learner did not complete (y = 0) and the model gave p = 0.8. For this learner's loss, what is the adjoint of z?",
+      "options": [
+        "−0.2",
+        "0.16",
+        "5.0",
+        "0.8"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The adjoint of z is p − y = 0.8 − 0: positive, so a descent step lowers this learner's score.",
+      "misconceptions": [
+        "Uses p − 1, the formula for a learner who completed",
+        "Stops at the sigmoid's local derivative p(1 − p) and forgets the loss's",
+        "Stops at the loss's local derivative 1/(1 − p) and forgets the sigmoid's",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "slide": "check-z-adjoint",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week3-q1",
+      "type": "single",
+      "prompt": "In h = (a · b) + a, at a = 4 and b = −1, what is ∂h/∂a?",
+      "options": [
+        "1",
+        "0",
+        "−1",
+        "5"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Through the product: b = −1. Directly: 1. The paths add to 0.",
+      "misconceptions": [
+        "Keeps only the direct path through the sum",
+        "",
+        "Keeps only the path through the product",
+        "Uses the value of a instead of its local derivative on the product path"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "slide": "review-week3",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-gradient-shape-q1",
+      "type": "single",
+      "prompt": "A layer computes y = A x with A of shape 3 × 5, then a scalar loss L follows. What shape is ∂L/∂A?",
+      "options": [
+        "5",
+        "5 × 3",
+        "3 × 15",
+        "3 × 5"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "L is a scalar, so ∂L/∂A has one entry per entry of A: the outer product g xᵀ is 3 × 5.",
+      "misconceptions": [
+        "Confuses the gradient with the input: x has 5 entries, A has 15",
+        "Transposes the convention: a gradient has the shape of the thing it is taken with respect to",
+        "Builds a full Jacobian of y with respect to A: reverse mode never forms it",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 1,
+      "slide": "check-gradient-shape",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-backward-order-q1",
+      "type": "single",
+      "prompt": "An engine calls every node's _backward in the order the nodes were created (inputs first), after setting the output's grad to 1. What do the inputs end with?",
+      "options": [
+        "The correct gradients",
+        "Zero, or only part of their gradient",
+        "The correct gradients with flipped signs",
+        "An error about the graph's order"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Inputs run their _backward before their users have sent anything, so they pass on zeros; only the output's direct parents receive anything.",
+      "misconceptions": [
+        "Assumes the order of calls does not matter: a node passes on only what it has received so far",
+        "",
+        "Thinks the order flips signs: it changes which contributions arrive, not their signs",
+        "Thinks the engine detects the order: nothing checks it, the numbers are simply wrong"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "slide": "check-backward-order",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-relu-kink-q1",
+      "type": "single",
+      "prompt": "Every test passes except a finite-difference check of relu(x) at exactly x = 0, where the engine says 0 and the central difference says 0.5. What should you do?",
+      "options": [
+        "Change ReLU's derivative to 0.5",
+        "Use a smaller step for the check",
+        "Keep it, and check ReLU away from 0",
+        "Remove ReLU from the engine"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "ReLU has no derivative at 0; any value between 0 and 1 is a valid choice there. The check is only meaningful away from the kink.",
+      "misconceptions": [
+        "Treats the central difference as the truth everywhere: at a kink it averages two one-sided slopes",
+        "Blames the step: any step straddling 0 gives the same 0.5",
+        "",
+        "Thinks a kink breaks reverse mode: the engine only needs a choice at one point"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "slide": "check-relu-kink",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week4-q1",
+      "type": "single",
+      "prompt": "A node computes y = A x with A of shape 4 × 6, and receives the upstream gradient g = ∂L/∂y. What does its backward pass add to x's gradient?",
+      "options": [
+        "A g",
+        "g xᵀ",
+        "The 4 × 6 Jacobian A",
+        "Aᵀ g"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Each xⱼ reaches every yᵢ with local derivative Aᵢⱼ, so its adjoint is Σᵢ gᵢ Aᵢⱼ: the j-th entry of Aᵀg, 6 numbers.",
+      "misconceptions": [
+        "Multiplies in the forward direction: A g does not even have matching shapes here",
+        "Sends the gradient with respect to A, not to x",
+        "Builds the whole Jacobian: reverse mode sends a vector, never the matrix",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 5,
+      "slide": "review-week4",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-stable-rate-q1",
+      "type": "single",
+      "prompt": "A least-squares loss has curvatures (eigenvalues of AᵀA / n) from 0.05 to 4. The analyst sweeps the rate over 0.01, 0.1, 0.4 and 0.6 with full-batch gradient descent. Which runs diverge?",
+      "options": [
+        "0.1, 0.4 and 0.6",
+        "0.4 and 0.6",
+        "0.6 only",
+        "None of them"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The edge is 2 / 4 = 0.5. Only 0.6 passes it; 0.01 will be slow along the 0.05 direction.",
+      "misconceptions": [
+        "Uses the smallest curvature for the edge: divergence comes from the steepest direction",
+        "Uses 1/λ_max as the edge: the steep direction overshoots but still shrinks until 2/λ_max",
+        "",
+        "Thinks least squares always converges: it is convex, but a large rate still overshoots"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "slide": "check-stable-rate",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-momentum-q1",
+      "type": "single",
+      "prompt": "Plain gradient descent at its largest stable rate zigzags across a narrow valley and crawls along it. The analyst adds momentum with β = 0.9 and keeps the rate. What should she expect first?",
+      "options": [
+        "Faster progress along the valley, possibly with overshoot; retune the rate",
+        "Faster progress along the valley, and nothing else",
+        "A lower final loss than the least-squares solution",
+        "No change unless the batch size changes"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Agreeing steps add up along the valley; the zigzags partly cancel. The effective step grows, so the best rate with momentum is usually smaller.",
+      "misconceptions": [
+        "",
+        "Assumes momentum only speeds things up: at a rate already near the edge, the larger effective step may overshoot",
+        "Thinks momentum removes noise from the data: it averages gradients, it does not change the loss",
+        "Thinks momentum and the rate are unrelated: the effective step grows to about η / (1 − β)"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "slide": "check-momentum",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-diagnose-curve-q1",
+      "type": "single",
+      "prompt": "On a dataset of household energy use, a run on raw, unscaled features falls from 900 to 520 in ten epochs, then sits near 500 for 190 more. The least-squares loss is 3. Any larger rate diverges. What is the diagnosis?",
+      "options": [
+        "Converged",
+        "Slow: the rate fits the steepest direction and starves the flattest",
+        "Noisy: use a larger batch",
+        "Diverged: lower the rate"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Unscaled features spread the curvatures over many orders of magnitude; the stable rate is tiny and the flat directions do not move. Scale the features.",
+      "misconceptions": [
+        "Reads a flat curve as success: flat at 500 is far from the reference of 3",
+        "",
+        "Blames batch noise: the curve is flat, not a wide band, and noise does not explain a gap of 500",
+        "Reads any trouble as divergence: the loss never rose"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "slide": "check-diagnose-curve",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week5-q1",
+      "type": "single",
+      "prompt": "Mini-batch SGD at a constant rate reaches the reference loss quickly, then keeps jumping in a band 30% wide for the rest of training. Which single change narrows the band?",
+      "options": [
+        "Double the learning rate",
+        "Train for twice as many epochs at the same rate",
+        "Add more features",
+        "Decay the rate after the loss reaches the band"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The band's width scales with the rate times the gradient noise; shrinking the rate shrinks the jumps.",
+      "misconceptions": [
+        "Raises the noise: a larger rate widens the band",
+        "Treats the band as slow convergence: more epochs at the same rate keep the same band",
+        "Changes the model, not the optimiser: the band comes from gradient noise times the rate",
+        ""
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 6,
+      "slide": "review-week5",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-convex-q1",
+      "type": "single",
+      "prompt": "The charity's analyst fits a logistic regression twice, from two different starting weights, with a small enough step. Both runs stop. What can she conclude about the two end points?",
+      "options": [
+        "They may be different local minima",
+        "Both runs reach the same lowest loss",
+        "Any step size gives the same end point",
+        "One of them may be a saddle point"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The loss is convex, so every local minimum is global: both runs reach the same lowest value (the weights themselves may differ if the data allows several optima, as week 7 shows).",
+      "misconceptions": [
+        "Thinks every model has local traps: the logistic loss is convex in its weights",
+        "",
+        "Confuses convex with linear: convex losses still need a small enough step",
+        "Confuses stopping with a saddle: a convex function has no saddle points"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "slide": "check-convex",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-hessian-kind-q1",
+      "type": "single",
+      "prompt": "At a point where the gradient of a two-weight loss is zero, the Hessian is [[3, 0], [0, −0.2]]. The run has stopped there. What should the analyst say?",
+      "options": [
+        "It is a minimum, since 3 is large and positive",
+        "The test cannot tell: −0.2 is too small to count as negative",
+        "It is a saddle: lower loss lies along the second weight",
+        "It is a maximum"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Eigenvalues of both signs: the loss curves down along the second weight, so moving along it lowers the loss.",
+      "misconceptions": [
+        "Looks only at the larger eigenvalue: one negative eigenvalue makes it a saddle",
+        "Reads a small eigenvalue as zero: −0.2 is clearly negative, so the test decides",
+        "",
+        "Thinks a zero gradient always means a maximum or minimum"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "slide": "check-hessian-kind",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-condition-q1",
+      "type": "single",
+      "prompt": "A convex quadratic loss has curvatures 0.5 and 50. The analyst runs plain gradient descent at steps 0.01, 0.039 and 0.041. What does she see?",
+      "options": [
+        "0.041 diverges; the other two converge, slowly along the flat direction",
+        "All three converge quickly",
+        "All three converge, since a convex loss cannot diverge whatever the step",
+        "0.039 and 0.041 diverge"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The edge is 2 / 50 = 0.04. With κ = 100, even the best step leaves the flat direction shrinking by only about 2% per step.",
+      "misconceptions": [
+        "",
+        "Uses the smallest curvature for the edge (2 / 0.5 = 4): divergence comes from the largest",
+        "Thinks convex losses cannot diverge: a step past 2 / λ_max always does",
+        "Puts the edge at 1 / λ_max = 0.02: the steep direction still shrinks up to 0.04"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "slide": "check-condition",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week6-q1",
+      "type": "single",
+      "prompt": "Gradient descent on a two-weight loss stops moving at a point where the gradient is zero. The Hessian there has eigenvalues 6 and −1. What should the report say?",
+      "options": [
+        "The run found a minimum and can stop",
+        "The run is stuck at a saddle; a small push lowers the loss",
+        "The step was too large and must be halved",
+        "The loss is non-convex, so nothing better can be found here at all"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Eigenvalues of both signs make a saddle: along the eigenvector of −1 the loss curves down.",
+      "misconceptions": [
+        "Reads a zero gradient as a minimum: one negative eigenvalue rules that out",
+        "",
+        "Blames the step size: a step that is too large makes the loss grow, it does not park it at a zero gradient",
+        "Treats non-convex as unsolvable: descent can still leave a saddle"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 7,
+      "slide": "review-week6",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-overflow-q1",
+      "type": "single",
+      "prompt": "A model gives the logits (900, 905) for a learner with label 0. Which way of computing the cross-entropy returns a finite, correct number in 64-bit floats?",
+      "options": [
+        "Take −log of exp(900) / (exp(900) + exp(905))",
+        "Clip both logits to 709, then use the naive formula",
+        "Compute 905 + log(e⁻⁵ + 1) − 900",
+        "Divide both logits by 905, then use the naive formula"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "That is log-sum-exp shifted by the maximum, minus the label's logit: about 5.007.",
+      "misconceptions": [
+        "exp(905) is inf, so the ratio is inf / inf = nan before the log",
+        "Clipping to 709 changes the difference between the logits, and so the answer",
+        "",
+        "Dividing logits by a number changes the softmax: the shift must be subtracted, not divided"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 7,
+      "session": 1,
+      "slide": "check-overflow",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-gradient-q1",
+      "type": "single",
+      "prompt": "For one learner the model's probabilities are (0.1, 0.7, 0.2) and the true level is 0. What is the gradient of the cross-entropy with respect to the three logits?",
+      "options": [
+        "(0.1, −0.3, 0.2)",
+        "(0.9, −0.7, −0.2)",
+        "(−10, 0, 0)",
+        "(−0.9, 0.7, 0.2)"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "p − e_y with y = 0: (0.1 − 1, 0.7, 0.2). The entries sum to 0.",
+      "misconceptions": [
+        "Subtracts the label from the wrong entry: the one-hot vector marks level 0",
+        "Gives the label minus the probabilities: the sign is reversed, so descent would move the wrong way",
+        "Differentiates −log p₀ with respect to p₀, not to the logits",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 7,
+      "session": 1,
+      "slide": "check-gradient",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-penalty-q1",
+      "type": "single",
+      "prompt": "At its minimum, a plain loss in two weights has Hessian eigenvalues 0 and 4. The analyst adds the penalty (0.5/2)‖w‖². What are the new eigenvalues, and what changes?",
+      "options": [
+        "0.5 and 4.5: the minimiser is now unique",
+        "0 and 2: the steep direction is flattened",
+        "0.5 and 4: only the flat direction changes",
+        "0 and 4: a penalty only moves the minimum"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The penalty's Hessian is λI = 0.5 I. With no zero eigenvalue left, the loss is strictly convex.",
+      "misconceptions": [
+        "",
+        "Multiplies instead of adding: the penalty's Hessian is λI, which adds",
+        "Adds only to the zero eigenvalue: λI raises every eigenvalue",
+        "Thinks a penalty cannot change curvature: its Hessian λI adds to H"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 7,
+      "session": 1,
+      "slide": "check-penalty",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-week7-q1",
+      "type": "single",
+      "prompt": "A training run prints a finite loss for 300 steps, then inf, then nan for ever. The code computes -log(softmax(z)[y]). What is the most likely cause?",
+      "options": [
+        "The learning rate is too low",
+        "The L2 penalty is too strong",
+        "A label's probability rounded to 0, and its log is −inf",
+        "The batches were not shuffled between the epochs of training"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Once one probability rounds to 0, the loss is inf and every gradient after it is nan. Compute it as logsumexp(z) − z_y.",
+      "misconceptions": [
+        "A rate that is too high makes the loss grow, but the inf here comes from taking the log of an exact 0",
+        "A penalty bounds the weights; it does not create infinities in the loss",
+        "",
+        "The order of the batches changes the path, not whether the code takes the log of an exact 0"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 8,
+      "slide": "review-week7",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-lagrange-q1",
+      "type": "single",
+      "prompt": "A training team's best accuracy under a compute limit of 100 hours has multiplier λ = 0.002 accuracy points per hour. The limit is cut to 90 hours. What should the team expect?",
+      "options": [
+        "Accuracy falls by 0.002",
+        "Accuracy falls by about 0.02",
+        "Accuracy is unchanged and λ rises",
+        "Accuracy falls by 0.0002"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Change in best value ≈ λ × change in the limit = 0.002 × 10.",
+      "misconceptions": [
+        "Reads λ as the total value, not as a rate per hour",
+        "",
+        "Thinks a cut moves only the multiplier: the best value moves at the rate λ",
+        "Divides instead of multiplying: the change is λ times the change in the limit"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "slide": "check-lagrange",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-corner-q1",
+      "type": "single",
+      "prompt": "At the optimum of an allocation, λ = 1.5. A fourth programme has margin k / s = 1.2 at zero budget. What should it receive?",
+      "options": [
+        "An equal share of the budget",
+        "Enough budget to raise its margin up to λ = 1.5 first",
+        "1.5 units of budget",
+        "Nothing: its first unit is worth less than λ"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A programme is funded only where its margin can equal λ; margins fall with budget, so 1.2 never rises to 1.5.",
+      "misconceptions": [
+        "Thinks every programme must share the budget: the conditions allow zero",
+        "Reverses the comparison: a margin below λ means the money is worth more elsewhere",
+        "Treats λ as a budget figure: λ is a rate, not an amount to give",
+        ""
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "slide": "check-corner",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-roles-q1",
+      "type": "single",
+      "prompt": "An analyst finds that adding a floor for two programmes costs 0.6 units of the objective per unit of budget. Which next step keeps the duties separate?",
+      "options": [
+        "Present both options with their prices to the person who sets the weights",
+        "Adopt the floor, since it is fairer",
+        "Drop the floor, since it lowers the objective",
+        "Approve the cheaper option now and tell the finance officer afterwards"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The analyst's job is to show the trade-off and its price; choosing the weights belongs to the programme lead.",
+      "misconceptions": [
+        "",
+        "The analyst would be making the policy choice that belongs to someone else",
+        "The analyst would be dropping an option instead of pricing it",
+        "Approving a budget is the finance officer's duty, not the analyst's"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "slide": "check-roles",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo1-tangent",
+      "type": "single",
+      "prompt": "A learner's notes need √101 without a calculator. Using the tangent line of √x at x = 100, what is the estimate?",
+      "options": [
+        "10.5",
+        "10.05",
+        "10.1",
+        "10.005"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The derivative of √x at 100 is 1 / (2 × 10) = 0.05, so √101 ≈ 10 + 0.05.",
+      "misconceptions": [
+        "Uses 1/2 as the slope, forgetting to divide by √x",
+        "",
+        "Uses 1/10 as the slope, forgetting the factor 1/2",
+        "Uses 1/200 as the slope, dividing by 2√x twice"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo1-gradient",
+      "type": "single",
+      "prompt": "For g(u, v) = u²v + 3v, what is the gradient at (u, v) = (2, 1)?",
+      "options": [
+        "(4, 4)",
+        "(7, 4)",
+        "(2, 7)",
+        "(4, 7)"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "∂g/∂u = 2uv = 4 and ∂g/∂v = u² + 3 = 7.",
+      "misconceptions": [
+        "Drops the 3 from ∂g/∂v",
+        "Swaps the order of the components",
+        "Differentiates u² as u",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo1-jacobian",
+      "type": "single",
+      "prompt": "A function takes three inputs (attendance, hours, entry score) and returns two outputs (a completion score and a level score). What shape is its Jacobian?",
+      "options": [
+        "2 × 3",
+        "3 × 2",
+        "3 × 3",
+        "1 × 3"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "One row per output and one column per input: 2 rows, 3 columns.",
+      "misconceptions": [
+        "",
+        "Puts the inputs in the rows",
+        "Assumes a Jacobian is always square",
+        "Treats the function as having one output"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo1-central",
+      "type": "tf",
+      "prompt": "For a smooth function in 64-bit floats with step h = 1e-5, a central difference is usually more accurate than a forward difference.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The central difference's step error shrinks like h², the forward one's like h; at 1e-5 rounding error is still small.",
+      "misconceptions": [
+        "",
+        "Thinks the two differences have the same order of error"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo2-hessian",
+      "type": "single",
+      "prompt": "At a point where a two-weight loss has zero gradient, its Hessian is [[2, 0], [0, −3]]. What is the point?",
+      "options": [
+        "A minimum",
+        "A maximum",
+        "A saddle point",
+        "The second-derivative test cannot tell"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Eigenvalues 2 and −3 have both signs: the loss curves up along one weight and down along the other.",
+      "misconceptions": [
+        "Looks only at the positive eigenvalue",
+        "Looks only at the negative eigenvalue",
+        "",
+        "Treats mixed signs as undecided; only a zero eigenvalue is"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo2-edge",
+      "type": "single",
+      "prompt": "A convex quadratic loss has curvatures 4 and 0.5. Which fixed step is the largest at which plain gradient descent still converges?",
+      "options": [
+        "Just below 0.5",
+        "Just below 4",
+        "Just below 0.25",
+        "Just below 2"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The edge is 2 / λ_max = 2 / 4 = 0.5.",
+      "misconceptions": [
+        "",
+        "Uses the largest curvature itself as the step",
+        "Uses 1 / λ_max: it converges, but it is not the largest such step",
+        "Uses 1 / λ_min = 2, the flat direction's scale"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo2-convex",
+      "type": "tf",
+      "prompt": "A convex function can have two local minima with different loss values.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "On a convex function every local minimum is global, so all its minima share the lowest value.",
+      "misconceptions": [
+        "Confuses convex with any smooth, bowl-like shape",
+        ""
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 6,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo2-penalty",
+      "type": "single",
+      "prompt": "A plain loss in two weights has Hessian eigenvalues 0 and 3 at its minimum. A penalty (0.2/2)‖w‖² is added. What are the new eigenvalues?",
+      "options": [
+        "0 and 3.2",
+        "0 and 3",
+        "0.2 and 3.2",
+        "0.2 and 3"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The penalty's Hessian is 0.2 I, which adds 0.2 to every eigenvalue.",
+      "misconceptions": [
+        "Adds only to the non-zero eigenvalue",
+        "Thinks a penalty only moves the minimum",
+        "",
+        "Adds only to the zero eigenvalue"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 7,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo3-lagrange",
+      "type": "single",
+      "prompt": "Maximise 3 log x + log y subject to x + y = 8. Where is the optimum?",
+      "options": [
+        "x = 4, y = 4",
+        "x = 2, y = 6",
+        "x = 6.5, y = 1.5",
+        "x = 6, y = 2"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "3/x = 1/y = λ gives x = 3y; with x + y = 8, y = 2 and x = 6, and λ = 0.5.",
+      "misconceptions": [
+        "Splits evenly, ignoring the weights",
+        "Reverses the weights",
+        "Guesses a split without solving the conditions",
+        ""
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo3-price",
+      "type": "single",
+      "prompt": "At the optimum of an outreach allocation, λ = 0.8 enrolments per thousand. The budget rises by 5 thousand. What should the analyst expect?",
+      "options": [
+        "About 0.8 more enrolments",
+        "About 4 more enrolments",
+        "About 5 more enrolments",
+        "Exactly 4 more enrolments"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Change ≈ λ × change in budget = 0.8 × 5; only approximately, because λ moves with the budget.",
+      "misconceptions": [
+        "Reads λ as a total, not a rate",
+        "",
+        "Treats each thousand as one enrolment",
+        "Treats a derivative as exact over a large change"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo3-corner",
+      "type": "tf",
+      "prompt": "At the optimum of an allocation with budgets that cannot be negative, a programme whose margin at zero budget is below λ receives nothing.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Its first unit is worth less than the last unit anywhere else, and margins only fall as budget rises.",
+      "misconceptions": [
+        "",
+        "Thinks every programme must receive a share"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo3-roles",
+      "type": "single",
+      "prompt": "An analyst finds that maximising total enrolments leaves two districts with almost nothing. Who should decide how much weight those districts carry?",
+      "options": [
+        "The data analyst, who built the model",
+        "The finance officer, who approves budgets",
+        "The programme lead, accountable for whom it serves",
+        "The optimiser, by maximising the total number of enrolments"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Weights are a policy decision: the analyst proposes and prices options, the finance officer approves the budget, the programme lead decides.",
+      "misconceptions": [
+        "Lets the person who built the model make the policy choice",
+        "Confuses approving a budget with setting priorities",
+        "",
+        "Treats the proxy's answer as neutral"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 8,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo4-chain",
+      "type": "single",
+      "prompt": "One learner: z = w·x + b with x = 2, w = 0.5, b = −1; label y = 1; loss L = −log σ(z). What is ∂L/∂w?",
+      "options": [
+        "−1.0",
+        "−0.5",
+        "−2.0",
+        "+1.0"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "z = 0, so σ(z) = 0.5; ∂L/∂z = σ(z) − y = −0.5; ∂L/∂w = −0.5 × x = −1.0.",
+      "misconceptions": [
+        "",
+        "Stops at ∂L/∂z and forgets the factor x",
+        "Multiplies −1/σ(z) by x and forgets σ′(z)",
+        "Uses (y − σ(z)) x, reversing the sign"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo4-reuse",
+      "type": "single",
+      "prompt": "f = a·b + a with a = 3 and b = 4. What is ∂f/∂a?",
+      "options": [
+        "4",
+        "3",
+        "1",
+        "5"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "a reaches f along two paths; their contributions add: b + 1 = 5.",
+      "misconceptions": [
+        "Keeps only the product path",
+        "Gives the value of a",
+        "Keeps only the direct path",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo4-passes",
+      "type": "tf",
+      "prompt": "To get the gradient of one scalar loss with respect to all its parameters, reverse mode needs one backward pass per parameter.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "One backward pass gives the derivative with respect to every parameter; forward mode needs one pass per parameter.",
+      "misconceptions": [
+        "Confuses reverse mode with forward mode",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo4-cost",
+      "type": "single",
+      "prompt": "A model has 1,000 parameters and one scalar loss. How many passes does each mode need for the full gradient?",
+      "options": [
+        "1,000 passes in each mode",
+        "1 reverse pass, against 1,000 forward-mode passes",
+        "1 pass in either mode",
+        "1,000 reverse passes, against 1 forward-mode pass"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Reverse mode propagates one output's sensitivity to all inputs at once; forward mode carries one input at a time.",
+      "misconceptions": [
+        "Thinks both modes cost one pass per parameter",
+        "",
+        "Thinks both modes give the whole gradient at once",
+        "Swaps the two modes"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo5-bug",
+      "type": "single",
+      "prompt": "An engine passes every test except those where a node is used more than once. What is the most likely bug?",
+      "options": [
+        "The exp rule uses the wrong derivative",
+        "The topological order is reversed",
+        "zero_grad is never called",
+        "Gradients overwritten instead of added"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A reused node receives one contribution per use; assigning instead of adding keeps only the last one.",
+      "misconceptions": [
+        "A wrong exp rule fails exp tests whether or not a node is reused",
+        "A reversed order fails almost every graph, not only reused nodes",
+        "A missing zero_grad shows across repeated backward calls, not within one",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo5-order",
+      "type": "single",
+      "prompt": "In what order must a reverse-mode engine call each node's backward rule?",
+      "options": [
+        "Reverse topological order",
+        "Topological order from the inputs",
+        "The order the nodes were created",
+        "Any order: addition commutes"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A node may pass its gradient on only after every node that uses it has added its share.",
+      "misconceptions": [
+        "",
+        "Runs the forward order, so a node passes on its gradient before it is complete",
+        "Creation order is not always a valid order for the backward pass",
+        "The sums commute, but a node must hold its total before passing it on"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo5-onepoint",
+      "type": "tf",
+      "prompt": "If an engine's gradients agree with central differences at one random point, the engine is proven correct.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A check at one point can miss a rule that is wrong elsewhere, for example on the other side of a relu's kink; test many points and expressions.",
+      "misconceptions": [
+        "Treats one passing check as a proof",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo5-relerr",
+      "type": "single",
+      "prompt": "A gradient check gives relative errors near 1e-9 for every parameter except one, at 3e-2. What does it point to?",
+      "options": [
+        "Normal rounding error, safe to ignore",
+        "The finite-difference step h is too small",
+        "A bug in one operation's backward rule",
+        "The loss is non-convex there"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Rounding gives errors near 1e-9 at h = 1e-6; 3e-2 on one parameter points to a wrong rule on its path.",
+      "misconceptions": [
+        "Rounding error is far smaller than 3e-2 here",
+        "A step that is too small would affect every parameter",
+        "",
+        "Convexity does not change whether a derivative is correct"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo6-diverge",
+      "type": "single",
+      "prompt": "After the learning rate is raised from 0.1 to 0.5, the training loss grows every epoch. What should change?",
+      "options": [
+        "Train for more epochs",
+        "Lower the learning rate",
+        "Add momentum",
+        "Use a larger network"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A loss that grows every epoch means the step passed the stable edge; lower the rate.",
+      "misconceptions": [
+        "More epochs make a diverging run worse",
+        "",
+        "Momentum makes the effective steps larger",
+        "Model size is not the cause of a step-size problem"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo6-noise",
+      "type": "tf",
+      "prompt": "Mini-batch gradient descent at a constant learning rate keeps fluctuating near the minimum instead of settling exactly on it.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Each mini-batch gradient is noisy and a constant rate keeps the jumps' size; decaying the rate lets it settle.",
+      "misconceptions": [
+        "",
+        "Expects mini-batch steps to vanish at the minimum as full-batch steps do"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo6-scale",
+      "type": "single",
+      "prompt": "One feature is in thousands and another is a fraction. Only a rate of 1e-7 avoids divergence, and at that rate training crawls. What is the best fix?",
+      "options": [
+        "Standardise the features",
+        "Raise the rate to 1e-6",
+        "Train ten times longer",
+        "Switch to a larger batch"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Very different scales make the curvatures very unequal; standardising lowers their ratio so that one rate suits every direction.",
+      "misconceptions": [
+        "",
+        "A larger rate passes the edge set by the steep direction",
+        "Longer training treats the symptom, not the scaling",
+        "Batch size does not change the curvature ratio"
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "lo6-slow",
+      "type": "single",
+      "prompt": "After 200 epochs the loss is still falling steadily, far above the reference, with no oscillation. What is the likeliest diagnosis?",
+      "options": [
+        "The rate is too high",
+        "The data are too noisy",
+        "The model has converged",
+        "The rate is too low or the features badly scaled"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Steady, smooth, slow progress is the signature of a small step or a badly conditioned problem.",
+      "misconceptions": [
+        "A rate that is too high oscillates or grows",
+        "Noise shows as jumps, not slow steady progress",
+        "A falling loss has not converged",
+        ""
+      ],
+      "lo": [
+        "LO6"
+      ],
+      "day": 5,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    }
+  ]
+}

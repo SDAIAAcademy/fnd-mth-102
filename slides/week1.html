@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="foundations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1 · Change and approximation · Calculus and Optimisation for Machine Learning</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="week1.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Calculus and Optimisation for Machine Learning" data-track="foundations" data-day="Week 1">
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Calculus and Optimisation for Machine Learning</div>
+  <h1>Change and approximation</h1>
+  <p class="lead mt">Week 1: Derivatives as local linear approximations, and three ways to compute one</p>
+  <div class="meta"><span class="track">Data &amp; AI Foundations Track</span><span>8 weeks + capstone</span><span>1 session · 1 lab</span><span>FND-MTH-102</span></div>
+  <aside class="notes"><p>Welcome the cohort. Ask two quick questions with a show of hands: who differentiated anything in the last year, and who has trained a model with a library? The answers set the pace of today's first block. Eight weeks, one session a week: about 105 minutes of teaching in three blocks with a checkpoint after each, then a 105-minute lab. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.</p></aside>
+</section>
+
+<section class="slide" id="eight-weeks" data-label="The course" data-minutes="4" data-n="2">
+  <div class="kicker">The course at a glance</div>
+  <h2>Eight weeks from a single slope to a network you train with your own engine</h2>
+  <div class="cols cols-4 gap-s">
+    <div class="card c-teal flat"><h4>1 · Change</h4><p class="small mb0">Derivatives, Taylor, finite differences</p></div>
+    <div class="card c-teal flat"><h4>2 · Several variables</h4><p class="small mb0">Gradients and Jacobians</p></div>
+    <div class="card c-cyan flat"><h4>3 · Graphs</h4><p class="small mb0">The chain rule, backprop by hand</p></div>
+    <div class="card c-cyan flat"><h4>4 · Reverse mode</h4><p class="small mb0">Your own differentiation engine</p></div>
+    <div class="card c-coral flat"><h4>5 · Descent</h4><p class="small mb0">Step size, batches, momentum, loss curves</p></div>
+    <div class="card c-coral flat"><h4>6 · Shape</h4><p class="small mb0">Convexity, saddles, curvature</p></div>
+    <div class="card c-purple flat"><h4>7 · Stability</h4><p class="small mb0">Log-sum-exp, softmax, penalties</p></div>
+    <div class="card c-purple flat"><h4>8 · Constraints</h4><p class="small mb0">Lagrange multipliers, projections</p></div>
+  </div>
+  <div class="callout tip mt"><b>Capstone.</b> A two-layer network on public data, trained with the engine you write in week 4, defended in a ten-minute oral check.</div>
+  <aside class="notes"><p>One sentence per week, no teaching yet. Point out the arc: weeks 1 to 4 compute gradients, weeks 5 to 8 use them. The engine of week 4 is the one the capstone trains with, so week 4 matters most.</p></aside>
+</section>
+
+<section class="slide" id="how-assessed" data-label="Assessment" data-minutes="4" data-n="3">
+  <div class="kicker">How the course is assessed</div>
+  <h2>Four parts, and two tests you sit without help</h2>
+  <div class="cols cols-2">
+    <div class="bars">
+      <div class="row"><span>Weekly problem sets, auto-checked</span><div class="bar c-teal" style="--w:50%"></div><span class="val">20%</span></div>
+      <div class="row"><span>Two supervised AI-off tests</span><div class="bar c-coral" style="--w:100%"></div><span class="val">40%</span></div>
+      <div class="row"><span>Capstone engine and report</span><div class="bar c-cyan" style="--w:75%"></div><span class="val">30%</span></div>
+      <div class="row"><span>Oral check</span><div class="bar c-purple" style="--w:25%"></div><span class="val">10%</span></div>
+    </div>
+    <div class="stack">
+      <div class="card c-navy flat"><h4>To pass</h4><p class="small mb0">60% overall and at least 50% on each supervised test.</p></div>
+      <div class="card c-coral flat"><h4>AI levels</h4><p class="small mb0"><b>Off</b>: first attempts at problem sets, Lab 3.1, both tests. <b>Tutor</b>: the other labs. <b>Full</b>: the capstone, defended orally.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Read the AI levels aloud and say why: the tests and the oral check ask you to trace a backward pass yourself, so the practice has to be yours. A tutor gives hints, not answers; its instruction text is in labs/TUTOR.md. Test 1 comes after week 4, Test 2 after week 8, each 90 minutes: 40 on paper, 50 at the keyboard.</p></aside>
+</section>
+
+<section class="slide" id="the-charity" data-label="Case study" data-minutes="4" data-n="4">
+  <div class="kicker">One case all term</div>
+  <h2>The adult learning charity: evening classes in five districts</h2>
+  <p class="lead">A non-profit that teaches adults to read, write and calculate. Its data analyst wants to understand the models before trusting them.</p>
+  <div class="cols cols-3 gap-s mt-s">
+    <div class="card c-teal flat"><h4>Completion model</h4><p class="small mb0">The chance a learner finishes, from attendance and weekly hours. Weeks 1 to 3.</p></div>
+    <div class="card c-cyan flat"><h4>Placement model</h4><p class="small mb0">Three class levels from an entry score. Week 7.</p></div>
+    <div class="card c-coral flat"><h4>Outreach budget</h4><p class="small mb0">Enrolment curves for districts D1 to D5, one budget. Weeks 1, 2 and 8.</p></div>
+  </div>
+  <div class="callout note mt"><b>All synthetic.</b> 600 learners coded LR-0001 onwards, generated with a fixed seed. Week 5 and the capstone use public datasets instead.</div>
+  <aside class="notes"><p>People appear by role only: the programme lead, the data analyst, the finance officer. The data is written by labs/_tools/make_data.py with seed 102; no names, no identity numbers. The two public datasets (week 5 and the capstone) come from the UCI Machine Learning Repository under CC BY 4.0 and are downloaded when the lab runs; they are never the charity's data.</p></aside>
+</section>
+
+<section class="slide" id="setup-check" data-label="Setup" data-minutes="4" data-n="5">
+  <div class="kicker">Before the first lab</div>
+  <h2>Open the setup check and run it once</h2>
+  <div class="cols cols-2">
+    <ol class="bullets">
+      <li>Colab: open <code>00_setup_check.ipynb</code> from the course page and run every cell.</li>
+      <li>Laptop: clone the repository, then run the commands on the right from <code>labs/</code>.</li>
+      <li>It lists missing libraries and downloads the two public datasets once.</li>
+      <li>No lab calls an AI model: no key, no account.</li>
+    </ol>
+    <pre class="code s" data-file="terminal"><code class="language-bash"><span class="hljs-built_in">cd</span> fnd-mth-102/labs
+uv <span class="hljs-built_in">sync</span>
+uv run python _tools/py2nb.py
+uv run jupyter lab 00_setup_check.ipynb</code></pre>
+  </div>
+  <aside class="notes"><p>Have everyone run it now, while you teach the first block, so failures surface early. Common failures: a firewall that blocks the UCI download (the helper then uses a clearly labelled synthetic stand-in; tell the room that its numbers are not the public data's), an old Python (uv installs 3.12 by itself), a disk without room for the framework (use Colab).</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="6">
+  <div class="kicker">This week</div>
+  <h2>Change and approximation</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Derivatives as local lines</b><small>A derivative is the slope of the best straight-line fit near a point; you compute it by hand, symbolically and numerically</small></div></div></div>
+</section>
+
+<!-- Session 1 -->
+
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="7">
+  <div class="kicker">Session 1</div>
+  <h1>Derivatives as local lines</h1>
+  <ul class="bullets outcomes"><li>Explain a derivative as the slope of the best local linear approximation</li><li>Compute derivatives by rule, with symbolic algebra and with finite differences</li><li>Choose a finite-difference step by weighing truncation against rounding error</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" id="secant-to-tangent" data-lo="LO1" data-minutes="7" data-n="8" data-session="1">
+  <div class="kicker">Block 1 · What a derivative is</div>
+  <h2>A derivative is the slope a secant settles on as the gap closes</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>The slope between <code>x</code> and <code>x + h</code> is <code>(f(x + h) - f(x)) / h</code>.</p>
+      <p>Shrink <code>h</code>: for a smooth function the slope settles on one number, <b>f′(x)</b>.</p>
+      <table class="t small">
+        <tr><th>h</th><th class="num">slope of x² at 3</th></tr>
+        <tr><td>1</td><td class="num">7</td></tr>
+        <tr><td>0.1</td><td class="num">6.1</td></tr>
+        <tr><td>0.01</td><td class="num">6.01</td></tr>
+        <tr class="hl"><td>limit</td><td class="num">6</td></tr>
+      </table>
+    </div>
+    <div class="card c-teal"><h4>Read it as a rate</h4><p class="small mb0">f′(x) is how fast <code>f</code> changes per unit of <code>x</code>, right at <code>x</code>: enrolments per extra thousand of budget, loss per unit change of a weight.</p></div>
+  </div>
+  <aside class="notes"><p>Do the table on the board for x squared at 3: (3+h)² - 9 over h is 6 + h. That last line is the whole idea: the slope is 6 plus something that vanishes with h. Ask what happens for |x| at 0: the slope from the left is -1 and from the right +1, so there is no single number. Losses with a kink (ReLU, absolute error) behave like that at one point, and week 4 decides what the engine does there.</p></aside>
+</section>
+
+<section class="slide" id="best-linear-fit" data-lo="LO1" data-minutes="7" data-n="9" data-session="1">
+  <div class="kicker">Block 1 · The definition that generalises</div>
+  <h2>The derivative gives the best straight-line fit near a point</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>Local linear approximation</h4><p class="mb0"><code>f(x + h) ≈ f(x) + f′(x) · h</code></p></div>
+      <p class="small">The error shrinks <b>faster than h</b>: halve the step and the error falls to about a quarter.</p>
+      <p class="small">No other straight line through <code>(x, f(x))</code> does that. This, not "slope of a curve", is the definition that carries to many variables in week 2.</p>
+    </div>
+    <div class="card c-coral flat"><h4>Why machine learning cares</h4><p class="small mb0">Training changes weights by small steps. Near the current weights, the loss changes by about <b>derivative × step</b>. Every optimiser in weeks 5 to 8 starts from that line.</p></div>
+  </div>
+  <aside class="notes"><p>Write f(x + h) = f(x) + f'(x) h + r(h), with r(h)/h going to 0. Stress "faster than h": a line with any other slope leaves an error proportional to h. Then the bridge to the course: gradient descent is this approximation used to choose a step. Keep it brief; Taylor makes the error term precise in block 2.</p></aside>
+</section>
+
+<section class="slide" id="tangent-d3" data-lo="LO1" data-minutes="6" data-n="10" data-session="1">
+  <div class="kicker">Block 1 · In the case</div>
+  <h2>District D3's enrolment curve and its tangent at 12 thousand</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w1-tangent-d3.svg" alt="The concave enrolment curve of district D3 rises and flattens; the tangent line at a budget of 12 thousand touches it there and lies above it everywhere else; the quadratic follows the curve further before falling away" width="760">
+      <div class="caption">Synthetic: E(x) = 45 · ln(1 + x / 8), drawn by labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <div class="stat"><div class="big">2.25</div><div class="lbl">enrolments per extra thousand at x = 12</div></div>
+      <p class="small">E′(x) = 45 / (8 + x), so E′(12) = 45 / 20.</p>
+      <p class="small">The tangent says 2 more thousand bring 4.5 enrolments; the curve gives 4.3.</p>
+    </div>
+  </div>
+  <aside class="notes"><p>This is district D3, not the D1 curve of the lab. Numbers from the figure script: E(12) = 41.23, E(14) = 45.52, tangent at 14 = 45.73, so the tangent overstates by 0.46%. At 17 thousand it overstates by 2.4%, at 22 by 7.2%, at 32 by 19%. Ask: is the overstatement an accident of this curve? Hold the answer for the Taylor slide.</p></aside>
+</section>
+
+<section class="slide" id="check-local-estimate" data-lo="LO1" data-minutes="4" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What does the slope promise the finance officer?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-local-estimate-q1">
+    <p class="lead">District D2's curve has E(15) = 50 enrolments and E′(15) = 1.8 per thousand. The finance officer asks what 2 more thousand of outreach would bring. Which answer is best?</p>
+    <div class="opts">
+      <div class="opt" data-why="Uses the derivative as the change for any step: it is a rate per thousand, so a 2-thousand step needs it twice" data-k="A">About 1.8 more enrolments</div>
+      <div class="opt" data-ok data-k="B">About 3.6 more, slightly fewer since the curve flattens</div>
+      <div class="opt" data-why="Treats the linear estimate as exact: the tangent only matches the curve at the point itself" data-k="C">Exactly 3.6 more enrolments</div>
+      <div class="opt" data-why="Multiplies the level by the rate: the derivative scales the change in budget, not the current enrolments" data-k="D">About 90 more enrolments</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Change ≈ E′(15) × 2 = 3.6. The curve bends down as budget grows, so the true gain is a little smaller.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. If many pick C, go back to the D3 figure: the tangent lies above the curve. If many pick A, write the approximation again with h = 2. Two minutes, then move on.</p></aside>
+</section>
+
+<section class="slide" id="rules-table" data-lo="LO1" data-minutes="9" data-n="12" data-session="1">
+  <div class="kicker">Block 2 · Computing derivatives exactly</div>
+  <h2>Five rules cover every function in this course</h2>
+  <table class="t">
+    <tr><th>Rule</th><th>Statement</th><th>Example</th></tr>
+    <tr><td>Power</td><td><code>(xⁿ)′ = n xⁿ⁻¹</code></td><td><code>(x³)′ = 3x²</code></td></tr>
+    <tr><td>Exponential and log</td><td><code>(eˣ)′ = eˣ</code>, <code>(ln x)′ = 1/x</code></td><td><code>(e^(0.5x))′ = 0.5 e^(0.5x)</code></td></tr>
+    <tr><td>Sum and constant</td><td><code>(a f + b g)′ = a f′ + b g′</code></td><td><code>(4x² - x)′ = 8x - 1</code></td></tr>
+    <tr><td>Product</td><td><code>(f g)′ = f′ g + f g′</code></td><td><code>(x eˣ)′ = (1 + x) eˣ</code></td></tr>
+    <tr class="hl"><td>Chain</td><td><code>f(g(x))′ = f′(g(x)) · g′(x)</code></td><td><code>ln(1 + x/8)′ = 1 / (8 + x)</code></td></tr>
+  </table>
+  <div class="callout note mt"><b>Sigmoid.</b> σ(z) = 1 / (1 + e⁻ᶻ) has σ′(z) = σ(z)(1 - σ(z)): you will use it every week.</div>
+  <aside class="notes"><p>Work the sigmoid derivative on the board with the chain rule: d/dz (1 + e^-z)^-1 = (1 + e^-z)^-2 e^-z, then rewrite. The chain rule row is highlighted because weeks 3 and 4 are the chain rule applied to a graph. Do not derive the D1 curve of the lab: the lab asks for it.</p></aside>
+</section>
+
+<section class="slide" id="symbolic-algebra" data-lo="LO1" data-minutes="9" data-n="13" data-session="1">
+  <div class="kicker">Block 2 · Rules, done by a program</div>
+  <h2>Symbolic algebra applies the same rules exactly, and can bloat</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="symbolic.py"><code class="language-python"><span class="hljs-keyword">import</span> sympy <span class="hljs-keyword">as</span> sp
+
+x = sp.symbols(<span class="hljs-string">&quot;x&quot;</span>, real=<span class="hljs-literal">True</span>)
+g = sp.exp(sp.Rational(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>) * x) * x**<span class="hljs-number">2</span>
+dg = sp.diff(g, x)
+<span class="hljs-built_in">print</span>(sp.factor(dg))   <span class="hljs-comment"># x*(x + 4)*exp(x/2)/2</span>
+f = sp.lambdify(x, dg, <span class="hljs-string">&quot;numpy&quot;</span>)
+<span class="hljs-built_in">print</span>(f(<span class="hljs-number">1.0</span>))          <span class="hljs-comment"># 4.1218...</span></code></pre>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>Exact</h4><p class="small mb0">No step size, no rounding until you evaluate. Good for checking a hand derivation.</p></div>
+      <div class="card c-coral flat"><h4>Expression swell</h4><p class="small mb0">Differentiate a long composition symbolically and the formula can grow far larger than the program that computes it. Reverse mode (week 4) avoids that.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Run it live if the room has the environment ready: sp.factor gives x(x + 4) e^(x/2) / 2, and f(1.0) = 4.1218 (that is 2.5 times e to the 0.5). Symbolic algebra is one of the tool slots (SymPy, Maxima): any system that applies the rules exactly fills it. Expression swell is the reason frameworks do not differentiate symbolically.</p></aside>
+</section>
+
+<section class="slide" id="taylor-quadratic" data-lo="LO1" data-minutes="9" data-n="14" data-session="1">
+  <div class="kicker">Block 2 · Taylor expansions</div>
+  <h2>Add the curvature term and the approximation reaches further</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-navy"><h4>Taylor, to second order</h4><p class="mb0"><code>f(x + h) ≈ f(x) + f′(x) h + ½ f″(x) h²</code></p></div>
+      <p class="small">The first neglected term is of order <code>h³</code>. The sign of <code>f″</code> says which side of the tangent the curve lies on.</p>
+      <p class="small"><b>f″ &lt; 0</b> (concave): the tangent overestimates. <b>f″ &gt; 0</b> (convex): it underestimates.</p>
+    </div>
+    <table class="t small">
+      <tr><th>Extra budget, D3 from 12</th><th class="num">Tangent off by</th></tr>
+      <tr><td>2 thousand</td><td class="num">0.5%</td></tr>
+      <tr><td>5 thousand</td><td class="num">2.4%</td></tr>
+      <tr><td>10 thousand</td><td class="num">7.2%</td></tr>
+      <tr><td>20 thousand</td><td class="num">19.1%</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Answer the question from the D3 slide: E''(x) = -45 / (8 + x)², negative everywhere, so the tangent always overestimates. The percentages are the figure script's, for D3. The lab measures the same for D1 and also for the quadratic; do not give those numbers. Week 6 uses f'' again, as the Hessian, to bound the step size.</p></aside>
+</section>
+
+<section class="slide" id="check-concave-tangent" data-lo="LO1" data-minutes="4" data-n="15" data-session="1">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>Which side of the tangent is the curve on?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-concave-tangent-q1">
+    <p class="lead">A completion-rate curve r(h) of weekly hours h has r″(h) &lt; 0 for every h. The analyst uses the tangent line at h = 3 to predict r at h = 6. What can you say before computing anything?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reverses the sign rule: a negative second derivative bends the curve below the tangent, not above" data-k="A">The prediction is too low</div>
+      <div class="opt" data-why="Assumes knowing the slope makes the line exact: it matches the curve only at h = 3" data-k="B">The prediction is exact</div>
+      <div class="opt" data-why="Thinks the side depends on direction: a concave curve lies below its tangent on both sides" data-k="C">It depends on which side of 3 we predict</div>
+      <div class="opt" data-ok data-k="D">The prediction is too high</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A concave curve lies below every tangent line, so any linear prediction away from the point overestimates.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Draw a hill and a tangent touching it once. The same picture explains why a step of gradient descent on a concave piece overshoots the gain it promised.</p></aside>
+</section>
+
+<section class="slide" id="finite-differences" data-lo="LO1" data-minutes="8" data-n="16" data-session="1">
+  <div class="kicker">Block 3 · Derivatives from values alone</div>
+  <h2>Finite differences need only the function, and pay with error</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-coral flat"><h4>Forward</h4><p class="mb0"><code>(f(x + h) - f(x)) / h</code></p><p class="small mb0">Truncation error about <code>h/2 · |f″|</code>: first order.</p></div>
+      <div class="card c-teal flat"><h4>Central</h4><p class="mb0"><code>(f(x + h) - f(x - h)) / (2h)</code></p><p class="small mb0">The h² terms cancel: error about <code>h²/6 · |f‴|</code>, second order.</p></div>
+    </div>
+    <div class="card c-navy"><h4>Their real job</h4><p class="small mb0">Nobody trains a model with finite differences: one extra evaluation per weight is far too slow. They are the <b>referee</b>: every gradient you derive or code in this course is checked against a central difference.</p></div>
+  </div>
+  <aside class="notes"><p>Derive both error terms from Taylor on the board: subtract f(x - h) from f(x + h) and the even powers cancel. Say clearly what finite differences are for in machine learning: gradient checking. A model with a million weights needs two million evaluations for one central-difference gradient; reverse mode needs one backward pass (week 3).</p></aside>
+</section>
+
+<section class="slide" id="rounding-error" data-lo="LO1" data-minutes="7" data-n="17" data-session="1">
+  <div class="kicker">Block 3 · The second error</div>
+  <h2>A float holds about 16 digits, and subtraction throws them away</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li>Machine epsilon, 64-bit: <b>2.2 × 10⁻¹⁶</b>, the relative gap between neighbouring floats.</li>
+      <li>For tiny <code>h</code>, <code>f(x + h)</code> and <code>f(x)</code> share most digits; their difference keeps the noisy ones.</li>
+      <li>Dividing by <code>h</code> magnifies the noise: rounding error ≈ <code>ε |f| / h</code>.</li>
+    </ul>
+    <pre class="code s" data-file="python"><code class="language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-meta">&gt;&gt;&gt; </span>np.finfo(<span class="hljs-built_in">float</span>).eps
+<span class="hljs-number">2.220446049250313e-16</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>(<span class="hljs-number">1.0</span> + <span class="hljs-number">1e-16</span>) - <span class="hljs-number">1.0</span>
+<span class="hljs-number">0.0</span></code></pre>
+  </div>
+  <div class="callout warn mt"><b>What goes wrong.</b> A gradient check with <code>h = 1e-14</code> "fails" for a correct gradient. The check is broken, not the gradient.</div>
+  <aside class="notes"><p>The last line of the code is the whole story: 1e-16 is below half the gap between 1 and the next float, so it vanishes. Floating-point limits are a prerequisite topic from FND-MTH-101; this is the one consequence that matters here.</p></aside>
+</section>
+
+<section class="slide" id="error-v" data-lo="LO1" data-minutes="7" data-n="18" data-session="1">
+  <div class="kicker">Block 3 · Two errors, one best step</div>
+  <h2>Error falls with h, then rises: the best step sits in the V</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w1-error-v-exp.svg" alt="Log-log plot of the error of two finite differences of g(x) = exp(0.5x) at 1 against the step: both fall as the step shrinks, reach a lowest point, then rise again; the central difference reaches a much lower error at a larger step" width="760">
+      <div class="caption">g(x) = e^(0.5x) at x = 1, steps from 0.1 to 1e-12; labs/_tools/make_figures.py.</div>
+    </div>
+    <table class="t small">
+      <tr><th></th><th class="num">Theory</th><th class="num">This example</th></tr>
+      <tr><td>Best forward step</td><td class="num">√ε ≈ 1.5e-8</td><td class="num">3e-8</td></tr>
+      <tr><td>Best central step</td><td class="num">∛ε ≈ 6.1e-6</td><td class="num">3e-6</td></tr>
+      <tr><td>Lowest error, forward</td><td class="num"></td><td class="num">6e-9</td></tr>
+      <tr><td>Lowest error, central</td><td class="num"></td><td class="num">5e-13</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Balance h/2 |f''| against eps |f| / h and the minimum is near the square root of eps; for the central difference balance h²/6 against eps/h and you get the cube root. The example numbers come from the figure script. The lab makes the same plot for the three case functions; let the room predict where their V's sit before they run it.</p></aside>
+</section>
+
+<section class="slide" id="check-step-size" data-lo="LO1" data-minutes="4" data-n="19" data-session="1">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>Which step should the gradient check use next?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="check-step-size-q1">
+    <p class="lead">A colleague checks a hand-coded derivative with a forward difference. With h = 1e-14 the mismatch is 1e-2; with h = 1e-3 it is 1e-4. She concludes the derivative is wrong. Which step should she try first?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">A forward step near 1e-8</div>
+      <div class="opt" data-why="Believes a smaller step is always more accurate: below about 1e-8 rounding error grows as the step shrinks" data-k="B">A forward step of 1e-16</div>
+      <div class="opt" data-why="Thinks a larger step averages away the noise: truncation error grows with the step" data-k="C">A forward step of 1e-1</div>
+      <div class="opt" data-why="Thinks the central formula cures rounding: at 1e-14 both formulas divide noise by a tiny step" data-k="D">A central step of 1e-14</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Both of her steps sit on the walls of the V. The best forward step is near √ε, about 1e-8 for a function of moderate size.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. A central step near 1e-5 or 1e-6 would be better still; that is the lab's finding to make. Then introduce the lab.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-1-1" data-auto="lab" data-lab="1.1" data-label="Lab 1.1" data-n="20" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 1.1 · 105 min</div><h2>Three ways to a derivative</h2><p class="lead small">Analytic, symbolic and finite-difference derivatives compared across step sizes</p><a class="nb" href="../labs/W1_1_derivatives.ipynb">W1_1_derivatives.ipynb</a></div><ul class="checklist"><li>Derive three derivatives by hand and code them <span class="min">15 min</span></li><li>Get the same derivatives from SymPy and compare <span class="min">15 min</span></li><li>Write forward and central differences <span class="min">15 min</span></li><li>Sweep the step from 0.1 to 1e-12 and plot the error <span class="min">20 min</span></li><li>Explain the V: truncation against rounding, and the best step <span class="min">15 min</span></li><li>Test how far the tangent line and the quadratic hold <span class="min">15 min</span></li><li>Write three findings in the lab log <span class="min">10 min</span></li><li class="stretch">✱ Stretch: Compute the complex-step derivative and see why it has no rounding V</li></ul></div>
+  <aside class="notes"><p>AI-tutor lab: hints, not answers (labs/TUTOR.md). Walk the room during task 1: the common slip is forgetting the inner derivative of the chain rule for p (the factor w_a). In task 4, people who plot without log axes see nothing: point them to loglog. Task 5 is a written explanation: ask two people to read theirs aloud at the end. Every exercise has a safety net, so a stuck participant can still run the later cells.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-1" data-label="Problem set 1" data-minutes="3" data-n="21" data-session="1">
+  <div class="kicker">Before week 2</div>
+  <h2>Problem set 1: six derivatives and one explanation</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS1.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b> Work on paper, then code your answers.</li>
+      <li>The checker tests your functions against finite differences; it holds no answer key.</li>
+      <li>Hand in the file before the week 2 session.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash"><span class="hljs-built_in">cd</span> labs
+uv run python problem_sets/check.py PS1</code></pre>
+  </div>
+  <aside class="notes"><p>The weekly problem sets are 20% of the grade together. The written answer (question 6) is marked by the trainer; the checker only sees that it is there. Remind the room of the pre-work refresher in labs/prework/README.md for anyone whose rules were slow today.</p></aside>
+</section>
+
+<section class="slide" id="wrap-up" data-minutes="3" data-n="22" data-session="1">
+  <div class="kicker">Week 1 · wrap-up</div>
+  <h2>Three things to keep</h2>
+  <div class="cols cols-3">
+    <div class="card c-teal"><h4>A local line</h4><p class="small mb0">f(x + h) ≈ f(x) + f′(x) h, with an error that shrinks faster than h.</p></div>
+    <div class="card c-coral"><h4>Curvature decides the side</h4><p class="small mb0">The second-order term says how far the line holds and whether it over- or underestimates.</p></div>
+    <div class="card c-purple"><h4>Finite differences referee</h4><p class="small mb0">Central differences with a step near 1e-5 check any derivative; too small a step breaks the check.</p></div>
+  </div>
+</section>
+
+<section class="slide dark" id="next" data-label="Next" data-minutes="2" data-n="23" data-session="1">
+  <div class="kicker">Next</div>
+  <h2>Week 2: Several variables</h2>
+  <p class="lead">Hand in Problem set 1. Finish Lab 1.1 at home if needed: week 2 opens with its results.</p>
+  <aside class="notes"><p>Nothing to install for week 2. Ask everyone to keep their central_diff function: Lab 2.1 turns it into a gradient checker.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-25T07:57:24Z","version":"2027.1.0","commit":"413d7b3"},"course":{"id":"fnd-mth-102","code":"FND-MTH-102","title":"Calculus and Optimisation for Machine Learning","track":"foundations","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/fnd-mth-102/","repo":"SDAIAAcademy/fnd-mth-102","home":"../index.html"},"deck":{"id":"week1","kind":"day","day":1,"label":"Week 1","title":"Change and approximation","prev":null,"next":"week2.html","md":"week1.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Derivatives as local lines","slide":"s1","outcomes":["Explain a derivative as the slope of the best local linear approximation","Compute derivatives by rule, with symbolic algebra and with finite differences","Choose a finite-difference step by weighing truncation against rounding error"],"minutes":210,"lab":{"id":"1.1","title":"Three ways to a derivative","minutes":105,"href":"../labs/W1_1_derivatives.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Change and approximation","kind":"title","session":0,"hash":"e8df09f1","md":"#### [week1#title] Change and approximation\n\n*SDAIA Academy · Calculus and Optimisation for Machine Learning*\n\nWeek 1: Derivatives as local linear approximations, and three ways to compute one\n\nData & AI Foundations Track · 8 weeks + capstone · 1 session · 1 lab · FND-MTH-102","notes":"Welcome the cohort. Ask two quick questions with a show of hands: who differentiated anything in the last year, and who has trained a model with a library? The answers set the pace of today's first block. Eight weeks, one session a week: about 105 minutes of teaching in three blocks with a checkpoint after each, then a 105-minute lab. The minute marks on the slides add up to the 105 minutes of teaching: they include the board work, the questions to the room and the discussion of each checkpoint that the notes describe.","minutes":null,"lo":[]},{"id":"eight-weeks","n":2,"title":"Eight weeks from a single slope to a network you train with your own engine","kind":"content","session":0,"hash":"90a040ec","md":"#### [week1#eight-weeks] Eight weeks from a single slope to a network you train with your own engine\n\n*The course at a glance*\n\n- **1 · Change.** Derivatives, Taylor, finite differences\n- **2 · Several variables.** Gradients and Jacobians\n- **3 · Graphs.** The chain rule, backprop by hand\n- **4 · Reverse mode.** Your own differentiation engine\n- **5 · Descent.** Step size, batches, momentum, loss curves\n- **6 · Shape.** Convexity, saddles, curvature\n- **7 · Stability.** Log-sum-exp, softmax, penalties\n- **8 · Constraints.** Lagrange multipliers, projections\n\n> **Capstone.** A two-layer network on public data, trained with the engine you write in week 4, defended in a ten-minute oral check.","notes":"One sentence per week, no teaching yet. Point out the arc: weeks 1 to 4 compute gradients, weeks 5 to 8 use them. The engine of week 4 is the one the capstone trains with, so week 4 matters most.","minutes":4,"lo":[]},{"id":"how-assessed","n":3,"title":"Four parts, and two tests you sit without help","kind":"content","session":0,"hash":"f9ce14ca","md":"#### [week1#how-assessed] Four parts, and two tests you sit without help\n\n*How the course is assessed*\n\n| Item | Value |\n| --- | --- |\n| Weekly problem sets, auto-checked | 20% |\n| Two supervised AI-off tests | 40% |\n| Capstone engine and report | 30% |\n| Oral check | 10% |\n\n- **To pass.** 60% overall and at least 50% on each supervised test.\n- **AI levels.** **Off**: first attempts at problem sets, Lab 3.1, both tests. **Tutor**: the other labs. **Full**: the capstone, defended orally.","notes":"Read the AI levels aloud and say why: the tests and the oral check ask you to trace a backward pass yourself, so the practice has to be yours. A tutor gives hints, not answers; its instruction text is in labs/TUTOR.md. Test 1 comes after week 4, Test 2 after week 8, each 90 minutes: 40 on paper, 50 at the keyboard.","minutes":4,"lo":[]},{"id":"the-charity","n":4,"title":"The adult learning charity: evening classes in five districts","kind":"content","session":0,"hash":"be395724","md":"#### [week1#the-charity] The adult learning charity: evening classes in five districts\n\n*One case all term*\n\nA non-profit that teaches adults to read, write and calculate. Its data analyst wants to understand the models before trusting them.\n\n- **Completion model.** The chance a learner finishes, from attendance and weekly hours. Weeks 1 to 3.\n- **Placement model.** Three class levels from an entry score. Week 7.\n- **Outreach budget.** Enrolment curves for districts D1 to D5, one budget. Weeks 1, 2 and 8.\n\n> **All synthetic.** 600 learners coded LR-0001 onwards, generated with a fixed seed. Week 5 and the capstone use public datasets instead.","notes":"People appear by role only: the programme lead, the data analyst, the finance officer. The data is written by labs/_tools/make_data.py with seed 102; no names, no identity numbers. The two public datasets (week 5 and the capstone) come from the UCI Machine Learning Repository under CC BY 4.0 and are downloaded when the lab runs; they are never the charity's data.","minutes":4,"lo":[]},{"id":"setup-check","n":5,"title":"Open the setup check and run it once","kind":"content","session":0,"hash":"5b153f40","md":"#### [week1#setup-check] Open the setup check and run it once\n\n*Before the first lab*\n\n1. Colab: open `00_setup_check.ipynb` from the course page and run every cell.\n2. Laptop: clone the repository, then run the commands on the right from `labs/`.\n3. It lists missing libraries and downloads the two public datasets once.\n4. No lab calls an AI model: no key, no account.\n\n```bash\n# file: terminal\ncd fnd-mth-102/labs\nuv sync\nuv run python _tools/py2nb.py\nuv run jupyter lab 00_setup_check.ipynb\n```","notes":"Have everyone run it now, while you teach the first block, so failures surface early. Common failures: a firewall that blocks the UCI download (the helper then uses a clearly labelled synthetic stand-in; tell the room that its numbers are not the public data's), an old Python (uv installs 3.12 by itself), a disk without room for the framework (use Colab).","minutes":4,"lo":[]},{"id":"agenda","n":6,"title":"Change and approximation","kind":"content","session":0,"hash":"64852470","md":"#### [week1#agenda] Change and approximation\n\n*This week*\n\n- **Session 1 · Derivatives as local lines**: A derivative is the slope of the best straight-line fit near a point; you compute it by hand, symbolically and numerically","notes":"","minutes":null,"lo":[]},{"id":"s1","n":7,"title":"Derivatives as local lines","kind":"section","session":1,"hash":"c9d41e41","md":"#### [week1#s1] Derivatives as local lines\n\n*Session 1*\n\n- Explain a derivative as the slope of the best local linear approximation\n- Compute derivatives by rule, with symbolic algebra and with finite differences\n- Choose a finite-difference step by weighing truncation against rounding error","notes":"","minutes":null,"lo":["LO1"]},{"id":"secant-to-tangent","n":8,"title":"A derivative is the slope a secant settles on as the gap closes","kind":"content","session":1,"hash":"4c8c5e18","md":"#### [week1#secant-to-tangent] A derivative is the slope a secant settles on as the gap closes\n\n*Block 1 · What a derivative is*\n\nThe slope between `x` and `x + h` is `(f(x + h) - f(x)) / h`.\n\nShrink `h`: for a smooth function the slope settles on one number, **f′(x)**.\n\n| h | slope of x² at 3 |\n| --- | --- |\n| 1 | 7 |\n| 0.1 | 6.1 |\n| 0.01 | 6.01 |\n| limit | 6 |\n\n- **Read it as a rate.** f′(x) is how fast `f` changes per unit of `x`, right at `x`: enrolments per extra thousand of budget, loss per unit change of a weight.","notes":"Do the table on the board for x squared at 3: (3+h)² - 9 over h is 6 + h. That last line is the whole idea: the slope is 6 plus something that vanishes with h. Ask what happens for |x| at 0: the slope from the left is -1 and from the right +1, so there is no single number. Losses with a kink (ReLU, absolute error) behave like that at one point, and week 4 decides what the engine does there.","minutes":7,"lo":["LO1"]},{"id":"best-linear-fit","n":9,"title":"The derivative gives the best straight-line fit near a point","kind":"content","session":1,"hash":"083173c3","md":"#### [week1#best-linear-fit] The derivative gives the best straight-line fit near a point\n\n*Block 1 · The definition that generalises*\n\n- **Local linear approximation.** `f(x + h) ≈ f(x) + f′(x) · h`\n\nThe error shrinks **faster than h**: halve the step and the error falls to about a quarter.\n\nNo other straight line through `(x, f(x))` does that. This, not \"slope of a curve\", is the definition that carries to many variables in week 2.\n\n- **Why machine learning cares.** Training changes weights by small steps. Near the current weights, the loss changes by about **derivative × step**. Every optimiser in weeks 5 to 8 starts from that line.","notes":"Write f(x + h) = f(x) + f'(x) h + r(h), with r(h)/h going to 0. Stress \"faster than h\": a line with any other slope leaves an error proportional to h. Then the bridge to the course: gradient descent is this approximation used to choose a step. Keep it brief; Taylor makes the error term precise in block 2.","minutes":7,"lo":["LO1"]},{"id":"tangent-d3","n":10,"title":"District D3's enrolment curve and its tangent at 12 thousand","kind":"content","session":1,"hash":"838c862e","md":"#### [week1#tangent-d3] District D3's enrolment curve and its tangent at 12 thousand\n\n*Block 1 · In the case*\n\nFigure: Synthetic: E(x) = 45 · ln(1 + x / 8), drawn by labs/_tools/make_figures.py.\n\n**2.25** enrolments per extra thousand at x = 12\n\nE′(x) = 45 / (8 + x), so E′(12) = 45 / 20.\n\nThe tangent says 2 more thousand bring 4.5 enrolments; the curve gives 4.3.","notes":"This is district D3, not the D1 curve of the lab. Numbers from the figure script: E(12) = 41.23, E(14) = 45.52, tangent at 14 = 45.73, so the tangent overstates by 0.46%. At 17 thousand it overstates by 2.4%, at 22 by 7.2%, at 32 by 19%. Ask: is the overstatement an accident of this curve? Hold the answer for the Taylor slide.","minutes":6,"lo":["LO1"]},{"id":"check-local-estimate","n":11,"title":"What does the slope promise the finance officer?","kind":"quiz","session":1,"hash":"86978cec","md":"#### [week1#check-local-estimate] What does the slope promise the finance officer?\n\n*Checkpoint 1*\n\n**Question:** District D2's curve has E(15) = 50 enrolments and E′(15) = 1.8 per thousand. The finance officer asks what 2 more thousand of outreach would bring. Which answer is best?\n\n- A. About 1.8 more enrolments\n- B. About 3.6 more, slightly fewer since the curve flattens\n- C. Exactly 3.6 more enrolments\n- D. About 90 more enrolments","notes":"Answer: B. If many pick C, go back to the D3 figure: the tangent lies above the curve. If many pick A, write the approximation again with h = 2. Two minutes, then move on.","minutes":4,"lo":["LO1"]},{"id":"rules-table","n":12,"title":"Five rules cover every function in this course","kind":"content","session":1,"hash":"9086c003","md":"#### [week1#rules-table] Five rules cover every function in this course\n\n*Block 2 · Computing derivatives exactly*\n\n| Rule | Statement | Example |\n| --- | --- | --- |\n| Power | `(xⁿ)′ = n xⁿ⁻¹` | `(x³)′ = 3x²` |\n| Exponential and log | `(eˣ)′ = eˣ`, `(ln x)′ = 1/x` | `(e^(0.5x))′ = 0.5 e^(0.5x)` |\n| Sum and constant | `(a f + b g)′ = a f′ + b g′` | `(4x² - x)′ = 8x - 1` |\n| Product | `(f g)′ = f′ g + f g′` | `(x eˣ)′ = (1 + x) eˣ` |\n| Chain | `f(g(x))′ = f′(g(x)) · g′(x)` | `ln(1 + x/8)′ = 1 / (8 + x)` |\n\n> **Sigmoid.** σ(z) = 1 / (1 + e⁻ᶻ) has σ′(z) = σ(z)(1 - σ(z)): you will use it every week.","notes":"Work the sigmoid derivative on the board with the chain rule: d/dz (1 + e^-z)^-1 = (1 + e^-z)^-2 e^-z, then rewrite. The chain rule row is highlighted because weeks 3 and 4 are the chain rule applied to a graph. Do not derive the D1 curve of the lab: the lab asks for it.","minutes":9,"lo":["LO1"]},{"id":"symbolic-algebra","n":13,"title":"Symbolic algebra applies the same rules exactly, and can bloat","kind":"content","session":1,"hash":"7e757328","md":"#### [week1#symbolic-algebra] Symbolic algebra applies the same rules exactly, and can bloat\n\n*Block 2 · Rules, done by a program*\n\n```python\n# file: symbolic.py\nimport sympy as sp\n\nx = sp.symbols(\"x\", real=True)\ng = sp.exp(sp.Rational(1, 2) * x) * x**2\ndg = sp.diff(g, x)\nprint(sp.factor(dg))   # x*(x + 4)*exp(x/2)/2\nf = sp.lambdify(x, dg, \"numpy\")\nprint(f(1.0))          # 4.1218...\n```\n\n- **Exact.** No step size, no rounding until you evaluate. Good for checking a hand derivation.\n- **Expression swell.** Differentiate a long composition symbolically and the formula can grow far larger than the program that computes it. Reverse mode (week 4) avoids that.","notes":"Run it live if the room has the environment ready: sp.factor gives x(x + 4) e^(x/2) / 2, and f(1.0) = 4.1218 (that is 2.5 times e to the 0.5). Symbolic algebra is one of the tool slots (SymPy, Maxima): any system that applies the rules exactly fills it. Expression swell is the reason frameworks do not differentiate symbolically.","minutes":9,"lo":["LO1"]},{"id":"taylor-quadratic","n":14,"title":"Add the curvature term and the approximation reaches further","kind":"content","session":1,"hash":"74595d03","md":"#### [week1#taylor-quadratic] Add the curvature term and the approximation reaches further\n\n*Block 2 · Taylor expansions*\n\n- **Taylor, to second order.** `f(x + h) ≈ f(x) + f′(x) h + ½ f″(x) h²`\n\nThe first neglected term is of order `h³`. The sign of `f″` says which side of the tangent the curve lies on.\n\n**f″ \u003c 0** (concave): the tangent overestimates. **f″ > 0** (convex): it underestimates.\n\n| Extra budget, D3 from 12 | Tangent off by |\n| --- | --- |\n| 2 thousand | 0.5% |\n| 5 thousand | 2.4% |\n| 10 thousand | 7.2% |\n| 20 thousand | 19.1% |","notes":"Answer the question from the D3 slide: E''(x) = -45 / (8 + x)², negative everywhere, so the tangent always overestimates. The percentages are the figure script's, for D3. The lab measures the same for D1 and also for the quadratic; do not give those numbers. Week 6 uses f'' again, as the Hessian, to bound the step size.","minutes":9,"lo":["LO1"]},{"id":"check-concave-tangent","n":15,"title":"Which side of the tangent is the curve on?","kind":"quiz","session":1,"hash":"7ab8c9e1","md":"#### [week1#check-concave-tangent] Which side of the tangent is the curve on?\n\n*Checkpoint 2*\n\n**Question:** A completion-rate curve r(h) of weekly hours h has r″(h) \u003c 0 for every h. The analyst uses the tangent line at h = 3 to predict r at h = 6. What can you say before computing anything?\n\n- A. The prediction is too low\n- B. The prediction is exact\n- C. It depends on which side of 3 we predict\n- D. The prediction is too high","notes":"Answer: D. Draw a hill and a tangent touching it once. The same picture explains why a step of gradient descent on a concave piece overshoots the gain it promised.","minutes":4,"lo":["LO1"]},{"id":"finite-differences","n":16,"title":"Finite differences need only the function, and pay with error","kind":"content","session":1,"hash":"48f4bee4","md":"#### [week1#finite-differences] Finite differences need only the function, and pay with error\n\n*Block 3 · Derivatives from values alone*\n\n- **Forward.** `(f(x + h) - f(x)) / h` Truncation error about `h/2 · |f″|`: first order.\n- **Central.** `(f(x + h) - f(x - h)) / (2h)` The h² terms cancel: error about `h²/6 · |f‴|`, second order.\n\n- **Their real job.** Nobody trains a model with finite differences: one extra evaluation per weight is far too slow. They are the **referee**: every gradient you derive or code in this course is checked against a central difference.","notes":"Derive both error terms from Taylor on the board: subtract f(x - h) from f(x + h) and the even powers cancel. Say clearly what finite differences are for in machine learning: gradient checking. A model with a million weights needs two million evaluations for one central-difference gradient; reverse mode needs one backward pass (week 3).","minutes":8,"lo":["LO1"]},{"id":"rounding-error","n":17,"title":"A float holds about 16 digits, and subtraction throws them away","kind":"content","session":1,"hash":"c1ec0246","md":"#### [week1#rounding-error] A float holds about 16 digits, and subtraction throws them away\n\n*Block 3 · The second error*\n\n- Machine epsilon, 64-bit: **2.2 × 10⁻¹⁶**, the relative gap between neighbouring floats.\n- For tiny `h`, `f(x + h)` and `f(x)` share most digits; their difference keeps the noisy ones.\n- Dividing by `h` magnifies the noise: rounding error ≈ `ε |f| / h`.\n\n```python\n# file: python\n>>> import numpy as np\n>>> np.finfo(float).eps\n2.220446049250313e-16\n>>> (1.0 + 1e-16) - 1.0\n0.0\n```\n\n> **What goes wrong.** A gradient check with `h = 1e-14` \"fails\" for a correct gradient. The check is broken, not the gradient.","notes":"The last line of the code is the whole story: 1e-16 is below half the gap between 1 and the next float, so it vanishes. Floating-point limits are a prerequisite topic from FND-MTH-101; this is the one consequence that matters here.","minutes":7,"lo":["LO1"]},{"id":"error-v","n":18,"title":"Error falls with h, then rises: the best step sits in the V","kind":"content","session":1,"hash":"7b833c23","md":"#### [week1#error-v] Error falls with h, then rises: the best step sits in the V\n\n*Block 3 · Two errors, one best step*\n\nFigure: g(x) = e^(0.5x) at x = 1, steps from 0.1 to 1e-12; labs/_tools/make_figures.py.\n\n|  | Theory | This example |\n| --- | --- | --- |\n| Best forward step | √ε ≈ 1.5e-8 | 3e-8 |\n| Best central step | ∛ε ≈ 6.1e-6 | 3e-6 |\n| Lowest error, forward |  | 6e-9 |\n| Lowest error, central |  | 5e-13 |","notes":"Balance h/2 |f''| against eps |f| / h and the minimum is near the square root of eps; for the central difference balance h²/6 against eps/h and you get the cube root. The example numbers come from the figure script. The lab makes the same plot for the three case functions; let the room predict where their V's sit before they run it.","minutes":7,"lo":["LO1"]},{"id":"check-step-size","n":19,"title":"Which step should the gradient check use next?","kind":"quiz","session":1,"hash":"360789c8","md":"#### [week1#check-step-size] Which step should the gradient check use next?\n\n*Checkpoint 3*\n\n**Question:** A colleague checks a hand-coded derivative with a forward difference. With h = 1e-14 the mismatch is 1e-2; with h = 1e-3 it is 1e-4. She concludes the derivative is wrong. Which step should she try first?\n\n- A. A forward step near 1e-8\n- B. A forward step of 1e-16\n- C. A forward step of 1e-1\n- D. A central step of 1e-14","notes":"Answer: A. A central step near 1e-5 or 1e-6 would be better still; that is the lab's finding to make. Then introduce the lab.","minutes":4,"lo":["LO1"]},{"id":"lab-1-1","n":20,"title":"Three ways to a derivative","kind":"lab","session":1,"hash":"9da53327","md":"#### [week1#lab-1-1] Three ways to a derivative\n\nLab 1.1 · 105 min\n\nAnalytic, symbolic and finite-difference derivatives compared across step sizes\n\n[W1_1_derivatives.ipynb](https://sdaiaacademy.github.io/fnd-mth-102/labs/W1_1_derivatives.ipynb)\n\n- [ ] Derive three derivatives by hand and code them (15 min)\n- [ ] Get the same derivatives from SymPy and compare (15 min)\n- [ ] Write forward and central differences (15 min)\n- [ ] Sweep the step from 0.1 to 1e-12 and plot the error (20 min)\n- [ ] Explain the V: truncation against rounding, and the best step (15 min)\n- [ ] Test how far the tangent line and the quadratic hold (15 min)\n- [ ] Write three findings in the lab log (10 min)\n- [ ] ✱ Stretch: Compute the complex-step derivative and see why it has no rounding V","notes":"AI-tutor lab: hints, not answers (labs/TUTOR.md). Walk the room during task 1: the common slip is forgetting the inner derivative of the chain rule for p (the factor w_a). In task 4, people who plot without log axes see nothing: point them to loglog. Task 5 is a written explanation: ask two people to read theirs aloud at the end. Every exercise has a safety net, so a stuck participant can still run the later cells.","minutes":null,"lo":[]},{"id":"problem-set-1","n":21,"title":"Problem set 1: six derivatives and one explanation","kind":"content","session":1,"hash":"3761df4d","md":"#### [week1#problem-set-1] Problem set 1: six derivatives and one explanation\n\n*Before week 2*\n\n- **50 minutes**, graded, auto-checked: `labs/problem_sets/PS1.py`.\n- **AI-off for the first attempt.** Work on paper, then code your answers.\n- The checker tests your functions against finite differences; it holds no answer key.\n- Hand in the file before the week 2 session.\n\n```bash\n# file: terminal\ncd labs\nuv run python problem_sets/check.py PS1\n```","notes":"The weekly problem sets are 20% of the grade together. The written answer (question 6) is marked by the trainer; the checker only sees that it is there. Remind the room of the pre-work refresher in labs/prework/README.md for anyone whose rules were slow today.","minutes":3,"lo":[]},{"id":"wrap-up","n":22,"title":"Three things to keep","kind":"content","session":1,"hash":"fa6bcf33","md":"#### [week1#wrap-up] Three things to keep\n\n*Week 1 · wrap-up*\n\n- **A local line.** f(x + h) ≈ f(x) + f′(x) h, with an error that shrinks faster than h.\n- **Curvature decides the side.** The second-order term says how far the line holds and whether it over- or underestimates.\n- **Finite differences referee.** Central differences with a step near 1e-5 check any derivative; too small a step breaks the check.","notes":"","minutes":3,"lo":[]},{"id":"next","n":23,"title":"Week 2: Several variables","kind":"content","session":1,"hash":"169c44fa","md":"#### [week1#next] Week 2: Several variables\n\n*Next*\n\nHand in Problem set 1. Finish Lab 1.1 at home if needed: week 2 opens with its results.","notes":"Nothing to install for week 2. Ask everyone to keep their central_diff function: Lab 2.1 turns it into a gradient checker.","minutes":2,"lo":[]}],"activities":[{"id":"check-local-estimate-q1","slide":"check-local-estimate","type":"single","prompt":"District D2's curve has E(15) = 50 enrolments and E′(15) = 1.8 per thousand. The finance officer asks what 2 more thousand of outreach would bring. Which answer is best?","options":[{"key":"A","text":"About 1.8 more enrolments"},{"key":"B","text":"About 3.6 more, slightly fewer since the curve flattens"},{"key":"C","text":"Exactly 3.6 more enrolments"},{"key":"D","text":"About 90 more enrolments"}],"correct":[1],"explanation":"Change ≈ E′(15) × 2 = 3.6. The curve bends down as budget grows, so the true gain is a little smaller.","misconceptions":["Uses the derivative as the change for any step: it is a rate per thousand, so a 2-thousand step needs it twice","","Treats the linear estimate as exact: the tangent only matches the curve at the point itself","Multiplies the level by the rate: the derivative scales the change in budget, not the current enrolments"],"lo":["LO1"]},{"id":"check-concave-tangent-q1","slide":"check-concave-tangent","type":"single","prompt":"A completion-rate curve r(h) of weekly hours h has r″(h) \u003c 0 for every h. The analyst uses the tangent line at h = 3 to predict r at h = 6. What can you say before computing anything?","options":[{"key":"A","text":"The prediction is too low"},{"key":"B","text":"The prediction is exact"},{"key":"C","text":"It depends on which side of 3 we predict"},{"key":"D","text":"The prediction is too high"}],"correct":[3],"explanation":"A concave curve lies below every tangent line, so any linear prediction away from the point overestimates.","misconceptions":["Reverses the sign rule: a negative second derivative bends the curve below the tangent, not above","Assumes knowing the slope makes the line exact: it matches the curve only at h = 3","Thinks the side depends on direction: a concave curve lies below its tangent on both sides",""],"lo":["LO1"]},{"id":"check-step-size-q1","slide":"check-step-size","type":"single","prompt":"A colleague checks a hand-coded derivative with a forward difference. With h = 1e-14 the mismatch is 1e-2; with h = 1e-3 it is 1e-4. She concludes the derivative is wrong. Which step should she try first?","options":[{"key":"A","text":"A forward step near 1e-8"},{"key":"B","text":"A forward step of 1e-16"},{"key":"C","text":"A forward step of 1e-1"},{"key":"D","text":"A central step of 1e-14"}],"correct":[0],"explanation":"Both of her steps sit on the walls of the V. The best forward step is near √ε, about 1e-8 for a function of moderate size.","misconceptions":["","Believes a smaller step is always more accurate: below about 1e-8 rounding error grows as the step shrinks","Thinks a larger step averages away the noise: truncation error grows with the step","Thinks the central formula cures rounding: at 1e-14 both formulas divide noise by a tiny step"],"lo":["LO1"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"week1.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

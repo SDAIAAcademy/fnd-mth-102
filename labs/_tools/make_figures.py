@@ -150,6 +150,24 @@ def week6() -> None:
     save(fig, "w6-saddle-escape.svg")
 
 
+def week7() -> None:
+    # parallel example: one weight c on four separable points x = -2, -1, 1, 2 with labels 0, 0, 1, 1
+    x, s = np.array([-2.0, -1.0, 1.0, 2.0]), np.array([-1.0, -1.0, 1.0, 1.0])
+    cs = np.linspace(0, 8, 400)
+    plain = np.array([np.mean(np.logaddexp(0.0, -s * c * x)) for c in cs])
+    fig, ax = plt.subplots(figsize=(7.5, 4.2))
+    ax.plot(cs, plain, color=CORAL, lw=2.5, label="plain loss: falls for ever")
+    for lam, col in [(0.02, PURPLE), (0.1, TEAL)]:
+        pen = plain + 0.5 * lam * cs ** 2
+        i = int(np.argmin(pen))
+        ax.plot(cs, pen, color=col, lw=2, label=f"with penalty, lam = {lam}: minimum at c = {cs[i]:.2f}")
+        ax.plot([cs[i]], [pen[i]], "o", color=col, ms=7)
+        print(f"lam {lam}: minimum at c = {cs[i]:.3f}, loss {pen[i]:.4f}")
+    print("plain loss at c = 8:", plain[-1])
+    ax.set_xlabel("weight c"), ax.set_ylabel("loss"), ax.set_ylim(0, 0.8), ax.legend(frameon=False, fontsize=10)
+    save(fig, "w7-penalty-shape.svg")
+
+
 if __name__ == "__main__":
     for w in sys.argv[1:] or ["1"]:
         globals()[f"week{w}"]()

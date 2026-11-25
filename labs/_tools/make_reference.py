@@ -262,6 +262,57 @@ def week6(C):
     save("w6_traces", traces)
 
 
+def week7(C):
+    def lse(Z):
+        m = Z.max(axis=1, keepdims=True)
+        return (m + np.log(np.exp(Z - m).sum(axis=1, keepdims=True)))[:, 0]
+
+    sm = lambda Z: np.exp(Z - lse(Z)[:, None])  # noqa: E731
+    ce = lambda Z, y: float(np.mean(lse(Z) - Z[np.arange(len(y)), y]))  # noqa: E731
+    Zb, yb = np.array(C["overflow_logits"]), np.array([1, 2, 0])
+    save("w7_stable", {"softmax": np.round(sm(Zb), 6).tolist(), "cross_entropy": ce(Zb, yb)})
+
+    rng = np.random.default_rng(7)
+    Zs, ys = rng.normal(0, 2, (5, 3)), np.array([0, 2, 1, 1, 0])
+    Xs, Ws = rng.normal(0, 1, (5, 4)), rng.normal(0, 0.5, (4, 3))
+    Y = np.eye(3)[ys]
+    gZ = (sm(Zs) - Y) / 5
+    nZ = U.central_diff(lambda z: ce(z.reshape(5, 3), ys), Zs.ravel()).reshape(5, 3)
+    gW = Xs.T @ (sm(Xs @ Ws) - Y) / 5
+    nW = U.central_diff(lambda w: ce(Xs @ w.reshape(4, 3), ys), Ws.ravel()).reshape(4, 3)
+    save("w7_gradcheck", [U.rel_err(gZ, nZ), U.rel_err(gW, nW)])
+
+    L = U.learners()
+    Xr = np.column_stack([L["entry_score"], L["attendance"], L["weekly_hours"]]).astype(float)
+    y = L["level"]
+    perm = np.random.default_rng(102).permutation(len(y))
+    TR, TE = perm[:450], perm[450:]
+    X = np.column_stack([(Xr - Xr[TR].mean(axis=0)) / Xr[TR].std(axis=0), np.ones(len(y))])
+    Xtr, ytr, Xte, yte = X[TR], y[TR], X[TE], y[TE]
+
+    def train(lam, steps=2000, lr=0.5):
+        W, Yt, hist = np.zeros((4, 3)), np.eye(3)[ytr], []
+        for t in range(1, steps + 1):
+            W = W - lr * (Xtr.T @ (sm(Xtr @ W) - Yt) / len(ytr) + lam * W)
+            if t % 50 == 0:
+                hist.append((t, ce(Xtr @ W, ytr), float(np.linalg.norm(W))))
+        return W, hist
+
+    W, hist = train(0.0)
+    save("w7_plain", {"train": ce(Xtr @ W, ytr), "held_out": ce(Xte @ W, yte),
+                      "accuracy": float(np.mean((Xte @ W).argmax(axis=1) == yte)), "history": hist})
+    rows = []
+    for lam in [0.0, 1e-3, 1e-2, 1e-1, 1.0]:
+        W, h = train(lam)
+        rows.append([lam, float(np.linalg.norm(W)), ce(Xtr @ W, ytr), ce(Xte @ W, yte),
+                     float(np.mean((Xte @ W).argmax(axis=1) == yte))])
+        if lam == 1e-2:
+            save("w7_penalised_history", h)
+    save("w7_sweep", rows)
+    best = min(rows, key=lambda r: r[3])
+    save("w7_compare", [best[0], bool(any(r[3] < rows[0][3] for r in rows[1:]))])
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

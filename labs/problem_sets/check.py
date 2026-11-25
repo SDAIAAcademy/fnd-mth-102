@@ -340,6 +340,67 @@ def _(m):
     return written(m.why_saddle)
 
 
+# ------------------------------------------------------------------ PS7 · week 7
+_Z = np.array([-1000.0, -50.0, -3.0, -0.2, 0.0, 0.7, 4.0, 60.0, 1000.0])
+
+
+@check("PS7", "1 · a stable log-sigmoid")
+def _(m):
+    got = np.asarray(m.log_sigmoid(_Z), float)
+    return bool(np.all(np.isfinite(got))) and close(got, -np.logaddexp(0.0, -_Z), 1e-9)
+
+
+@check("PS7", "2 · binary cross-entropy from logits")
+def _(m):
+    y = np.array([0, 1, 1, 0, 1, 0, 0, 1, 0])
+    want = float(np.mean(np.logaddexp(0.0, _Z) - y * _Z))
+    got = float(m.bce_from_logits(_Z, y))
+    return math.isfinite(got) and close(got, want, 1e-9)
+
+
+@check("PS7", "3 · the gradient of cross-entropy for one row")
+def _(m):
+    def ce(z, y):
+        mx = z.max()
+        return mx + math.log(np.exp(z - mx).sum()) - z[y]
+    rng = np.random.default_rng(71)
+    for _ in range(3):
+        z, y = rng.normal(0, 3, 4), int(rng.integers(0, 4))
+        if not close(m.ce_grad_row(z, y), cdiff(lambda v: ce(v, y), z), 1e-5):
+            return False
+    return True
+
+
+def _ridge_data():
+    rng = np.random.default_rng(72)
+    X = rng.normal(0, 1, (30, 3))
+    return X, X @ np.array([1.0, -2.0, 0.5]) + rng.normal(0, 0.3, 30)
+
+
+@check("PS7", "4 · the gradient of a penalised squared loss")
+def _(m):
+    X, y = _ridge_data()
+    loss = lambda w, lam: 0.5 * np.mean((X @ w - y) ** 2) + 0.5 * lam * (w @ w)  # noqa: E731
+    w = np.array([0.3, 0.1, -0.4])
+    return all(close(m.ridge_grad(w, X, y, lam), cdiff(lambda v: loss(v, lam), w), 1e-5) for lam in (0.0, 0.5))
+
+
+@check("PS7", "5 · the minimiser of the penalised loss")
+def _(m):
+    X, y = _ridge_data()
+    for lam in (0.1, 2.0):
+        w = np.asarray(m.ridge_solution(X, y, lam), float)
+        g = X.T @ (X @ w - y) / len(y) + lam * w
+        if not np.linalg.norm(g) < 1e-8:
+            return False
+    return True
+
+
+@check("PS7", "6 · written: separable data and the penalty")
+def _(m):
+    return written(m.why_penalty)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

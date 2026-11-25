@@ -331,4 +331,4 @@ except NotImplementedError:
 #    <details><summary>Answer</summary>It diverges: the edge is 2 / 50 = 0.04.</details>
 #
 # **Carry forward.** The annotated figure `out/W6_1_annotated.png` is the form of the LO2
-# evidence. Week 7 adds a penalty that makes a non-convex-looking loss convex.
+# evidence. Week 7 adds a penalty that makes a convex loss strictly convex, with one minimum.

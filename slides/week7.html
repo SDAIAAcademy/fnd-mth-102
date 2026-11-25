@@ -1,56 +1,206 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Collect Problem set 6. This week is about two habits every training loop needs: computing a loss so that it cannot overflow, and deciding deliberately whether to penalise the weights. Both come back in the capstone.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
+
+<section class="slide" id="review-week6" data-lo="LO2" data-minutes="4">
+  <div class="kicker">Review of week 6</div>
+  <h2>Why did this run stop?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">Gradient descent on a two-weight loss stops moving at a point where the gradient is zero. The Hessian there has eigenvalues 6 and −1. What should the report say?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads a zero gradient as a minimum: one negative eigenvalue rules that out">The run found a minimum and can stop</div>
+      <div class="opt" data-ok>The run is stuck at a saddle; a small push lowers the loss</div>
+      <div class="opt" data-why="Blames the step size: a step that is too large makes the loss grow, it does not park it at a zero gradient">The step was too large and must be halved</div>
+      <div class="opt" data-why="Treats non-convex as unsolvable: descent can still leave a saddle">The loss is non-convex, so nothing better can be found</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Eigenvalues of both signs make a saddle: along the eigenvector of −1 the loss curves down.</div>
+  </div>
+  <aside class="notes"><p>Answer: B.</p></aside>
+</section>
+
+<section class="slide" id="lab-6-1-debrief" data-lo="LO2" data-minutes="6">
+  <div class="kicker">Lab 6.1 · what your annotations showed</div>
+  <h2>Two of six surfaces were convex, and one of those still diverged</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Surface</th><th>Convex</th><th>Trace ended</th></tr>
+      <tr><td>bowl</td><td>yes</td><td>global minimum</td></tr>
+      <tr class="hl"><td>narrow, step 0.085</td><td>yes</td><td>diverged</td></tr>
+      <tr><td>valley</td><td>no</td><td>global minimum</td></tr>
+      <tr><td>saddle, from (1, 0)</td><td>no</td><td>stuck at the saddle</td></tr>
+      <tr><td>bumpy</td><td>no</td><td>a local minimum</td></tr>
+      <tr><td>plateau</td><td>no</td><td>did not move</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>The edge on narrow: 2 / 25 = 0.08</h4><p class="small mb0">Loss after 60 steps: 0.0096 at 0.05, 0.60 at 0.079, 242 at 0.081.</p></div>
+      <div class="card c-purple flat"><h4>The ridge</h4><p class="small mb0">From (1, 0) descent stopped at (0, 0); from (1, 0.001) it reached (0, 1.414).</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Numbers from the solution run. Ask who annotated valley as convex: its Hessian at (1, 1) is positive (0.39 and 51.6), but a grid finds negative eigenvalues elsewhere, and a convexity verdict is about the whole region. Plateau: the gradient at the start was about 3e-7, so "did not move" is not "converged". Newton reached (1, 1) in 7 steps where descent was given 1,500.</p></aside>
+</section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" id="float-range" data-lo="LO1" data-minutes="7">
+  <div class="kicker">Block 1 · Overflow</div>
+  <h2>Shift the logits by their maximum before exponentiating</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="stack">
+      <p>A 64-bit float stops at about 1.8 × 10³⁰⁸, so <code>exp(z)</code> is <code>inf</code> for z above about 709.8. A model's logits can reach that.</p>
+      <div class="card c-navy"><h4>Softmax ignores a common shift</h4><p class="mb0"><code>softmax(z) = softmax(z − m)</code> for any number m. Take <code>m = max z</code>: the largest exponent is then <code>exp(0) = 1</code>.</p></div>
+    </div>
+    <table class="t small">
+      <tr><th>Logits (3, 1, −1)</th><th class="num">value</th></tr>
+      <tr><td>exp of the shifted (0, −2, −4)</td><td class="num">1, 0.135, 0.018</td></tr>
+      <tr><td>softmax</td><td class="num">0.867, 0.117, 0.016</td></tr>
+      <tr class="hl"><td>log-sum-exp = 3 + log(1 + e⁻² + e⁻⁴)</td><td class="num">3.143</td></tr>
+    </table>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Shifting changes nothing mathematically: the factor exp(−m) cancels between numerator and denominator. The same trick gives log-sum-exp: m + log Σ exp(z − m). Very negative logits fail the other way: exp underflows towards 0, and log of 0 is −inf.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" id="ce-from-logits" data-lo="LO1" data-minutes="6">
+  <div class="kicker">Block 1 · The loss</div>
+  <h2>Compute cross-entropy from logits, never as the log of a probability</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Stable form</h4><p class="mb0"><code>CE(z, y) = logsumexp(z) − z_y</code></p><p class="small mb0">No probability is formed, so no probability can round to 0.</p></div>
+    <div class="card c-coral flat"><h4>Fragile form</h4><p class="mb0"><code>−log(softmax(z)_y)</code></p><p class="small mb0">If the probability of the label rounds to 0, the loss is <code>inf</code> and every gradient after it is <code>nan</code>.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <div class="callout tip mt"><b>In practice.</b> Libraries offer a loss that takes logits for exactly this reason; pass it logits, not probabilities.</div>
+  <aside class="notes"><p>The binary case is the same idea: log(1 + e^z) − y z, with the softplus computed stably. That is a problem-set question, so do not write it out here.</p></aside>
+</section>
+
+<section class="slide" id="check-overflow" data-lo="LO1" data-minutes="3">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>Which computation is safe?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">A model gives the logits (900, 905) for a learner with label 0. Which way of computing the cross-entropy returns a finite, correct number in 64-bit floats?</p>
+    <div class="opts">
+      <div class="opt" data-why="exp(905) is inf, so the ratio is inf / inf = nan before the log">Take −log of exp(900) / (exp(900) + exp(905))</div>
+      <div class="opt" data-why="Clipping to 709 changes the difference between the logits, and so the answer">Clip both logits to 709, then use the naive formula</div>
+      <div class="opt" data-ok>Compute 905 + log(e⁻⁵ + 1) − 900</div>
+      <div class="opt" data-why="Dividing logits by a number changes the softmax: the shift must be subtracted, not divided">Divide both logits by 905, then use the naive formula</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> That is log-sum-exp shifted by the maximum, minus the label's logit: about 5.007.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. 5 + log(1 + e⁻⁵) = 5.0067.</p></aside>
+</section>
+
+<section class="slide" id="softmax-jacobian" data-lo="LO1" data-minutes="7">
+  <div class="kicker">Block 2 · The gradient</div>
+  <h2>The gradient of softmax cross-entropy is probabilities minus the label</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p class="small">The Jacobian of softmax is <code>∂pᵢ/∂zⱼ = pᵢ (δᵢⱼ − pⱼ)</code>: <code>diag(p) − p pᵀ</code>.</p>
+      <p class="small">Differentiate <code>logsumexp(z) − z_y</code> directly: the first term gives p, the second gives the one-hot vector <code>e_y</code>.</p>
+      <div class="card c-navy"><h4>Result</h4><p class="mb0"><code>∂CE / ∂z = p − e_y</code></p></div>
+    </div>
+    <table class="t small">
+      <tr><th>Logits (2, 0, 1), label 2</th><th class="num">value</th></tr>
+      <tr><td>p</td><td class="num">0.665, 0.090, 0.245</td></tr>
+      <tr><td>e_y</td><td class="num">0, 0, 1</td></tr>
+      <tr class="hl"><td>gradient p − e_y</td><td class="num">0.665, 0.090, −0.755</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Read the gradient: descent raises the label's logit and lowers the others, each in proportion to how much probability it took. The entries sum to 0, because shifting every logit equally changes nothing. With logits Z = XW the chain rule from week 3 gives Xᵀ(P − Y)/n for the weights.</p></aside>
+</section>
+
+<section class="slide" id="check-gradient" data-lo="LO1" data-minutes="3">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>What is the gradient?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">For one learner the model's probabilities are (0.1, 0.7, 0.2) and the true level is 0. What is the gradient of the cross-entropy with respect to the three logits?</p>
+    <div class="opts">
+      <div class="opt" data-why="Subtracts the label from the wrong entry: the one-hot vector marks level 0">(0.1, −0.3, 0.2)</div>
+      <div class="opt" data-why="Gives the label minus the probabilities: the sign is reversed, so descent would move the wrong way">(0.9, −0.7, −0.2)</div>
+      <div class="opt" data-why="Differentiates −log p₀ with respect to p₀, not to the logits">(−10, 0, 0)</div>
+      <div class="opt" data-ok>(−0.9, 0.7, 0.2)</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> p − e_y with y = 0: (0.1 − 1, 0.7, 0.2). The entries sum to 0.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Option C is a useful wrong answer: it is the derivative with respect to the probability, the step before the softmax Jacobian.</p></aside>
+</section>
+
+<section class="slide" id="penalty-shape" data-lo="LO2" data-minutes="7">
+  <div class="kicker">Block 3 · Penalties</div>
+  <h2>On separable data the plain loss falls for ever; a penalty gives it a minimum</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w7-penalty-shape.svg" alt="Three curves of loss against one weight c from 0 to 8: the plain logistic loss falls steadily towards zero without a minimum; with a penalty of 0.02 the curve has a minimum at c of about 2.4; with 0.1 the minimum is at about 1.5 and higher" width="640">
+      <div class="caption">Four points x = −2, −1, 1, 2 with labels 0, 0, 1, 1; labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <p class="small">Any c &gt; 0 classifies all four points; a larger c is more confident, and the loss is lower. No finite c is best.</p>
+      <div class="card c-teal flat"><h4>Penalised loss</h4><p class="small mb0"><code>L(w) + (λ/2) ‖w‖²</code></p></div>
+      <p class="small">Minimum at c = 2.43 for λ = 0.02, and at c = 1.46 for λ = 0.1.</p>
+    </div>
+  </div>
+  <aside class="notes"><p>A parallel example in one weight; the lab's placement data are separable in the same way, and participants will measure what happens to the weights. Do not predict the lab's held-out numbers.</p></aside>
+</section>
+
+<section class="slide" id="penalty-curvature" data-lo="LO2" data-minutes="6">
+  <div class="kicker">Block 3 · What the penalty changes</div>
+  <h2>The penalty adds λ to every curvature, so the minimum becomes unique</h2>
+  <div class="cols cols-3">
+    <div class="card c-navy flat"><h4>Hessian</h4><p class="small mb0"><code>H + λI</code>: every eigenvalue rises by λ. A convex loss becomes strictly convex, with one minimiser.</p></div>
+    <div class="card c-purple flat"><h4>Gradient</h4><p class="small mb0"><code>∇L + λw</code>: each step also shrinks the weights by the factor <code>1 − ηλ</code>, which is why it is called weight decay.</p></div>
+    <div class="card c-coral flat"><h4>Price</h4><p class="small mb0">The minimiser is no longer the plain loss's best point: the training loss rises. Whether held-out loss falls is a measurement, not a promise.</p></div>
+  </div>
+  <aside class="notes"><p>Link to week 6: a larger smallest eigenvalue also means a smaller condition number. Whether the bias is penalised is a choice; the lab penalises every parameter so that the stretch claim about strict convexity holds, and says so.</p></aside>
+</section>
+
+<section class="slide" id="check-penalty" data-lo="LO2" data-minutes="3">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>What does the penalty do to this Hessian?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">At its minimum, a plain loss in two weights has Hessian eigenvalues 0 and 4. The analyst adds the penalty (0.5/2)‖w‖². What are the new eigenvalues, and what changes?</p>
+    <div class="opts">
+      <div class="opt" data-ok>0.5 and 4.5: the minimiser is now unique</div>
+      <div class="opt" data-why="Multiplies instead of adding: the penalty's Hessian is λI, which adds">0 and 2: the steep direction is flattened</div>
+      <div class="opt" data-why="Adds only to the zero eigenvalue: λI raises every eigenvalue">0.5 and 4: only the flat direction changes</div>
+      <div class="opt" data-why="Thinks a penalty cannot change curvature: its Hessian λI adds to H">0 and 4: a penalty only moves the minimum</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The penalty's Hessian is λI = 0.5 I. With no zero eigenvalue left, the loss is strictly convex.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Then start the lab.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-7-1" data-auto="lab" data-lab="7.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>AI-tutor. Task 1 asks for a prediction before running: collect a few. The two failure modes differ by row, and that is the point. In task 6 participants often expect the penalty to win on held-out loss; let the measurement settle it and ask them to explain what they see. Common mistakes: subtracting the global maximum of the matrix instead of each row's (correct, but can still underflow a row), and forgetting to divide the gradient by n.</p></aside>
+</section>
+
+<section class="slide" id="problem-set-7" data-label="Problem set 7">
+  <div class="kicker">Before week 8</div>
+  <h2>Problem set 7: stable losses, two gradients and a penalised minimum</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS7.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b></li>
+      <li>The checker feeds logits of size 1000: a naive formula fails it.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash">cd labs
+uv run python problem_sets/check.py PS7</code></pre>
+  </div>
+  <aside class="notes"><p>Worked answers are in the trainer pack. Test 2 follows week 8.</p></aside>
 </section>
 
 <section class="slide" id="wrap-up">
   <div class="kicker">Week 7 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+    <div class="card c-teal"><h4>Shift, then exp</h4><p class="small mb0">Log-sum-exp with the row's maximum; cross-entropy from logits.</p></div>
+    <div class="card c-coral"><h4>p − e_y</h4><p class="small mb0">The gradient of softmax cross-entropy with respect to the logits.</p></div>
+    <div class="card c-purple"><h4>A penalty is a choice</h4><p class="small mb0">It bounds the weights and makes the minimum unique; its effect on held-out loss is measured.</p></div>
   </div>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Week 8: REPLACE: the theme of this unit, in a few words</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Week 8: Constraints</h2>
+  <p class="lead">Hand in Problem set 7. Week 8 replaces a soft penalty with a hard limit: a fixed budget, and the price of each extra thousand.</p>
+  <aside class="notes"><p>Week 8's lab is the charity's outreach budget across its five districts. Test 2 follows week 8.</p></aside>
 </section>

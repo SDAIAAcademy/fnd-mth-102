@@ -17,14 +17,14 @@ Run `00_setup_check.ipynb` once first. No lab calls an AI model, so no key is ne
 
 | Unit | Session | Notebook | AI level |
 |---|---|---|---|
-| Week 1 | Derivatives, Taylor expansions and finite differences | [`W1_1_derivatives.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W1_1_derivatives.ipynb) | tutor |
-| Week 2 | Partial derivatives, gradients and Jacobians | [`W2_1_gradients.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W2_1_gradients.ipynb) | tutor |
-| Week 3 | Computational graphs and backpropagation by hand | [`W3_1_backprop_by_hand.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W3_1_backprop_by_hand.ipynb) | off |
-| Week 4 | Vector chain rules and a reverse-mode engine | [`W4_1_autodiff_engine.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W4_1_autodiff_engine.ipynb) | tutor |
-| Week 5 | Gradient descent, its variants and loss curves | [`W5_1_lr_sweeps.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W5_1_lr_sweeps.ipynb) | tutor |
-| Week 6 | Convexity, curvature and stable steps | [`W6_1_loss_surfaces.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W6_1_loss_surfaces.ipynb) | tutor |
-| Week 7 | Numerically stable losses and penalties | [`W7_1_stable_softmax.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W7_1_stable_softmax.ipynb) | tutor |
-| Week 8 | Constrained optimisation and what a multiplier means | [`W8_1_budget_allocation.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W8_1_budget_allocation.ipynb) | tutor |
+| Week 1 | Derivatives as local lines | [`W1_1_derivatives.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W1_1_derivatives.ipynb) | tutor |
+| Week 2 | Gradients and Jacobians | [`W2_1_gradients.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W2_1_gradients.ipynb) | tutor |
+| Week 3 | Graphs and the chain rule | [`W3_1_backprop_by_hand.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W3_1_backprop_by_hand.ipynb) | off |
+| Week 4 | A reverse-mode engine | [`W4_1_autodiff_engine.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W4_1_autodiff_engine.ipynb) | tutor |
+| Week 5 | Descent and loss curves | [`W5_1_lr_sweeps.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W5_1_lr_sweeps.ipynb) | tutor |
+| Week 6 | Convexity and curvature | [`W6_1_loss_surfaces.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W6_1_loss_surfaces.ipynb) | tutor |
+| Week 7 | Stable losses and penalties | [`W7_1_stable_softmax.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W7_1_stable_softmax.ipynb) | tutor |
+| Week 8 | Constraints and prices | [`W8_1_budget_allocation.ipynb`](https://colab.research.google.com/github/SDAIAAcademy/fnd-mth-102/blob/main/labs/W8_1_budget_allocation.ipynb) | tutor |
 
 The tutor's instruction text is in [`TUTOR.md`](TUTOR.md).
 

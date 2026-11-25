@@ -637,5 +637,57 @@
     "session_lab": true,
     "lab_minutes": 105
   },
-  "sources": []
+  "sources": [
+    {
+      "group": "Differentiation",
+      "items": [
+        {
+          "title": "Baydin, Pearlmutter, Radul and Siskind: Automatic differentiation in machine learning: a survey (JMLR 18, 2018)",
+          "url": "https://arxiv.org/abs/1502.05767"
+        },
+        {
+          "title": "PyTorch documentation: Autograd mechanics",
+          "url": "https://docs.pytorch.org/docs/2.15/notes/autograd.html"
+        },
+        {
+          "title": "SymPy documentation: Calculus (derivatives with diff)",
+          "url": "https://docs.sympy.org/latest/tutorials/intro-tutorial/calculus.html"
+        },
+        {
+          "title": "NumPy documentation: numpy.finfo, machine limits for floating-point types",
+          "url": "https://numpy.org/doc/stable/reference/generated/numpy.finfo.html"
+        }
+      ]
+    },
+    {
+      "group": "Optimisation",
+      "items": [
+        {
+          "title": "Ruder: An overview of gradient descent optimization algorithms",
+          "url": "https://arxiv.org/abs/1609.04747"
+        },
+        {
+          "title": "Kingma and Ba: Adam: A Method for Stochastic Optimization (ICLR 2015)",
+          "url": "https://arxiv.org/abs/1412.6980"
+        },
+        {
+          "title": "Boyd and Vandenberghe: Convex Optimization (Cambridge University Press; free PDF from the authors)",
+          "url": "https://web.stanford.edu/~boyd/cvxbook/"
+        }
+      ]
+    },
+    {
+      "group": "Public data (CC BY 4.0)",
+      "items": [
+        {
+          "title": "Airfoil Self-Noise, UCI Machine Learning Repository, doi 10.24432/C5VW2C",
+          "url": "https://archive.ics.uci.edu/dataset/291/airfoil+self+noise"
+        },
+        {
+          "title": "Banknote Authentication, UCI Machine Learning Repository, doi 10.24432/C55P57",
+          "url": "https://archive.ics.uci.edu/dataset/267/banknote+authentication"
+        }
+      ]
+    }
+  ]
 }

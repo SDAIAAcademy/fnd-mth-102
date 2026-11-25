@@ -11,7 +11,7 @@
     <p class="lead">Mini-batch SGD at a constant rate reaches the reference loss quickly, then keeps jumping in a band 30% wide for the rest of training. Which single change narrows the band?</p>
     <div class="opts">
       <div class="opt" data-why="Raises the noise: a larger rate widens the band">Double the learning rate</div>
-      <div class="opt" data-why="Treats the band as slow convergence: more epochs at the same rate keep the same band">Train for twice as many epochs</div>
+      <div class="opt" data-why="Treats the band as slow convergence: more epochs at the same rate keep the same band">Train for twice as many epochs at the same rate</div>
       <div class="opt" data-why="Changes the model, not the optimiser: the band comes from gradient noise times the rate">Add more features</div>
       <div class="opt" data-ok>Decay the rate after the loss reaches the band</div>
     </div>
@@ -129,7 +129,7 @@
     <p class="lead">At a point where the gradient of a two-weight loss is zero, the Hessian is [[3, 0], [0, −0.2]]. The run has stopped there. What should the analyst say?</p>
     <div class="opts">
       <div class="opt" data-why="Looks only at the larger eigenvalue: one negative eigenvalue makes it a saddle">It is a minimum, since 3 is large and positive</div>
-      <div class="opt" data-why="Reads a small eigenvalue as zero: −0.2 is clearly negative, so the test decides">The test cannot tell</div>
+      <div class="opt" data-why="Reads a small eigenvalue as zero: −0.2 is clearly negative, so the test decides">The test cannot tell: −0.2 is too small to count as negative</div>
       <div class="opt" data-ok>It is a saddle: lower loss lies along the second weight</div>
       <div class="opt" data-why="Thinks a zero gradient always means a maximum or minimum">It is a maximum</div>
     </div>
@@ -174,7 +174,7 @@
     <div class="opts">
       <div class="opt" data-ok>0.041 diverges; the other two converge, slowly along the flat direction</div>
       <div class="opt" data-why="Uses the smallest curvature for the edge (2 / 0.5 = 4): divergence comes from the largest">All three converge quickly</div>
-      <div class="opt" data-why="Thinks convex losses cannot diverge: a step past 2 / λ_max always does">All three converge, since the loss is convex</div>
+      <div class="opt" data-why="Thinks convex losses cannot diverge: a step past 2 / λ_max always does">All three converge, since a convex loss cannot diverge whatever the step</div>
       <div class="opt" data-why="Puts the edge at 1 / λ_max = 0.02: the steep direction still shrinks up to 0.04">0.039 and 0.041 diverge</div>
     </div>
     <div class="callout tip why"><b>Why.</b> The edge is 2 / 50 = 0.04. With κ = 100, even the best step leaves the flat direction shrinking by only about 2% per step.</div>

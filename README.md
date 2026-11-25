@@ -43,7 +43,13 @@ Participants work through the calculus that trains models: derivatives as local 
 
 ## Case study
 
-**REPLACE: the name of the fictional organisation every lab works on.** REPLACE: two sentences on the case study and its synthetic data
+**The adult learning charity.** A non-profit that runs evening literacy and numeracy classes for
+adults in five districts, D1 to D5, of one city. Every charity figure in the labs is synthetic,
+generated with a fixed seed by `labs/_tools/make_data.py`: 600 learners coded LR-0001 to LR-0600,
+the outreach response curve of each district and the outreach budget. People appear only as
+roles: the programme lead, the data analyst and the finance officer. The gradient-descent lab and
+the capstone use public datasets instead (see Public data below), never presented as the
+charity's.
 
 <!-- academy:labs -->
 ## Labs
@@ -66,7 +72,78 @@ Every lab is a notebook in `labs/`. Open it in Google Colab from the course page
 
 A two-layer network trained on public data with the participant's own engine, with gradient checks, three optimisers compared across seeds and every run reported, defended in a ten-minute oral check
 
-**Submission:** REPLACE: what participants submit and how: a public repository link, or a shared folder for a course without code
+**Submission:** a link to a public GitHub repository with the participant's engine, its tests and
+gradient checks, the training code, the log of every run with its seed and the report; then a
+ten-minute oral check, questions included, in which the participant traces a backward pass through
+their engine and explains a failed run from the log. The brief, the rubric and the data loader are
+in [`labs/capstone/`](labs/capstone/BRIEF.md).
+
+## Hours
+
+45 hours over 8 weeks and a capstone day.
+
+| Component | Hours | Minutes | What |
+|---|---|---|---|
+| Instruction | 14 | 840 | 8 sessions × 105 minutes of teaching, one a week |
+| Lab | 14 | 840 | 8 labs × 105 minutes, one after each session |
+| Guided self-study | 8 | 480 | pre-work refresher 80; Problem sets 1 to 8, 50 each (400) |
+| Assessment | 3 | 180 | Test 1 after week 4 and Test 2 after week 8, 90 each: 40 on paper, 50 at the keyboard |
+| Capstone | 6 | 360 | brief and planning clinic 30; build 255; gradient check and test oral 30; oral check 10; changeover 5; written feedback 30 |
+| **Total** | **45** | **2,700** | |
+
+## Assessment
+
+- Weekly problem sets, auto-checked (20%)
+- Two supervised AI-off tests, on paper and at the keyboard (40%)
+- Capstone engine and report, rubric-scored (30%)
+- Oral check (10%)
+
+Passing: 60% overall and at least 50% on each supervised test
+
+Authenticity: Proctored tests without assistance, and an oral check in which the participant traces a backward pass through their engine and explains a failed run from the log
+
+Certificate: completion with assessed work
+
+The capstone rubric scores the repository and report; the oral check is scored separately, on
+understanding shown live, so the same evidence is not counted twice.
+
+## AI policy
+
+AI-off for first attempts at problem sets, the hand backpropagation lab and both tests. AI-tutor
+in the other labs. AI-full in the capstone, which is defended orally.
+
+The AI level of each lab is in [`labs/README.md`](labs/README.md); the tutor's hint-only
+instruction is in [`labs/TUTOR.md`](labs/TUTOR.md). No lab calls an AI model.
+
+## Responsible use
+
+Covers transparent reporting: the capstone lists every run, seed and failure, not the best result
+alone, and the allocation lab discusses how optimising a convenient proxy can harm the people a
+model serves.
+
+## Answers and keys
+
+The lab solutions are public, in `labs/solutions/`, with the labs' answer key
+(`labs/solutions/answer_key.md`). The problem sets are checked by property in
+`labs/problem_sets/check.py`, which holds no answers. Worked problem-set answers, the capstone
+reference run and the oral-check sheet are kept by the trainer outside this repository, because
+publishing them would defeat the assessment.
+
+## Running the labs
+
+Open a notebook in Google Colab from the course page, or run it locally with
+[uv](https://docs.astral.sh/uv/) from `labs/` (see [`labs/README.md`](labs/README.md)). Set
+`MTH_QUICK=1` for a short run. Build and check the course with the Academy engine:
+`node academy.mjs check`, `node academy.mjs build`.
+
+## Public data
+
+Lab 5.1 uses [Airfoil Self-Noise](https://archive.ics.uci.edu/dataset/291/airfoil+self+noise)
+(doi 10.24432/C5VW2C) and the capstone uses
+[Banknote Authentication](https://archive.ics.uci.edu/dataset/267/banknote+authentication)
+(doi 10.24432/C55P57), both from the UCI Machine Learning Repository under the Creative Commons
+Attribution 4.0 licence. The files are downloaded when a lab runs, checked against a pinned
+SHA-256 and kept in `labs/data/cache/`, which git ignores; they are not part of this repository.
 
 ## Prerequisites
 
@@ -89,5 +166,21 @@ Each line is a capability; the examples are interchangeable.
 <!-- academy:sources -->
 ## Sources
 
-- REPLACE: every source the course cites, with its address, in course.json under "sources"; this list is written from there
+### Differentiation
+
+- [Baydin, Pearlmutter, Radul and Siskind: Automatic differentiation in machine learning: a survey (JMLR 18, 2018)](https://arxiv.org/abs/1502.05767)
+- [PyTorch documentation: Autograd mechanics](https://docs.pytorch.org/docs/2.15/notes/autograd.html)
+- [SymPy documentation: Calculus (derivatives with diff)](https://docs.sympy.org/latest/tutorials/intro-tutorial/calculus.html)
+- [NumPy documentation: numpy.finfo, machine limits for floating-point types](https://numpy.org/doc/stable/reference/generated/numpy.finfo.html)
+
+### Optimisation
+
+- [Ruder: An overview of gradient descent optimization algorithms](https://arxiv.org/abs/1609.04747)
+- [Kingma and Ba: Adam: A Method for Stochastic Optimization (ICLR 2015)](https://arxiv.org/abs/1412.6980)
+- [Boyd and Vandenberghe: Convex Optimization (Cambridge University Press; free PDF from the authors)](https://web.stanford.edu/~boyd/cvxbook/)
+
+### Public data (CC BY 4.0)
+
+- [Airfoil Self-Noise, UCI Machine Learning Repository, doi 10.24432/C5VW2C](https://archive.ics.uci.edu/dataset/291/airfoil+self+noise)
+- [Banknote Authentication, UCI Machine Learning Repository, doi 10.24432/C55P57](https://archive.ics.uci.edu/dataset/267/banknote+authentication)
 <!-- /academy:sources -->

@@ -9,7 +9,7 @@
     "en": "Calculus and Optimisation for Machine Learning",
     "ar": "التفاضل والتكامل والأمثلة الرياضية لتعلم الآلة"
   },
-  "tagline": "REPLACE: one line under the title: what participants can do after the course",
+  "tagline": "Differentiate by hand and in code, build a small reverse-mode engine, and train models with gradient descent you can diagnose",
   "description": "Participants work through the calculus that trains models: derivatives as local linear approximations, gradients, Jacobians and the chain rule on computational graphs. They backpropagate by hand, then write a small reverse-mode automatic differentiation engine and check it against a framework. They run batch, stochastic and momentum gradient descent, read loss curves, and handle convexity and constraints. The capstone trains a small network with their own engine; tensor-level differentiation and modern optimisers follow in SPC-DLR-302.",
   "track": "foundations",
   "level": 100,
@@ -62,8 +62,8 @@
     }
   ],
   "case_study": {
-    "name": "REPLACE: the name of the fictional organisation every lab works on",
-    "summary": "REPLACE: two sentences on the case study and its synthetic data"
+    "name": "The adult learning charity",
+    "summary": "A non-profit that runs evening literacy and numeracy classes for adults in five districts, D1 to D5, of one city; its own labs use synthetic data generated with a fixed seed: 600 learners coded LR-0001 to LR-0600, five district outreach response curves and a budget, with planted problems (a wrong hand-coded derivative, logits that overflow, separable placement data and districts that a proxy objective starves). The gradient-descent lab and the capstone train on public datasets from the UCI Machine Learning Repository (CC BY 4.0), downloaded when the lab runs and never presented as the charity's data; people appear only as roles."
   },
   "format": "extended",
   "format_note": "Extended: 8 weeks part-time, one session and one lab a week, weekly graded problem sets and a capstone",
@@ -79,219 +79,514 @@
     {
       "id": "week1",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Change and approximation",
       "deck": "slides/week1.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Derivatives as local lines",
+          "summary": "A derivative is the slope of the best straight-line fit near a point; you compute it by hand, symbolically and numerically",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Explain a derivative as the slope of the best local linear approximation",
+            "Compute derivatives by rule, with symbolic algebra and with finite differences",
+            "Choose a finite-difference step by weighing truncation against rounding error"
           ],
-          "lo": [],
+          "lo": [
+            "LO1"
+          ],
           "minutes": 210,
           "lab": {
             "id": "1.1",
-            "title": "REPLACE: what participants build in lab 1.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Three ways to a derivative",
+            "summary": "Analytic, symbolic and finite-difference derivatives compared across step sizes",
             "minutes": 105,
-            "href": "W1_1.ipynb"
+            "href": "W1_1_derivatives.ipynb",
+            "steps": [
+              {
+                "text": "Derive three derivatives by hand and code them",
+                "minutes": 15
+              },
+              {
+                "text": "Get the same derivatives from SymPy and compare",
+                "minutes": 15
+              },
+              {
+                "text": "Write forward and central differences",
+                "minutes": 15
+              },
+              {
+                "text": "Sweep the step from 0.1 to 1e-12 and plot the error",
+                "minutes": 20
+              },
+              {
+                "text": "Explain the V: truncation against rounding, and the best step",
+                "minutes": 15
+              },
+              {
+                "text": "Test how far the tangent line and the quadratic hold",
+                "minutes": 15
+              },
+              {
+                "text": "Write three findings in the lab log",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Compute the complex-step derivative and see why it has no rounding V"
           }
         }
-      ]
+      ],
+      "subtitle": "Derivatives as local linear approximations, and three ways to compute one"
     },
     {
       "id": "week2",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Several variables",
       "deck": "slides/week2.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Gradients and Jacobians",
+          "summary": "Hold all inputs but one still to get a partial derivative; stack them into a gradient, or into a Jacobian for a map with several outputs",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Compute partial derivatives and assemble the gradient of a function of several variables",
+            "Explain the gradient as the direction of steepest increase and a Jacobian as the best local linear map",
+            "Check a hand-derived gradient or Jacobian with central differences and a relative-error tolerance"
           ],
-          "lo": [],
+          "lo": [
+            "LO1"
+          ],
           "minutes": 210,
           "lab": {
             "id": "2.1",
-            "title": "REPLACE: what participants build in lab 2.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Gradients and a Jacobian, checked",
+            "summary": "Partial derivatives, a gradient, two Jacobians and a reusable gradient checker on the charity's completion and enrolment models",
             "minutes": 105,
-            "href": "W2_1.ipynb"
+            "href": "W2_1_gradients.ipynb",
+            "steps": [
+              {
+                "text": "Derive the partial derivatives of the completion model",
+                "minutes": 15
+              },
+              {
+                "text": "Build the gradient and test the steepest direction",
+                "minutes": 15
+              },
+              {
+                "text": "Write a gradient checker for any function of n inputs",
+                "minutes": 15
+              },
+              {
+                "text": "Build two Jacobians and check them",
+                "minutes": 20
+              },
+              {
+                "text": "Predict a budget shift with the Jacobian and compare",
+                "minutes": 15
+              },
+              {
+                "text": "Find the planted wrong partial derivative",
+                "minutes": 15
+              },
+              {
+                "text": "Write three findings in the lab log",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Check the symmetry of second partial derivatives numerically"
           }
         }
-      ]
+      ],
+      "subtitle": "Partial derivatives, gradients and Jacobians, and how to check them"
     },
     {
       "id": "week3",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "The chain rule on graphs",
       "deck": "slides/week3.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Graphs and the chain rule",
+          "summary": "Write a loss as a graph of simple operations; the chain rule run backwards gives every gradient in one pass",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Draw the computational graph of a composite function",
+            "Explain why reverse mode costs one backward pass per output and forward mode one pass per input",
+            "Compute a backward pass by hand and confirm it with a numerical gradient check"
           ],
-          "lo": [],
+          "lo": [
+            "LO4"
+          ],
           "minutes": 210,
           "lab": {
             "id": "3.1",
-            "title": "REPLACE: what participants build in lab 3.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Backpropagation by hand",
+            "summary": "Backpropagation by hand on a tiny logistic regression, checked in code",
             "minutes": 105,
-            "href": "W3_1.ipynb"
+            "href": "W3_1_backprop_by_hand.ipynb",
+            "steps": [
+              {
+                "text": "Draw the computational graph of the two-example loss",
+                "minutes": 15
+              },
+              {
+                "text": "Fill in the forward pass by hand",
+                "minutes": 15
+              },
+              {
+                "text": "Run the backward pass by hand, node by node",
+                "minutes": 25
+              },
+              {
+                "text": "Enter your values and check the forward pass in code",
+                "minutes": 10
+              },
+              {
+                "text": "Match your gradient to a numerical gradient check",
+                "minutes": 15
+              },
+              {
+                "text": "Compute one directional derivative in forward mode",
+                "minutes": 15
+              },
+              {
+                "text": "Write where your hand values differed, and why",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Add an L2 term to the loss and extend your backward pass by hand"
           }
         }
-      ]
+      ],
+      "subtitle": "Computational graphs, forward and reverse mode, and a backward pass by hand"
     },
     {
       "id": "week4",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Reverse mode in code",
       "deck": "slides/week4.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "A reverse-mode engine",
+          "summary": "Reverse mode multiplies vector-Jacobian products from the output back; a small engine records operations and replays them backwards",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Apply the chain rule to vector functions as products of Jacobians",
+            "Design a scalar reverse-mode engine: nodes, local derivatives, topological order and accumulation",
+            "Verify an engine with finite-difference checks and against a framework's gradients"
           ],
-          "lo": [],
+          "lo": [
+            "LO5",
+            "LO4"
+          ],
           "minutes": 210,
           "lab": {
             "id": "4.1",
-            "title": "REPLACE: what participants build in lab 4.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "A scalar reverse-mode engine",
+            "summary": "A scalar reverse-mode differentiation engine built and tested",
             "minutes": 105,
-            "href": "W4_1.ipynb"
+            "href": "W4_1_autodiff_engine.ipynb",
+            "steps": [
+              {
+                "text": "Read the interface and run the test suite",
+                "minutes": 5
+              },
+              {
+                "text": "Implement addition, multiplication and backward",
+                "minutes": 25
+              },
+              {
+                "text": "Add power, exp, log, tanh and ReLU",
+                "minutes": 20
+              },
+              {
+                "text": "Pass the finite-difference checks on random expressions",
+                "minutes": 15
+              },
+              {
+                "text": "Compare your gradients with a framework's",
+                "minutes": 15
+              },
+              {
+                "text": "Fix gradient accumulation for a reused node",
+                "minutes": 15
+              },
+              {
+                "text": "Write three findings in the lab log",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Add a dot-product node with its vector-Jacobian product"
           }
         }
-      ]
+      ],
+      "subtitle": "The chain rule with vectors and matrices, and a small automatic differentiation engine"
     },
     {
       "id": "week5",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Gradient descent",
       "deck": "slides/week5.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Descent and loss curves",
+          "summary": "Gradient descent steps against the gradient; the step size, the batch and momentum decide whether a run converges, crawls or diverges",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Apply batch, mini-batch stochastic and momentum gradient descent",
+            "Describe what adaptive step methods, warm-up and decay change",
+            "Diagnose divergence, oscillation and slow convergence from a loss curve"
           ],
-          "lo": [],
+          "lo": [
+            "LO6"
+          ],
           "minutes": 210,
           "lab": {
             "id": "5.1",
-            "title": "REPLACE: what participants build in lab 5.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Learning-rate sweeps",
+            "summary": "Learning-rate sweeps for three gradient descent variants on public regression data",
             "minutes": 105,
-            "href": "W5_1.ipynb"
+            "href": "W5_1_lr_sweeps.ipynb",
+            "steps": [
+              {
+                "text": "Load the public data, split it and find the reference loss",
+                "minutes": 15
+              },
+              {
+                "text": "Sweep the learning rate for batch gradient descent",
+                "minutes": 20
+              },
+              {
+                "text": "Sweep it for mini-batch stochastic gradient descent",
+                "minutes": 15
+              },
+              {
+                "text": "Sweep it for momentum",
+                "minutes": 15
+              },
+              {
+                "text": "Run on unscaled features and diagnose",
+                "minutes": 15
+              },
+              {
+                "text": "Write the experiment log with a diagnosis per run",
+                "minutes": 15
+              },
+              {
+                "text": "Add warm-up and step decay to the noisy run",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Add an adaptive step method and compare its sweep"
           }
         }
-      ]
+      ],
+      "subtitle": "Step size, stochastic gradients, momentum and reading loss curves"
     },
     {
       "id": "week6",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "The shape of a loss",
       "deck": "slides/week6.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Convexity and curvature",
+          "summary": "The Hessian tells a minimum from a saddle and bounds the step size; convex losses have no traps, non-convex ones do",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Distinguish convex from non-convex objectives with a test you can run",
+            "Classify critical points from the eigenvalues of the Hessian",
+            "Relate the largest stable step to the largest curvature"
           ],
-          "lo": [],
+          "lo": [
+            "LO2",
+            "LO6"
+          ],
           "minutes": 210,
           "lab": {
             "id": "6.1",
-            "title": "REPLACE: what participants build in lab 6.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Six loss surfaces",
+            "summary": "Six loss surfaces with gradient-descent traces, classified and annotated",
             "minutes": 105,
-            "href": "W6_1.ipynb"
+            "href": "W6_1_loss_surfaces.ipynb",
+            "steps": [
+              {
+                "text": "Plot the six surfaces as contour maps",
+                "minutes": 10
+              },
+              {
+                "text": "Classify critical points from the Hessian",
+                "minutes": 20
+              },
+              {
+                "text": "Test each surface for convexity",
+                "minutes": 15
+              },
+              {
+                "text": "Trace gradient descent below, at and above the stable step",
+                "minutes": 20
+              },
+              {
+                "text": "Start on and off the saddle's ridge",
+                "minutes": 10
+              },
+              {
+                "text": "Annotate each plot against the reference",
+                "minutes": 20
+              },
+              {
+                "text": "Write three findings in the lab log",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Take Newton steps on the valley and compare with gradient descent"
           }
         }
-      ]
+      ],
+      "subtitle": "Convexity, saddle points, curvature and the largest stable step"
     },
     {
       "id": "week7",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Stable losses and penalties",
       "deck": "slides/week7.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Stable losses and penalties",
+          "summary": "Shift logits before exponentiating, use the clean gradient of softmax cross-entropy, and add a penalty to change the shape of the loss",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Compute softmax and log-sum-exp without overflow",
+            "Derive and check the gradient of softmax cross-entropy",
+            "Explain regularisation as a penalty that reshapes the loss and bounds the weights"
           ],
-          "lo": [],
+          "lo": [
+            "LO1",
+            "LO2"
+          ],
           "minutes": 210,
           "lab": {
             "id": "7.1",
-            "title": "REPLACE: what participants build in lab 7.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "Stable softmax and a penalty",
+            "summary": "A stable three-level placement model, trained with and without an L2 penalty",
             "minutes": 105,
-            "href": "W7_1.ipynb"
+            "href": "W7_1_stable_softmax.ipynb",
+            "steps": [
+              {
+                "text": "Watch naive softmax overflow on the planted logits",
+                "minutes": 10
+              },
+              {
+                "text": "Write stable log-sum-exp, softmax and cross-entropy",
+                "minutes": 20
+              },
+              {
+                "text": "Check the gradient of softmax cross-entropy",
+                "minutes": 15
+              },
+              {
+                "text": "Train the placement model with gradient descent",
+                "minutes": 20
+              },
+              {
+                "text": "Add an L2 penalty and sweep its strength",
+                "minutes": 15
+              },
+              {
+                "text": "Compare weight norms and held-out loss",
+                "minutes": 15
+              },
+              {
+                "text": "Write three findings in the lab log",
+                "minutes": 10
+              }
+            ],
+            "stretch": "Show that the penalised loss is strictly convex while the plain one is not"
           }
         }
-      ]
+      ],
+      "subtitle": "Log-sum-exp, softmax cross-entropy and regularisation as a penalty"
     },
     {
       "id": "week8",
       "kind": "day",
-      "title": "REPLACE: the theme of this unit, in a few words",
+      "title": "Constraints",
       "deck": "slides/week8.html",
       "sessions": [
         {
-          "title": "REPLACE: the title of Session 1",
+          "title": "Constraints and prices",
+          "summary": "A constraint moves the optimum; the Lagrange multiplier prices it, and projected gradients reach the same answer by stepping and projecting",
           "outcomes": [
-            "REPLACE: what a participant can do after this session; list in lo the course outcomes it serves"
+            "Solve a small equality-constrained problem with the Lagrangian",
+            "Read a multiplier as the price of its constraint",
+            "Explain how optimising a convenient proxy can harm the people a model serves"
           ],
-          "lo": [],
+          "lo": [
+            "LO3"
+          ],
           "minutes": 210,
           "lab": {
             "id": "8.1",
-            "title": "REPLACE: what participants build in lab 8.1",
-            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 105",
+            "title": "A budget allocation two ways",
+            "summary": "A budget allocation solved with Lagrange multipliers and with projected gradients",
             "minutes": 105,
-            "href": "W8_1.ipynb"
+            "href": "W8_1_budget_allocation.ipynb",
+            "steps": [
+              {
+                "text": "Write the Lagrangian for two districts and solve it by hand",
+                "minutes": 15
+              },
+              {
+                "text": "Solve the five-district problem from the Lagrange conditions",
+                "minutes": 20
+              },
+              {
+                "text": "Solve it again with projected gradient ascent",
+                "minutes": 20
+              },
+              {
+                "text": "Compare the answers and read the multiplier",
+                "minutes": 15
+              },
+              {
+                "text": "Find who the proxy leaves out and add a floor",
+                "minutes": 20
+              },
+              {
+                "text": "Write the recommendation for the finance officer",
+                "minutes": 15
+              }
+            ],
+            "stretch": "Weight each district by need and see how the multiplier moves"
           }
         }
-      ]
+      ],
+      "subtitle": "Lagrange multipliers, projected gradients and the price of a constraint"
     },
     {
       "id": "capstone",
       "kind": "capstone",
-      "title": "Capstone project presentations",
+      "title": "Capstone oral checks",
       "deck": "slides/capstone.html",
-      "subtitle": "REPLACE: the catalog gives 10 minutes for each presentation and nothing about questions; decide whether the questions are inside those minutes, set capstone.talk_minutes and capstone.qa_minutes in course.json and the timers of the now-presenting slide, and remove this line"
+      "subtitle": "A two-layer network trained with your own engine, defended in ten minutes with the questions inside them"
     }
   ],
   "capstone": {
     "summary": "A two-layer network trained on public data with the participant's own engine, with gradient checks, three optimisers compared across seeds and every run reported, defended in a ten-minute oral check",
-    "submission": "REPLACE: what participants submit and how: a public repository link, or a shared folder for a course without code",
+    "submission": "A link to a public GitHub repository with the participant's engine, its tests and gradient checks, the training code, the log of every run with its seed and the report; then a ten-minute oral check, questions included, in which the participant traces a backward pass through their engine and explains a failed run from the log",
     "talk_minutes": 10,
     "rubric": [
       {
-        "criterion": "REPLACE: rubric criterion 1 and its weight (the weights add up to 100)",
+        "criterion": "Engine correct: passes the course test suite and the gradient checks on the network",
         "weight": 25
       },
       {
-        "criterion": "REPLACE: rubric criterion 2 and its weight (the weights add up to 100)",
+        "criterion": "Network trained on the public data with a held-out split, reproducible from the seeds",
+        "weight": 20
+      },
+      {
+        "criterion": "Three optimisers compared across at least three seeds, with loss curves and held-out accuracy",
         "weight": 25
       },
       {
-        "criterion": "REPLACE: rubric criterion 3 and its weight (the weights add up to 100)",
-        "weight": 20
+        "criterion": "Every run, seed and failure reported, not the best result alone",
+        "weight": 15
       },
       {
-        "criterion": "REPLACE: rubric criterion 4 and its weight (the weights add up to 100)",
-        "weight": 20
-      },
-      {
-        "criterion": "REPLACE: rubric criterion 5 and its weight (the weights add up to 100)",
-        "weight": 10
+        "criterion": "A written diagnosis of each failed run from its loss curve and log",
+        "weight": 15
       }
     ]
   },
@@ -341,5 +636,6 @@
     "sessions_per_day": 1,
     "session_lab": true,
     "lab_minutes": 105
-  }
+  },
+  "sources": []
 }

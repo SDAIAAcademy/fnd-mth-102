@@ -5,7 +5,7 @@
 
 Data & AI Foundations Track · SDAIA Academy · FND-MTH-102 · Level 100
 
-REPLACE: one line under the title: what participants can do after the course
+Differentiate by hand and in code, build a small reverse-mode engine, and train models with gradient descent you can diagnose
 
 Participants work through the calculus that trains models: derivatives as local linear approximations, gradients, Jacobians and the chain rule on computational graphs. They backpropagate by hand, then write a small reverse-mode automatic differentiation engine and check it against a framework. They run batch, stochastic and momentum gradient descent, read loss curves, and handle convexity and constraints. The capstone trains a small network with their own engine; tensor-level differentiation and modern optimisers follow in SPC-DLR-302.
 
@@ -30,15 +30,15 @@ Participants work through the calculus that trains models: derivatives as local 
 
 | Unit | Title | Sessions | Slides |
 |---|---|---|---|
-| Week 1 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week1.html`](slides/week1.html) |
-| Week 2 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week2.html`](slides/week2.html) |
-| Week 3 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week3.html`](slides/week3.html) |
-| Week 4 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week4.html`](slides/week4.html) |
-| Week 5 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week5.html`](slides/week5.html) |
-| Week 6 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week6.html`](slides/week6.html) |
-| Week 7 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week7.html`](slides/week7.html) |
-| Week 8 | REPLACE: the theme of this unit, in a few words | REPLACE: the title of Session 1 | [`slides/week8.html`](slides/week8.html) |
-| Capstone | Capstone project presentations |  | [`slides/capstone.html`](slides/capstone.html) |
+| Week 1 | Change and approximation | Derivatives as local lines | [`slides/week1.html`](slides/week1.html) |
+| Week 2 | Several variables | Gradients and Jacobians | [`slides/week2.html`](slides/week2.html) |
+| Week 3 | The chain rule on graphs | Graphs and the chain rule | [`slides/week3.html`](slides/week3.html) |
+| Week 4 | Reverse mode in code | A reverse-mode engine | [`slides/week4.html`](slides/week4.html) |
+| Week 5 | Gradient descent | Descent and loss curves | [`slides/week5.html`](slides/week5.html) |
+| Week 6 | The shape of a loss | Convexity and curvature | [`slides/week6.html`](slides/week6.html) |
+| Week 7 | Stable losses and penalties | Stable losses and penalties | [`slides/week7.html`](slides/week7.html) |
+| Week 8 | Constraints | Constraints and prices | [`slides/week8.html`](slides/week8.html) |
+| Capstone | Capstone oral checks |  | [`slides/capstone.html`](slides/capstone.html) |
 <!-- /academy:units -->
 
 ## Case study
@@ -52,14 +52,14 @@ Every lab is a notebook in `labs/`. Open it in Google Colab from the course page
 
 | | Session | Lab | File |
 |---|---|---|---|
-| 1.1 | Week 1 · Session 1 | REPLACE: what participants build in lab 1.1 | [`W1_1.ipynb`](labs/W1_1.ipynb) |
-| 2.1 | Week 2 · Session 1 | REPLACE: what participants build in lab 2.1 | [`W2_1.ipynb`](labs/W2_1.ipynb) |
-| 3.1 | Week 3 · Session 1 | REPLACE: what participants build in lab 3.1 | [`W3_1.ipynb`](labs/W3_1.ipynb) |
-| 4.1 | Week 4 · Session 1 | REPLACE: what participants build in lab 4.1 | [`W4_1.ipynb`](labs/W4_1.ipynb) |
-| 5.1 | Week 5 · Session 1 | REPLACE: what participants build in lab 5.1 | [`W5_1.ipynb`](labs/W5_1.ipynb) |
-| 6.1 | Week 6 · Session 1 | REPLACE: what participants build in lab 6.1 | [`W6_1.ipynb`](labs/W6_1.ipynb) |
-| 7.1 | Week 7 · Session 1 | REPLACE: what participants build in lab 7.1 | [`W7_1.ipynb`](labs/W7_1.ipynb) |
-| 8.1 | Week 8 · Session 1 | REPLACE: what participants build in lab 8.1 | [`W8_1.ipynb`](labs/W8_1.ipynb) |
+| 1.1 | Week 1 · Session 1 | Three ways to a derivative | [`W1_1_derivatives.ipynb`](labs/W1_1_derivatives.ipynb) |
+| 2.1 | Week 2 · Session 1 | Gradients and a Jacobian, checked | [`W2_1_gradients.ipynb`](labs/W2_1_gradients.ipynb) |
+| 3.1 | Week 3 · Session 1 | Backpropagation by hand | [`W3_1_backprop_by_hand.ipynb`](labs/W3_1_backprop_by_hand.ipynb) |
+| 4.1 | Week 4 · Session 1 | A scalar reverse-mode engine | [`W4_1_autodiff_engine.ipynb`](labs/W4_1_autodiff_engine.ipynb) |
+| 5.1 | Week 5 · Session 1 | Learning-rate sweeps | [`W5_1_lr_sweeps.ipynb`](labs/W5_1_lr_sweeps.ipynb) |
+| 6.1 | Week 6 · Session 1 | Six loss surfaces | [`W6_1_loss_surfaces.ipynb`](labs/W6_1_loss_surfaces.ipynb) |
+| 7.1 | Week 7 · Session 1 | Stable softmax and a penalty | [`W7_1_stable_softmax.ipynb`](labs/W7_1_stable_softmax.ipynb) |
+| 8.1 | Week 8 · Session 1 | A budget allocation two ways | [`W8_1_budget_allocation.ipynb`](labs/W8_1_budget_allocation.ipynb) |
 <!-- /academy:labs -->
 
 ## Capstone

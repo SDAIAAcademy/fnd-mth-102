@@ -34,3 +34,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 /*.log
+
+# Lab run outputs and downloaded public data (fetched when a lab runs, never committed)
+labs/out/
+labs/data/cache/

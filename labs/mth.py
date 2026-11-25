@@ -32,10 +32,11 @@ def pick(full, quick):
     return quick if QUICK else full
 
 
-def reference(name: str):
-    """The reference answer of an exercise, for the safety-net cells."""
+def reference(name: str, quiet: bool = False):
+    """The reference answer of an exercise, for the safety-net cells (quiet: to compare with, not to use)."""
     value = json.loads((DATA / "reference" / f"{name}.json").read_text(encoding="utf-8"))
-    print(f"(safety net: using the reference value of {name})")
+    if not quiet:
+        print(f"(safety net: using the reference value of {name})")
     return value
 
 

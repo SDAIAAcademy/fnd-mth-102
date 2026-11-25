@@ -197,6 +197,71 @@ def week5(C):
     save("w5_diagnoses", diags)
 
 
+def week6(C):
+    S = {
+        "bowl": (lambda w: 0.5 * (w[0] ** 2 + 2 * w[1] ** 2), (2.0, 2.0), 0.4, 60, (-3, 3, -3, 3)),
+        "narrow": (lambda w: 0.5 * (w[0] ** 2 + 25 * w[1] ** 2), (3.0, 1.0), 0.085, 60, (-4, 4, -1.5, 1.5)),
+        "valley": (lambda w: (1 - w[0]) ** 2 + 5 * (w[1] - w[0] ** 2) ** 2, (-1.0, 2.0), 0.02, 1500, (-1.5, 1.8, -0.5, 2.5)),
+        "saddle": (lambda w: w[0] ** 2 - w[1] ** 2 + 0.25 * w[1] ** 4, (1.0, 0.0), 0.1, 200, (-2, 2, -2.2, 2.2)),
+        "bumpy": (lambda w: 0.1 * w[0] ** 2 + 0.5 * np.sin(2 * w[0]) + w[1] ** 2, (3.0, 1.0), 0.1, 300, (-4, 4, -2, 2)),
+        "plateau": (lambda w: 1 - np.exp(-(w[0] ** 2 + w[1] ** 2) / 8), (8.0, 8.0), 0.5, 300, (-10, 10, -10, 10)),
+    }
+
+    def hess(f, w, h=1e-4):
+        w = np.asarray(w, dtype=float)
+        E = np.eye(2) * h
+        H = np.array([[(f(w + E[i] + E[j]) - f(w + E[i] - E[j]) - f(w - E[i] + E[j]) + f(w - E[i] - E[j])) / (4 * h * h)
+                       for j in range(2)] for i in range(2)])
+        return (H + H.T) / 2
+
+    def kind(H):
+        e = np.linalg.eigvalsh(H)
+        if np.any(np.abs(e) < 1e-6):
+            return "flat"
+        return "minimum" if np.all(e > 0) else "maximum" if np.all(e < 0) else "saddle"
+
+    def trace(f, s, lr, n):
+        w, path = np.array(s, dtype=float), [np.array(s, dtype=float)]
+        with np.errstate(over="ignore", invalid="ignore"):
+            for _ in range(n):
+                w = w - lr * U.central_diff(f, w)
+                path.append(w.copy())
+                if not np.all(np.isfinite(w)):
+                    break
+        return path
+
+    pts = {"bowl": (0, 0), "narrow": (0, 0), "valley": (1, 1), "saddle": (0, 0), "saddle, side": (0, 2 ** 0.5)}
+    save("w6_points", {k: [np.round(np.linalg.eigvalsh(hess(S[k.split(",")[0]][0], p)), 3).tolist(),
+                           kind(hess(S[k.split(",")[0]][0], p))] for k, p in pts.items()})
+    convex = {}
+    for k, (f, s, lr, n, box) in S.items():
+        m = min(np.linalg.eigvalsh(hess(f, (x, y)))[0] for x in np.linspace(box[0], box[1], 15) for y in np.linspace(box[2], box[3], 15))
+        convex[k] = bool(m > -1e-6)
+    save("w6_convex", convex)
+    fn = S["narrow"][0]
+    save("w6_edge", {str(lr): float(fn(trace(fn, (3.0, 1.0), lr, 60)[-1])) for lr in (0.05, 0.079, 0.081)})
+    fs = S["saddle"][0]
+    save("w6_ridge", [trace(fs, (1.0, 0.0), 0.1, 200)[-1].tolist(), trace(fs, (1.0, 0.001), 0.1, 200)[-1].tolist()])
+    notes, traces = {}, {}
+    for k, (f, s, lr, n, box) in S.items():
+        path = trace(f, s, lr, n)
+        step = max(1, len(path) // 150)
+        traces[k] = [[float(v) for v in p] for p in path[::step] if np.all(np.isfinite(p)) and np.abs(p).max() < 1e3]
+        end = path[-1]
+        if not np.all(np.isfinite(end)) or np.abs(end).max() > 1e3:
+            o, g = "diverged", None
+        elif np.linalg.norm(end - np.array(s)) < 0.01:
+            o, g = "plateau", None
+        elif kind(hess(f, end)) == "saddle":
+            o, g = "saddle", None
+        else:
+            xs, ys = np.meshgrid(np.linspace(box[0], box[1], 400), np.linspace(box[2], box[3], 400))
+            o, g = "minimum", bool(f(end) - f(np.array([xs, ys])).min() < 1e-3)
+        notes[k] = {"convex": convex[k], "outcome": o, "global": g}
+    save("w6_annotations", notes)
+    save("w6_traces", traces)
+
+
 def main() -> None:
     C = U.case()
     weeks = sys.argv[1:] or ["1"]

@@ -284,6 +284,62 @@ def _(m):
     return written(m.why_noise)
 
 
+# ------------------------------------------------------------------ PS6 · week 6
+def _hess(f, w, h=1e-4):
+    w = np.asarray(w, dtype=float)
+    E = np.eye(len(w)) * h
+    return np.array([[(f(w + E[i] + E[j]) - f(w + E[i] - E[j]) - f(w - E[i] + E[j]) + f(w - E[i] - E[j])) / (4 * h * h)
+                      for j in range(len(w))] for i in range(len(w))])
+
+
+@check("PS6", "1 · Hessian of x^3 + 2xy + y^2")
+def _(m):
+    f = lambda w: w[0] ** 3 + 2 * w[0] * w[1] + w[1] ** 2  # noqa: E731
+    return all(close(m.hessian_f(x, y), _hess(f, [x, y]), 1e-4) for x, y in ((0.5, 1.0), (-2.0, 0.3)))
+
+
+@check("PS6", "2 · the kind of two critical points")
+def _(m):
+    g = lambda w: w[0] ** 3 - 3 * w[0] + w[1] ** 2  # noqa: E731
+    def k(p):
+        e = np.linalg.eigvalsh(_hess(g, p))
+        return "minimum" if np.all(e > 0) else "maximum" if np.all(e < 0) else "saddle"
+    return m.kind_at(1, 0) == k([1, 0]) and m.kind_at(-1, 0) == k([-1, 0])
+
+
+@check("PS6", "3 · the largest stable step")
+def _(m):
+    H = np.array([[4.0, 1.0], [1.0, 2.0]])
+    r = float(m.stable_step())
+    def ok(lr):
+        w = np.array([1.0, -1.0])
+        for _ in range(600):
+            w = w - lr * (H @ w)
+        return np.linalg.norm(w) < 1
+    return ok(0.98 * r) and not ok(1.02 * r)
+
+
+@check("PS6", "4 · three convexity verdicts")
+def _(m):
+    fs = {"a": lambda w: w[0] ** 4 + w[1] ** 2, "b": lambda w: w[0] ** 2 - w[1] ** 2 + w[0] * w[1],
+          "c": lambda w: np.log1p(np.exp(w[0])) + (w[0] - w[1]) ** 2}
+    truth = {k: bool(min(np.linalg.eigvalsh(_hess(f, [x, y]))[0] for x in np.linspace(-3, 3, 13)
+                         for y in np.linspace(-3, 3, 13)) > -1e-4) for k, f in fs.items()}
+    return {k: bool(v) for k, v in m.convex_flags().items()} == truth
+
+
+@check("PS6", "5 · a Newton step")
+def _(m):
+    H, g = np.array([[3.0, 0.5], [0.5, 1.0]]), np.array([1.0, -2.0])
+    d = np.asarray(m.newton_step(H, g), float)
+    return close(H @ d, -g)
+
+
+@check("PS6", "6 · written: saddles and noise")
+def _(m):
+    return written(m.why_saddle)
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ps = sys.argv[1] if len(sys.argv) > 1 else "PS1"

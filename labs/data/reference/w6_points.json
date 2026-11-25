@@ -1,0 +1,37 @@
+{
+ "bowl": [
+  [
+   1.0,
+   2.0
+  ],
+  "minimum"
+ ],
+ "narrow": [
+  [
+   1.0,
+   25.0
+  ],
+  "minimum"
+ ],
+ "valley": [
+  [
+   0.388,
+   51.612
+  ],
+  "minimum"
+ ],
+ "saddle": [
+  [
+   -2.0,
+   2.0
+  ],
+  "saddle"
+ ],
+ "saddle, side": [
+  [
+   2.0,
+   4.0
+  ],
+  "minimum"
+ ]
+}

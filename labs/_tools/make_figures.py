@@ -129,6 +129,27 @@ def week5() -> None:
     print("after 25 steps: gd", f(p1[-1]), "momentum", f(p2[-1]))
 
 
+def week6() -> None:
+    # parallel example: f = 0.5 x^2 - 0.5 y^2 + 0.1 y^4, saddle at 0, minima at y = +-sqrt(2.5)
+    f = lambda x, y: 0.5 * x ** 2 - 0.5 * y ** 2 + 0.1 * y ** 4  # noqa: E731
+    g = lambda w: np.array([w[0], -w[1] + 0.4 * w[1] ** 3])  # noqa: E731
+    X_, Y_ = np.meshgrid(np.linspace(-2.5, 2.5, 200), np.linspace(-2.2, 2.2, 200))
+    fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    ax.contour(X_, Y_, f(X_, Y_), levels=18, colors="#9aa5b1", linewidths=0.8)
+    for start, col, label in [((2.0, 0.0), CORAL, "start (2, 0): stops at the saddle"),
+                              ((2.0, 0.01), TEAL, "start (2, 0.01): escapes to a minimum")]:
+        w, path = np.array(start), [np.array(start)]
+        for _ in range(120):
+            w = w - 0.2 * g(w)
+            path.append(w.copy())
+        p = np.array(path)
+        ax.plot(p[:, 0], p[:, 1], ".-", color=col, ms=3, lw=1.5, label=label)
+        print(label, "ends at", np.round(p[-1], 4))
+    ax.plot([0], [0], "x", color=NAVY, ms=10, mew=2)
+    ax.set_aspect("equal"), ax.set_xlabel("x"), ax.set_ylabel("y"), ax.legend(frameon=False, fontsize=10, loc="lower right")
+    save(fig, "w6-saddle-escape.svg")
+
+
 if __name__ == "__main__":
     for w in sys.argv[1:] or ["1"]:
         globals()[f"week{w}"]()

@@ -1,56 +1,219 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Collect Problem set 5. Week 5 measured curvatures and edges; this week explains them. The lab's evidence form, six annotated surfaces marked against a reference, is the form of the LO2 assessment, so the lab is also practice for it.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
+
+<section class="slide" id="review-week5" data-lo="LO6" data-minutes="4">
+  <div class="kicker">Review of week 5</div>
+  <h2>Which change fixes this run?</h2>
+  <div class="quiz" data-type="single" data-lo="LO6">
+    <p class="lead">Mini-batch SGD at a constant rate reaches the reference loss quickly, then keeps jumping in a band 30% wide for the rest of training. Which single change narrows the band?</p>
+    <div class="opts">
+      <div class="opt" data-why="Raises the noise: a larger rate widens the band">Double the learning rate</div>
+      <div class="opt" data-why="Treats the band as slow convergence: more epochs at the same rate keep the same band">Train for twice as many epochs</div>
+      <div class="opt" data-why="Changes the model, not the optimiser: the band comes from gradient noise times the rate">Add more features</div>
+      <div class="opt" data-ok>Decay the rate after the loss reaches the band</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The band's width scales with the rate times the gradient noise; shrinking the rate shrinks the jumps.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. A larger batch would also help; it is not among the options on purpose.</p></aside>
+</section>
+
+<section class="slide" id="lab-5-1-debrief" data-lo="LO6" data-minutes="6">
+  <div class="kicker">Lab 5.1 · what your runs showed</div>
+  <h2>Scaling the features cut the curvature ratio from 2.7e11 to 12</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Airfoil data, reference run</th><th>Diagnosis</th></tr>
+      <tr><td>Batch, rate 0.01: loss 152 after 200 epochs</td><td>slow</td></tr>
+      <tr><td>Batch, rate 1.0, above the edge 0.948</td><td>diverged</td></tr>
+      <tr><td>SGD, rate 0.3: last 20 epochs spread 2.95</td><td>noisy</td></tr>
+      <tr><td>Momentum, rate 0.001: loss 125</td><td>slow</td></tr>
+      <tr class="hl"><td>Unscaled, rate 1e-7: loss 4,193; 1e-6 diverged at epoch 123</td><td>slow, diverged</td></tr>
+    </table>
+    <div class="stack">
+      <div class="card c-teal flat"><h4>Reference loss 11.31</h4><p class="small mb0">Least squares on 1,200 training rows; the yardstick every run was judged against.</p></div>
+      <div class="card c-purple flat"><h4>A schedule helped</h4><p class="small mb0">Warm-up and step decay cut the noisy run's spread from 2.95 to 0.014.</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>All numbers are from the solution run on the downloaded UCI data. Ask which runs participants labelled differently and why: usually rate 0.9, which zigzags but converges. Today explains the two headline numbers: the edge (2 divided by the largest curvature) and the ratio of curvatures, the condition number.</p></aside>
+</section>
 
 <!-- Session 1 -->
 
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" id="convex-definition" data-lo="LO2" data-minutes="7">
+  <div class="kicker">Block 1 · Convexity</div>
+  <h2>A convex function lies below every chord, so it has no traps</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="stack">
+      <div class="card c-navy"><h4>Definition</h4><p class="mb0"><code>f(t a + (1 − t) b) ≤ t f(a) + (1 − t) f(b)</code> for all a, b and t in [0, 1]</p></div>
+      <p class="small">Twice differentiable: convex exactly when <code>f″ ≥ 0</code> everywhere, or in several variables when the Hessian has no negative eigenvalue anywhere.</p>
+    </div>
+    <div class="card c-teal flat"><h4>Why it matters</h4><p class="small mb0">On a convex loss every local minimum is a global minimum, and a small enough step of gradient descent reaches it. Least squares and logistic regression are convex in their weights. A network's loss is not.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Draw a bowl and a chord above it, then a two-humped curve where a chord dips below. The logistic loss is convex in its weights: that is why week 3's model trains reliably from any start, and why the capstone's two-layer network does not.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" id="minima-and-saddles" data-lo="LO2" data-minutes="7">
+  <div class="kicker">Block 1 · What non-convex looks like</div>
+  <h2>Non-convex losses have local minima, saddles and plateaus</h2>
+  <div class="cols cols-3">
+    <div class="card c-coral flat"><h4>Local minimum</h4><p class="small mb0">Lower than its neighbours, higher than the best point. Descent stops there.</p></div>
+    <div class="card c-purple flat"><h4>Saddle point</h4><p class="small mb0">Gradient zero, curving up one way and down another. In many dimensions, saddles far outnumber minima.</p></div>
+    <div class="card c-amber flat"><h4>Plateau</h4><p class="small mb0">A wide region where the gradient is close to zero. Steps become tiny; the run looks converged and is not.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <div class="callout warn mt"><b>What goes wrong.</b> Reading "the loss stopped falling" as "we found the minimum". A saddle or a plateau stops the loss too.</div>
+  <aside class="notes"><p>The count argument for saddles: at a critical point of a function of n variables, every one of n curvatures must be positive for a minimum; with random signs, mixed signs are far more likely. The lab has one surface of each kind, plus two convex ones and a curved valley.</p></aside>
+</section>
+
+<section class="slide" id="check-convex" data-lo="LO2" data-minutes="3">
+  <div class="kicker">Checkpoint 1</div>
+  <h2>What does convexity guarantee here?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">The charity's analyst fits a logistic regression twice, from two different starting weights, with a small enough step. Both runs stop. What can she conclude about the two end points?</p>
+    <div class="opts">
+      <div class="opt" data-why="Thinks every model has local traps: the logistic loss is convex in its weights">They may be different local minima</div>
+      <div class="opt" data-ok>They reach the same lowest loss</div>
+      <div class="opt" data-why="Confuses convex with linear: convex losses still need a small enough step">Any step size gives the same end point</div>
+      <div class="opt" data-why="Confuses stopping with a saddle: a convex function has no saddle points">One of them may be a saddle point</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The loss is convex, so every local minimum is global: both runs reach the same lowest value (the weights themselves may differ if the data allows several optima, as week 7 shows).</div>
+  </div>
+  <aside class="notes"><p>Answer: B. The bracket in the why-callout prepares week 7: on separable data the logistic loss has no finite minimiser at all, and a penalty fixes that.</p></aside>
+</section>
+
+<section class="slide" id="hessian-curvatures" data-lo="LO2" data-minutes="7">
+  <div class="kicker">Block 2 · Curvature</div>
+  <h2>The Hessian's eigenvalues are the curvatures along its eigenvectors</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <p>The Hessian <b>H</b> holds the second partial derivatives: <code>Hᵢⱼ = ∂²f / ∂wᵢ∂wⱼ</code>. It is symmetric.</p>
+      <div class="card c-navy"><h4>Second-order Taylor</h4><p class="mb0"><code>f(w + d) ≈ f(w) + ∇f · d + ½ dᵀ H d</code></p></div>
+      <p class="small">Along an eigenvector with eigenvalue λ, the function curves like <code>½ λ t²</code>.</p>
+    </div>
+    <table class="t small">
+      <tr><th>At a critical point, eigenvalues</th><th>Kind</th></tr>
+      <tr><td>all positive</td><td>minimum</td></tr>
+      <tr><td>all negative</td><td>maximum</td></tr>
+      <tr class="hl"><td>both signs</td><td>saddle</td></tr>
+      <tr><td>some zero</td><td>the test cannot tell</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Example for the board: f = x² + xy − 2y² at the origin. H = [[2, 1], [1, −4]], eigenvalues about 2.16 and −4.16: a saddle. The eigenvectors and eigenvalues of a symmetric matrix are from FND-MTH-101; here they acquire a meaning, curvature.</p></aside>
+</section>
+
+<section class="slide" id="saddle-escape" data-lo="LO2" data-minutes="7">
+  <div class="kicker">Block 2 · Saddles in practice</div>
+  <h2>Exactly on a saddle's ridge, descent stops; a nudge lets it escape</h2>
+  <div class="cols cols-32">
+    <div class="figure">
+      <img src="../assets/w6-saddle-escape.svg" alt="Contours of a saddle surface with two minima above and below the origin; a trace starting on the horizontal axis runs straight into the saddle at the origin and stops, while a trace starting a hundredth above the axis bends upwards and ends at the upper minimum" width="640">
+      <div class="caption">f = ½x² − ½y² + 0.1y⁴, step 0.2, 120 steps; labs/_tools/make_figures.py.</div>
+    </div>
+    <div class="stack">
+      <p class="small">On the axis the y-component of the gradient is exactly 0: descent walks into the saddle at (0, 0).</p>
+      <p class="small">From y = 0.01 it ends at (0, 1.581), a minimum (√2.5).</p>
+      <div class="callout tip small"><b>Noise helps.</b> Mini-batch gradients rarely sit exactly on a ridge.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>A parallel example; the lab has its own saddle surface with different minima. The escape is slow at first: near the saddle the gradient is tiny, and the negative curvature only takes over once the point is off the ridge. In high dimension this slow start is the practical cost of saddles.</p></aside>
+</section>
+
+<section class="slide" id="check-hessian-kind" data-lo="LO2" data-minutes="3">
+  <div class="kicker">Checkpoint 2</div>
+  <h2>What kind of point is this?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">At a point where the gradient of a two-weight loss is zero, the Hessian is [[3, 0], [0, −0.2]]. The run has stopped there. What should the analyst say?</p>
+    <div class="opts">
+      <div class="opt" data-why="Looks only at the larger eigenvalue: one negative eigenvalue makes it a saddle">It is a minimum, since 3 is large and positive</div>
+      <div class="opt" data-why="Reads a small eigenvalue as zero: −0.2 is clearly negative, so the test decides">The test cannot tell</div>
+      <div class="opt" data-ok>It is a saddle: lower loss lies along the second weight</div>
+      <div class="opt" data-why="Thinks a zero gradient always means a maximum or minimum">It is a maximum</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Eigenvalues of both signs: the loss curves down along the second weight, so moving along it lowers the loss.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Ask how she would leave it: a small step along the second weight in either direction.</p></aside>
+</section>
+
+<section class="slide" id="largest-stable-step" data-lo="LO2 LO6" data-minutes="7">
+  <div class="kicker">Block 3 · Step size and curvature</div>
+  <h2>The largest curvature bounds the step; the ratio of curvatures sets the pace</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li>Near a minimum the loss is about quadratic with Hessian H: week 5's rule holds with λ_max of H. <b>Step &lt; 2 / λ_max.</b></li>
+      <li>At the best fixed step, the flattest direction shrinks by about <code>1 − 2/κ</code> per step, with <b>κ = λ_max / λ_min</b>, the condition number.</li>
+      <li>Steps needed grow roughly in proportion to κ.</li>
+    </ul>
+    <table class="t small">
+      <tr><th>Lab 5.1, airfoil data</th><th class="num">κ</th></tr>
+      <tr><td>Raw features</td><td class="num">2.7 × 10¹¹</td></tr>
+      <tr class="hl"><td>Standardised features</td><td class="num">12</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>The condition number is the conditioning of FND-MTH-101, seen from the optimiser's side. 2.109 / 0.174 = 12.1 after scaling. Standardising features is the cheapest preconditioning there is; adaptive methods (week 5) are a per-coordinate version of the same idea.</p></aside>
+</section>
+
+<section class="slide" id="newton-step" data-lo="LO2" data-minutes="5">
+  <div class="kicker">Block 3 · Using the curvature</div>
+  <h2>A Newton step divides by the curvature instead of guessing a rate</h2>
+  <div class="cols cols-2">
+    <div class="card c-navy"><h4>Newton</h4><p class="mb0">Solve <code>H d = −∇f</code>, then <code>w ← w + d</code>.</p><p class="small mb0">On a quadratic it lands on the minimum in one step, whatever κ is.</p></div>
+    <div class="card c-coral flat"><h4>Why not always</h4><p class="small mb0">H has n² entries: for a million weights, a trillion. At a saddle a Newton step goes towards the saddle, not away. Training uses first-order methods; Newton is the yardstick.</p></div>
+  </div>
+  <aside class="notes"><p>Awareness only. The lab's stretch compares Newton steps with gradient descent on its curved valley; do not quote the count. Quasi-Newton and second-order methods are outside this course.</p></aside>
+</section>
+
+<section class="slide" id="check-condition" data-lo="LO2" data-minutes="3">
+  <div class="kicker">Checkpoint 3</div>
+  <h2>What will the sweep show?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">A convex quadratic loss has curvatures 0.5 and 50. The analyst runs plain gradient descent at steps 0.01, 0.039 and 0.041. What does she see?</p>
+    <div class="opts">
+      <div class="opt" data-ok>0.041 diverges; the other two converge, slowly along the flat direction</div>
+      <div class="opt" data-why="Uses the smallest curvature for the edge (2 / 0.5 = 4): divergence comes from the largest">All three converge quickly</div>
+      <div class="opt" data-why="Thinks convex losses cannot diverge: a step past 2 / λ_max always does">All three converge, since the loss is convex</div>
+      <div class="opt" data-why="Puts the edge at 1 / λ_max = 0.02: the steep direction still shrinks up to 0.04">0.039 and 0.041 diverge</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The edge is 2 / 50 = 0.04. With κ = 100, even the best step leaves the flat direction shrinking by only about 2% per step.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. The numbers are not the lab's; its narrow surface has its own edge. Then start the lab.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-6-1" data-auto="lab" data-lab="6.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>AI-tutor. The comparison with the reference in task 6 is strict: a dictionary per surface must match exactly. When a participant's annotation differs, ask them to defend it before they change it; some differences are legitimate readings (a grid can only refute convexity) and worth discussing. Common mistakes: a Hessian step of 1e-8 (rounding swamps second differences: use 1e-4), and calling the plateau run "converged".</p></aside>
+</section>
+
+<section class="slide" id="problem-set-6" data-label="Problem set 6">
+  <div class="kicker">Before week 7</div>
+  <h2>Problem set 6: a Hessian, two critical points, an edge and three verdicts</h2>
+  <div class="cols cols-2">
+    <ul class="bullets">
+      <li><b>50 minutes</b>, graded, auto-checked: <code>labs/problem_sets/PS6.py</code>.</li>
+      <li><b>AI-off for the first attempt.</b></li>
+      <li>Convexity verdicts are checked on the whole plane: think before you sample.</li>
+    </ul>
+    <pre class="code s" data-file="terminal"><code class="language-bash">cd labs
+uv run python problem_sets/check.py PS6</code></pre>
+  </div>
+  <aside class="notes"><p>Worked answers are in the trainer pack, not in the repository. Remind participants that a NumPy eigenvalue routine is allowed for checking a hand answer, not for replacing it.</p></aside>
 </section>
 
 <section class="slide" id="wrap-up">
   <div class="kicker">Week 6 · wrap-up</div>
   <h2>Three things to keep</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+    <div class="card c-teal"><h4>Convex: no traps</h4><p class="small mb0">Every local minimum is global. Least squares and logistic regression are convex; networks are not.</p></div>
+    <div class="card c-coral"><h4>Hessian signs</h4><p class="small mb0">All positive: minimum. Mixed: saddle. Stopping is not proof of a minimum.</p></div>
+    <div class="card c-purple"><h4>2 / λ_max and κ</h4><p class="small mb0">The steepest curvature bounds the step; the condition number sets how many steps.</p></div>
   </div>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Week 7: REPLACE: the theme of this unit, in a few words</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Week 7: Stable losses and penalties</h2>
+  <p class="lead">Hand in Problem set 6. Week 7 makes the losses you will train in the capstone safe to compute.</p>
+  <aside class="notes"><p>Week 7's lab uses the charity's placement data again (three class levels). Nothing to install.</p></aside>
 </section>
